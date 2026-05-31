@@ -118,10 +118,17 @@ export function SettingsPage() {
     return {
       status: "Cloud sync available",
       mode: "Local-only",
-      message: "Sign-in will be added next. No data is synced yet.",
+      message: "Sign in is available on the Account page. No data is synced yet.",
       badgeClass: "border-sky-500/30 bg-sky-500/10 text-sky-300",
     };
   })();
+
+  const accountSessionHint =
+    auth.status === "signed_in"
+      ? "Use Account to sign out. No migration controls are active."
+      : auth.isConfigured
+        ? "Sign in to prepare sync. No data will upload."
+        : "Configure Supabase env vars to enable sign-in.";
 
   function exportData() {
     setError("");
@@ -277,11 +284,17 @@ export function SettingsPage() {
                     Local-first account status
                   </h2>
                   <p className="mt-1.5 text-xs leading-relaxed text-zinc-400">
-                    Account state is read-only for now. Atlas does not sync,
-                    migrate, or upload local data yet.
+                    Account controls live on the optional Account page. Atlas
+                    does not sync, migrate, or upload local data yet.
                   </p>
                 </div>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap items-center gap-2">
+                  <Link
+                    href="/account"
+                    className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-zinc-300 transition hover:bg-zinc-800 hover:text-white"
+                  >
+                    Open Account
+                  </Link>
                   <span
                     className={`rounded-full border px-3 py-1 text-[10px] font-bold uppercase tracking-wider ${accountSyncState.badgeClass}`}
                   >
@@ -315,7 +328,7 @@ export function SettingsPage() {
                       : "No active login"}
                   </p>
                   <p className="mt-1 text-xs leading-relaxed text-zinc-500">
-                    No login or signup controls are exposed yet.
+                    {accountSessionHint}
                   </p>
                 </div>
                 <div className="rounded-lg border border-[#27272a] bg-[#121214] p-4">

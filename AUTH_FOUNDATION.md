@@ -17,7 +17,8 @@ The provider:
 
 ## Settings Account & Sync Status
 
-The Settings page now shows a read-only **Account & Sync** section.
+The Settings page now shows an **Account & Sync** section with a link to the
+optional Account page.
 
 It can display:
 
@@ -32,13 +33,28 @@ It also shows a safe local workspace summary:
 - Approximate local record count
 - Number of populated Atlas storage keys
 
-It never displays private record contents.
+It never displays private record contents and never uploads local records.
+
+## Optional Account UI
+
+Atlas now has an optional `/account` route.
+
+The Account page can:
+
+- Show local-only status when Supabase env vars are missing.
+- Sign in with Supabase email/password when Supabase is configured.
+- Sign up with Supabase email/password when Supabase is configured.
+- Sign out from an existing Supabase session.
+- Display the current account/session status.
+
+The Account page is intentionally non-blocking. Users can continue using Atlas
+locally without an account.
+
+Signing in does not sync existing local data, upload records, migrate modules,
+create workspace rows, or protect routes. Migration choices will be added later.
 
 ## What Does Not Exist Yet
 
-- No login UI
-- No signup UI
-- No account route
 - No route protection
 - No cloud sync
 - No Supabase data reads for Atlas modules
@@ -55,9 +71,8 @@ continues to load normally.
 
 ## Next Step
 
-The next planned step is optional login/signup UI and a visible account surface.
-That should still avoid module migration until Row Level Security and migration
-flows are ready.
+The next planned step is a post-login migration prompt or a small cloud proof of
+concept for one low-risk module after Row Level Security is designed and tested.
 
 ## Related Documents
 

@@ -3,7 +3,7 @@
 import type { Session } from "@supabase/supabase-js";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
-import type { AtlasAuthState } from "@/lib/auth/types";
+import type { AtlasAuthState, AuthActionResult } from "@/lib/auth/types";
 
 export function getDisabledAuthState(): AtlasAuthState {
   return {
@@ -102,4 +102,68 @@ export async function signOutOfSupabase() {
   }
 
   return getStateFromSession(null);
+}
+
+export async function signInWithSupabasePassword(
+  email: string,
+  password: string,
+): Promise<AuthActionResult> {
+  const client = getSupabaseBrowserClient();
+
+  if (!client) {
+    return {
+      ok: false,
+      message: "Cloud sync is not configured yet. Atlas is running locally.",
+    };
+  }
+
+  const { error } = await client.auth.signInWithPassword({
+    email,
+    password,
+  });
+
+  if (error) {
+    return {
+      ok: false,
+      message: error.message,
+    };
+  }
+
+  return {
+    ok: true,
+    message: "Signed in. No Atlas data has been synced or migrated.",
+  };
+}
+
+export async function signUpWithSupabasePassword(
+  email: string,
+  password: string,
+): Promise<AuthActionResult> {
+  const client = getSupabaseBrowserClient();
+
+  if (!client) {
+    return {
+      ok: false,
+      message: "Cloud sync is not configured yet. Atlas is running locally.",
+    };
+  }
+
+  const { data, error } = await client.auth.signUp({
+    email,
+    password,
+  });
+
+  if (error) {
+    return {
+      ok: false,
+      message: error.message,
+    };
+  }
+
+  return {
+    ok: true,
+    message: data.session
+      ? "Account created and signed in. No Atlas data has been synced or migrated."
+      : "Account created. Check your email if confirmation is required. No Atlas data has been synced or migrated.",
+  };
 }

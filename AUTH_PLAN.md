@@ -1,8 +1,9 @@
 # Atlas Authentication Plan
 
 Atlas is currently a stable local-first MVP. This document describes the future
-authentication strategy only. It does not implement Supabase, authentication UI,
-cloud sync, or account behavior.
+authentication strategy. Atlas now has an inactive Supabase foundation, a
+mounted auth provider, and optional `/account` email/password UI. It still does
+not implement cloud sync, data migration, profile writes, or route protection.
 
 ## 1. Auth Goals
 
@@ -27,10 +28,11 @@ Initial supported methods:
 - Magic link, optional
 - Google OAuth, optional later
 
-The inactive Supabase and auth foundation files now exist, and the auth provider
-is mounted. No login UI, cloud sync, route protection, or data migration is
-active. Supabase should not handle real Atlas data until the database, RLS
-policies, and privacy boundaries are ready.
+The inactive Supabase and auth foundation files now exist, the auth provider is
+mounted, and optional login/signup UI exists at `/account`. No cloud sync, route
+protection, profile creation, or data migration is active. Supabase should not
+handle real Atlas data until the database, RLS policies, and privacy boundaries
+are ready.
 
 ## 3. Auth States
 
@@ -186,7 +188,7 @@ Recommended sequence:
 3. Create a Supabase browser client helper. Done as an inactive foundation.
 4. Add an auth provider or session context. Done and mounted as an inactive
    foundation with read-only Settings status.
-5. Add login/signup UI.
+5. Add optional login/signup UI. Done at `/account`; no sync or migration.
 6. Add account settings.
 7. Create profiles on first login.
 8. Implement local-only versus cloud mode for real cloud writes.

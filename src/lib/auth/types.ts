@@ -23,7 +23,14 @@ export type AtlasAuthState = {
 
 export type AtlasAuthContextValue = AtlasAuthState & {
   refresh: () => Promise<void>;
+  signInWithPassword: (email: string, password: string) => Promise<AuthActionResult>;
+  signUpWithPassword: (email: string, password: string) => Promise<AuthActionResult>;
   signOut: () => Promise<void>;
+};
+
+export type AuthActionResult = {
+  ok: boolean;
+  message: string;
 };
 
 export type AuthMigrationChoice =

@@ -14,6 +14,8 @@ import {
   getDisabledAuthState,
   getInitialAuthState,
   signOutOfSupabase,
+  signInWithSupabasePassword,
+  signUpWithSupabasePassword,
   subscribeToAuthState,
 } from "@/lib/auth/session";
 import type { AtlasAuthContextValue, AtlasAuthState } from "@/lib/auth/types";
@@ -27,6 +29,24 @@ export function AtlasAuthProvider({ children }: { children: ReactNode }) {
   const refresh = useCallback(async () => {
     setAuthState(await getCurrentAuthState());
   }, []);
+
+  const signInWithPassword = useCallback(
+    async (email: string, password: string) => {
+      const result = await signInWithSupabasePassword(email, password);
+      setAuthState(await getCurrentAuthState());
+      return result;
+    },
+    [],
+  );
+
+  const signUpWithPassword = useCallback(
+    async (email: string, password: string) => {
+      const result = await signUpWithSupabasePassword(email, password);
+      setAuthState(await getCurrentAuthState());
+      return result;
+    },
+    [],
+  );
 
   const signOut = useCallback(async () => {
     setAuthState(await signOutOfSupabase());
@@ -57,9 +77,11 @@ export function AtlasAuthProvider({ children }: { children: ReactNode }) {
     () => ({
       ...authState,
       refresh,
+      signInWithPassword,
+      signUpWithPassword,
       signOut,
     }),
-    [authState, refresh, signOut],
+    [authState, refresh, signInWithPassword, signOut, signUpWithPassword],
   );
 
   return (
@@ -79,6 +101,14 @@ export function useAtlasAuth() {
   return {
     ...getDisabledAuthState(),
     refresh: async () => undefined,
+    signInWithPassword: async () => ({
+      ok: false,
+      message: "Cloud sync is not configured yet. Atlas is running locally.",
+    }),
+    signUpWithPassword: async () => ({
+      ok: false,
+      message: "Cloud sync is not configured yet. Atlas is running locally.",
+    }),
     signOut: async () => undefined,
   } satisfies AtlasAuthContextValue;
 }
