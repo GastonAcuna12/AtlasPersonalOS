@@ -46,13 +46,18 @@ If Supabase environment variables are missing, the helper returns `null` instead
 of crashing the app. This keeps local-first mode intact while the project is
 prepared for future cloud work.
 
-## Next Planned Step
+## Auth Foundation Status
 
-The next technical step should be an auth provider/session context that can
-detect whether a Supabase session exists without forcing login or changing
+An inactive auth provider/session context now exists under `src/lib/auth`. It
+can detect a Supabase session in the future without forcing login or changing
 local-first behavior.
 
-That should still not migrate any module until RLS and migration flows are
+It is not mounted in the app yet and does not migrate any module.
+
+## Next Planned Step
+
+The next technical step should be login/account UI and explicit account state
+surfaces, still without migrating any module until RLS and migration flows are
 ready.
 
 ## Security Warning

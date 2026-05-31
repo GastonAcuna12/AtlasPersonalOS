@@ -27,8 +27,10 @@ Initial supported methods:
 - Magic link, optional
 - Google OAuth, optional later
 
-No Supabase client code exists yet. Supabase must not be added until the
-database, RLS policies, and privacy boundaries are ready.
+The inactive Supabase and auth foundation files now exist, but no login UI,
+cloud sync, route protection, or data migration is active. Supabase should not
+handle real Atlas data until the database, RLS policies, and privacy boundaries
+are ready.
 
 ## 3. Auth States
 
@@ -181,16 +183,17 @@ Recommended sequence:
 
 1. Add environment variable placeholders to `.env.example`.
 2. Install the Supabase client packages.
-3. Create a Supabase browser client helper.
-4. Add an auth provider or session context.
+3. Create a Supabase browser client helper. Done as an inactive foundation.
+4. Add an auth provider or session context. Done as an inactive foundation.
 5. Add login/signup UI.
 6. Add account settings.
-7. Create profiles on first login.
-8. Implement local-only versus cloud mode.
-9. Build the post-login migration prompt.
-10. Migrate Notes first.
-11. Test RLS with two users.
-12. Migrate remaining domains gradually after the first module is stable.
+7. Mount auth context only when Atlas is ready to expose account state.
+8. Create profiles on first login.
+9. Implement local-only versus cloud mode.
+10. Build the post-login migration prompt.
+11. Migrate Notes first.
+12. Test RLS with two users.
+13. Migrate remaining domains gradually after the first module is stable.
 
 Notes should be the first migrated module because they are lower risk than
 finances and have fewer relational dependencies.
