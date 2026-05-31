@@ -8,6 +8,7 @@ import {
 } from "@/lib/markdownExport";
 import { useNotes, type NoteDraft } from "@/lib/notes";
 import { useXP } from "@/lib/xp";
+import { NotesCloudPanel } from "@/components/NotesCloudPanel";
 
 const initialDraft: NoteDraft = {
   title: "",
@@ -128,6 +129,8 @@ export function NotesPage() {
             ✓ {message}
           </div>
         )}
+
+        <NotesCloudPanel localNotes={notes} />
 
         {/* Collapsible Form — Progressive Disclosure */}
         {showCreateForm && (

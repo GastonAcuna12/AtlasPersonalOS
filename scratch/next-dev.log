@@ -232,3 +232,14 @@
  GET /settings 200 in 35ms (next.js: 2ms, application-code: 33ms)
  GET /account 200 in 115ms (next.js: 28ms, application-code: 86ms)
  GET /settings 200 in 39ms (next.js: 2ms, application-code: 36ms)
+✓ Compiled in 68ms
+ GET /settings 200 in 102ms (next.js: 53ms, application-code: 49ms)
+ GET /calendar 200 in 103ms (next.js: 28ms, application-code: 75ms)
+ GET /calendar 200 in 57ms (next.js: 2ms, application-code: 55ms)
+ GET /settings 200 in 57ms (next.js: 16ms, application-code: 41ms)
+ GET /notes 200 in 125ms (next.js: 28ms, application-code: 96ms)
+ GET /notes 200 in 33ms (next.js: 2ms, application-code: 30ms)
+✓ Compiled in 32ms
+ GET /calendar 200 in 88ms (next.js: 62ms, application-code: 26ms)
+ GET /notes 200 in 90ms (next.js: 31ms, application-code: 60ms)
+ GET /notes 200 in 85ms (next.js: 2ms, application-code: 83ms)
