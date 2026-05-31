@@ -2,7 +2,9 @@
 
 import { useSyncExternalStore } from "react";
 import {
+  ATLAS_STORAGE_KEYS,
   ATLAS_STORAGE_KEY_VALUES,
+  type AtlasStorageDomain,
   subscribeToStorage,
 } from "@/lib/storage";
 
@@ -10,12 +12,14 @@ export type LocalAtlasDataSummary = {
   hasLocalData: boolean;
   populatedKeyCount: number;
   approximateRecordCount: number;
+  domainsDetected: AtlasStorageDomain[];
 };
 
 const EMPTY_LOCAL_DATA_SUMMARY: LocalAtlasDataSummary = {
   hasLocalData: false,
   populatedKeyCount: 0,
   approximateRecordCount: 0,
+  domainsDetected: [],
 };
 
 let cachedStorageSignature = "";
@@ -69,23 +73,26 @@ export function getLocalAtlasDataSummary(): LocalAtlasDataSummary {
   }
 
   cachedStorageSignature = storageSignature;
-  cachedLocalDataSummary = ATLAS_STORAGE_KEY_VALUES.reduce<LocalAtlasDataSummary>(
-    (summary, key) => {
-      const recordCount = countStoredValue(window.localStorage.getItem(key));
+  cachedLocalDataSummary = Object.entries(ATLAS_STORAGE_KEYS).reduce<
+    LocalAtlasDataSummary
+  >((summary, [domain, key]) => {
+    const recordCount = countStoredValue(window.localStorage.getItem(key));
 
-      if (recordCount === 0) {
-        return summary;
-      }
+    if (recordCount === 0) {
+      return summary;
+    }
 
-      return {
-        hasLocalData: true,
-        populatedKeyCount: summary.populatedKeyCount + 1,
-        approximateRecordCount:
-          summary.approximateRecordCount + recordCount,
-      };
-    },
-    EMPTY_LOCAL_DATA_SUMMARY,
-  );
+    return {
+      hasLocalData: true,
+      populatedKeyCount: summary.populatedKeyCount + 1,
+      approximateRecordCount:
+        summary.approximateRecordCount + recordCount,
+      domainsDetected: [
+        ...summary.domainsDetected,
+        domain as AtlasStorageDomain,
+      ],
+    };
+  }, EMPTY_LOCAL_DATA_SUMMARY);
 
   return cachedLocalDataSummary;
 }

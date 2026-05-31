@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { FormEvent, useState } from "react";
 import { useAtlasAuth, useLocalAtlasDataSummary } from "@/lib/auth";
+import { MigrationDecisionPanel } from "@/components/MigrationDecisionPanel";
 
 type AuthMode = "sign_in" | "sign_up";
 
@@ -92,7 +93,8 @@ export function AccountPage() {
         </header>
 
         <section className="mt-8 grid gap-6 lg:grid-cols-[1fr_0.8fr]">
-          <div className="rounded-xl border border-[#27272a] bg-[#18181b] p-6 shadow-xl">
+          <div className="grid gap-6 content-start">
+            <div className="rounded-xl border border-[#27272a] bg-[#18181b] p-6 shadow-xl">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div>
                 <p className="text-[10px] font-bold uppercase tracking-widest text-sky-400">
@@ -220,6 +222,9 @@ export function AccountPage() {
                 {error}
               </p>
             ) : null}
+            </div>
+
+            <MigrationDecisionPanel />
           </div>
 
           <aside className="grid gap-6 content-start">

@@ -53,13 +53,34 @@ locally without an account.
 Signing in does not sync existing local data, upload records, migrate modules,
 create workspace rows, or protect routes. Migration choices will be added later.
 
+## Migration Decision Placeholder
+
+Atlas now shows a safe migration decision placeholder on Account and Settings
+only when Supabase is configured, the user is signed in, and local Atlas data is
+detected.
+
+The placeholder can display:
+
+- Keep local only
+- Upload local data to cloud
+- Merge local and cloud
+- Replace cloud with local
+- Skip for now
+
+Upload, merge, and replace are disabled and marked as coming soon. Keep local
+only and skip for now only dismiss the placeholder with a small local UI flag:
+`atlas.migrationPromptDismissed`.
+
+No Supabase rows are created, inserted, updated, deleted, synced, or migrated by
+this placeholder.
+
 ## What Does Not Exist Yet
 
 - No route protection
 - No cloud sync
 - No Supabase data reads for Atlas modules
 - No data migration
-- No migration prompt
+- No active migration workflow
 
 ## Local-First Mode
 

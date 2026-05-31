@@ -41,6 +41,7 @@ import { useXP } from "@/lib/xp";
 import { useDailyWraps } from "@/lib/dailyWraps";
 import type { Currency, DayMode } from "@/types/atlas";
 import { loadSampleData } from "@/lib/sampleData";
+import { MigrationDecisionPanel } from "@/components/MigrationDecisionPanel";
 
 export function SettingsPage() {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -348,6 +349,8 @@ export function SettingsPage() {
                 </div>
               </div>
             </div>
+
+            <MigrationDecisionPanel />
             
             {/* System Configuration */}
             <div className="rounded-xl border border-[#27272a] bg-[#18181b] p-6 shadow-xl">
