@@ -3,6 +3,10 @@
 import Link from "next/link";
 import { ChangeEvent, useRef, useState } from "react";
 import {
+  useAtlasAuth,
+  useLocalAtlasDataSummary,
+} from "@/lib/auth";
+import {
   downloadAcademicWeekMarkdown,
   downloadAllNotesMarkdown,
   downloadGoalsSummaryMarkdown,
@@ -42,6 +46,8 @@ export function SettingsPage() {
   const inputRef = useRef<HTMLInputElement>(null);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const auth = useAtlasAuth();
+  const localDataSummary = useLocalAtlasDataSummary();
   
   // Storage Hooks for live QA diagnosis
   const { reviews } = useWeeklyReviews();
@@ -69,6 +75,53 @@ export function SettingsPage() {
   const today = todayISO();
   const todayStats = calculateTodayStats(tasks, today);
   const todaySections = groupTasksForToday(tasks, today);
+
+  const accountSyncState = (() => {
+    if (!auth.isConfigured) {
+      return {
+        status: "Cloud sync not configured",
+        mode: "Local-only",
+        message: "Atlas is running fully locally on this browser.",
+        badgeClass: "border-zinc-700 bg-zinc-800/70 text-zinc-300",
+      };
+    }
+
+    if (auth.status === "signed_in") {
+      return {
+        status: "Cloud session detected",
+        mode: "Cloud-ready",
+        message: "No data is synced yet. Migration will be added later.",
+        badgeClass: "border-emerald-500/30 bg-emerald-500/10 text-emerald-400",
+      };
+    }
+
+    if (auth.status === "error") {
+      return {
+        status: "Cloud session check failed",
+        mode: "Local-only",
+        message:
+          auth.errorMessage ||
+          "Atlas remains local-only while the cloud session is unavailable.",
+        badgeClass: "border-red-500/30 bg-red-500/10 text-red-300",
+      };
+    }
+
+    if (auth.status === "loading") {
+      return {
+        status: "Checking cloud session",
+        mode: "Local-only",
+        message: "Atlas remains local-only while account state is checked.",
+        badgeClass: "border-amber-500/30 bg-amber-500/10 text-amber-400",
+      };
+    }
+
+    return {
+      status: "Cloud sync available",
+      mode: "Local-only",
+      message: "Sign-in will be added next. No data is synced yet.",
+      badgeClass: "border-sky-500/30 bg-sky-500/10 text-sky-300",
+    };
+  })();
 
   function exportData() {
     setError("");
@@ -212,6 +265,76 @@ export function SettingsPage() {
         <section className="mt-8 grid gap-6 lg:grid-cols-[1.1fr_0.9fr] items-start">
           {/* Left Column — Config, Backup & RESET */}
           <div className="grid gap-6">
+            
+            {/* Account & Sync */}
+            <div className="rounded-xl border border-[#27272a] bg-[#18181b] p-6 shadow-xl">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-sky-400">
+                    Account &amp; Sync
+                  </p>
+                  <h2 className="mt-2 text-2xl font-bold tracking-tight text-zinc-100">
+                    Local-first account status
+                  </h2>
+                  <p className="mt-1.5 text-xs leading-relaxed text-zinc-400">
+                    Account state is read-only for now. Atlas does not sync,
+                    migrate, or upload local data yet.
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <span
+                    className={`rounded-full border px-3 py-1 text-[10px] font-bold uppercase tracking-wider ${accountSyncState.badgeClass}`}
+                  >
+                    {accountSyncState.status}
+                  </span>
+                  <span className="rounded-full border border-amber-500/25 bg-amber-500/10 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-amber-400">
+                    {accountSyncState.mode}
+                  </span>
+                </div>
+              </div>
+
+              <div className="mt-5 grid gap-3 md:grid-cols-3">
+                <div className="rounded-lg border border-[#27272a] bg-[#121214] p-4">
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">
+                    Status
+                  </p>
+                  <p className="mt-2 text-sm font-semibold text-zinc-100">
+                    {accountSyncState.status}
+                  </p>
+                  <p className="mt-1 text-xs leading-relaxed text-zinc-500">
+                    {accountSyncState.message}
+                  </p>
+                </div>
+                <div className="rounded-lg border border-[#27272a] bg-[#121214] p-4">
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">
+                    Session
+                  </p>
+                  <p className="mt-2 text-sm font-semibold text-zinc-100">
+                    {auth.status === "signed_in"
+                      ? (auth.user?.email ?? "Signed in")
+                      : "No active login"}
+                  </p>
+                  <p className="mt-1 text-xs leading-relaxed text-zinc-500">
+                    No login or signup controls are exposed yet.
+                  </p>
+                </div>
+                <div className="rounded-lg border border-[#27272a] bg-[#121214] p-4">
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">
+                    Local Workspace
+                  </p>
+                  <p className="mt-2 text-sm font-semibold text-zinc-100">
+                    {localDataSummary.hasLocalData
+                      ? "Detected"
+                      : "No records detected"}
+                  </p>
+                  <p className="mt-1 text-xs leading-relaxed text-zinc-500">
+                    {localDataSummary.hasLocalData
+                      ? `${localDataSummary.approximateRecordCount} approximate records across ${localDataSummary.populatedKeyCount} Atlas storage keys.`
+                      : "Atlas found no populated local workspace keys yet."}
+                  </p>
+                </div>
+              </div>
+            </div>
             
             {/* System Configuration */}
             <div className="rounded-xl border border-[#27272a] bg-[#18181b] p-6 shadow-xl">

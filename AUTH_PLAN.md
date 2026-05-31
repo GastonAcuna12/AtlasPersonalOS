@@ -27,8 +27,10 @@ Initial supported methods:
 - Magic link, optional
 - Google OAuth, optional later
 
-No Supabase client code exists yet. Supabase must not be added until the
-database, RLS policies, and privacy boundaries are ready.
+The inactive Supabase and auth foundation files now exist, and the auth provider
+is mounted. No login UI, cloud sync, route protection, or data migration is
+active. Supabase should not handle real Atlas data until the database, RLS
+policies, and privacy boundaries are ready.
 
 ## 3. Auth States
 
@@ -181,12 +183,13 @@ Recommended sequence:
 
 1. Add environment variable placeholders to `.env.example`.
 2. Install the Supabase client packages.
-3. Create a Supabase browser client helper.
-4. Add an auth provider or session context.
+3. Create a Supabase browser client helper. Done as an inactive foundation.
+4. Add an auth provider or session context. Done and mounted as an inactive
+   foundation with read-only Settings status.
 5. Add login/signup UI.
 6. Add account settings.
 7. Create profiles on first login.
-8. Implement local-only versus cloud mode.
+8. Implement local-only versus cloud mode for real cloud writes.
 9. Build the post-login migration prompt.
 10. Migrate Notes first.
 11. Test RLS with two users.

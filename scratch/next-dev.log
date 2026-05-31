@@ -1,0 +1,92 @@
+
+> atlas-personal-os@0.1.0 dev
+> next dev
+
+▲ Next.js 16.2.6 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.100.97:3000
+✓ Ready in 230ms
+
+ GET /settings 200 in 308ms (next.js: 135ms, application-code: 173ms)
+ GET /settings 200 in 39ms (next.js: 3ms, application-code: 36ms)
+[browser] The result of getSnapshot should be cached to avoid an infinite loop 
+    at updateSyncExternalStore (file://C:/Users/Gastón/Documents/AppSeguimiento,Proyecto largo plazo/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:4958:69)
+    at Object.useSyncExternalStore (file://C:/Users/Gastón/Documents/AppSeguimiento,Proyecto largo plazo/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:15514:20)
+    at exports.useSyncExternalStore (file://C:/Users/Gastón/Documents/AppSeguimiento,Proyecto largo plazo/.next/dev/static/chunks/node_modules_next_dist_compiled_0rpq4pf._.js:1757:36)
+    at useLocalAtlasDataSummary (file://C:/Users/Gastón/Documents/AppSeguimiento,Proyecto largo plazo/.next/dev/static/chunks/src_0st5bml._.js:118:198)
+    at SettingsPage (file://C:/Users/Gastón/Documents/AppSeguimiento,Proyecto largo plazo/.next/dev/static/chunks/src_0st5bml._.js:2231:193)
+    at Object.react_stack_bottom_frame (file://C:/Users/Gastón/Documents/AppSeguimiento,Proyecto largo plazo/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:15037:24)
+    at renderWithHooks (file://C:/Users/Gastón/Documents/AppSeguimiento,Proyecto largo plazo/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:4620:24)
+    at updateFunctionComponent (file://C:/Users/Gastón/Documents/AppSeguimiento,Proyecto largo plazo/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:6081:21)
+    at beginWork (file://C:/Users/Gastón/Documents/AppSeguimiento,Proyecto largo plazo/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:6691:24)
+    at runWithFiberInDEV (file://C:/Users/Gastón/Documents/AppSeguimiento,Proyecto largo plazo/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:965:74)
+    at performUnitOfWork (file://C:/Users/Gastón/Documents/AppSeguimiento,Proyecto largo plazo/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9555:97)
+    at workLoopSync (file://C:/Users/Gastón/Documents/AppSeguimiento,Proyecto largo plazo/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9449:40)
+    at renderRootSync (file://C:/Users/Gastón/Documents/AppSeguimiento,Proyecto largo plazo/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9433:13)
+    at performWorkOnRoot (file://C:/Users/Gastón/Documents/AppSeguimiento,Proyecto largo plazo/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9061:186)
+    at performSyncWorkOnRoot (file://C:/Users/Gastón/Documents/AppSeguimiento,Proyecto largo plazo/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:10263:9)
+    at flushSyncWorkAcrossRoots_impl (file://C:/Users/Gastón/Documents/AppSeguimiento,Proyecto largo plazo/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:10179:316)
+    at flushPassiveEffects (file://C:/Users/Gastón/Documents/AppSeguimiento,Proyecto largo plazo/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:10008:13)
+    at <unknown> (file://C:/Users/Gastón/Documents/AppSeguimiento,Proyecto largo plazo/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9724:13)
+    at MessagePort.performWorkUntilDeadline (file://C:/Users/Gastón/Documents/AppSeguimiento,Proyecto largo plazo/.next/dev/static/chunks/node_modules_next_dist_compiled_0rpq4pf._.js:2647:64) (file://C:/Users/Gastón/Documents/AppSeguimiento,Proyecto largo plazo/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:4958:69)
+[browser] Uncaught Error: Maximum update depth exceeded. This can happen when a component repeatedly calls setState inside componentWillUpdate or componentDidUpdate. React limits the number of nested updates to prevent infinite loops.
+    at getRootForUpdatedFiber (file://C:/Users/Gastón/Documents/AppSeguimiento,Proyecto largo plazo/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:2967:171)
+    at enqueueConcurrentRenderForLane (file://C:/Users/Gastón/Documents/AppSeguimiento,Proyecto largo plazo/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:2955:16)
+    at forceStoreRerender (file://C:/Users/Gastón/Documents/AppSeguimiento,Proyecto largo plazo/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:5010:20)
+    at updateStoreInstance (file://C:/Users/Gastón/Documents/AppSeguimiento,Proyecto largo plazo/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:4992:41)
+    at Object.react_stack_bottom_frame (file://C:/Users/Gastón/Documents/AppSeguimiento,Proyecto largo plazo/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:15087:22)
+    at runWithFiberInDEV (file://C:/Users/Gastón/Documents/AppSeguimiento,Proyecto largo plazo/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:965:74)
+    at commitHookEffectListMount (file://C:/Users/Gastón/Documents/AppSeguimiento,Proyecto largo plazo/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:7255:167)
+    at commitHookPassiveMountEffects (file://C:/Users/Gastón/Documents/AppSeguimiento,Proyecto largo plazo/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:7290:60)
+    at commitPassiveMountOnFiber (file://C:/Users/Gastón/Documents/AppSeguimiento,Proyecto largo plazo/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:8689:33)
+    at recursivelyTraversePassiveMountEffects (file://C:/Users/Gastón/Documents/AppSeguimiento,Proyecto largo plazo/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:8676:316)
+    at commitPassiveMountOnFiber (file://C:/Users/Gastón/Documents/AppSeguimiento,Proyecto largo plazo/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:8688:17)
+    at recursivelyTraversePassiveMountEffects (file://C:/Users/Gastón/Documents/AppSeguimiento,Proyecto largo plazo/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:8676:316)
+    at commitPassiveMountOnFiber (file://C:/Users/Gastón/Documents/AppSeguimiento,Proyecto largo plazo/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:8750:17)
+    at recursivelyTraversePassiveMountEffects (file://C:/Users/Gastón/Documents/AppSeguimiento,Proyecto largo plazo/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:8676:316)
+    at commitPassiveMountOnFiber (file://C:/Users/Gastón/Documents/AppSeguimiento,Proyecto largo plazo/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:8750:17)
+    at recursivelyTraversePassiveMountEffects (file://C:/Users/Gastón/Documents/AppSeguimiento,Proyecto largo plazo/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:8676:316)
+    at commitPassiveMountOnFiber (file://C:/Users/Gastón/Documents/AppSeguimiento,Proyecto largo plazo/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:8688:17)
+    at recursivelyTraversePassiveMountEffects (file://C:/Users/Gastón/Documents/AppSeguimiento,Proyecto largo plazo/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:8676:316)
+    at commitPassiveMountOnFiber (file://C:/Users/Gastón/Documents/AppSeguimiento,Proyecto largo plazo/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:8693:17)
+    at recursivelyTraversePassiveMountEffects (file://C:/Users/Gastón/Documents/AppSeguimiento,Proyecto largo plazo/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:8676:316)
+    at commitPassiveMountOnFiber (file://C:/Users/Gastón/Documents/AppSeguimiento,Proyecto largo plazo/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:8688:17)
+    at recursivelyTraversePassiveMountEffects (file://C:/Users/Gastón/Documents/AppSeguimiento,Proyecto largo plazo/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:8676:316)
+    at commitPassiveMountOnFiber (file://C:/Users/Gastón/Documents/AppSeguimiento,Proyecto largo plazo/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:8688:17)
+    at recursivelyTraversePassiveMountEffects (file://C:/Users/Gastón/Documents/AppSeguimiento,Proyecto largo plazo/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:8676:316)
+    at commitPassiveMountOnFiber (file://C:/Users/Gastón/Documents/AppSeguimiento,Proyecto largo plazo/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:8688:17)
+    at recursivelyTraversePassiveMountEffects (file://C:/Users/Gastón/Documents/AppSeguimiento,Proyecto largo plazo/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:8676:316)
+    at commitPassiveMountOnFiber (file://C:/Users/Gastón/Documents/AppSeguimiento,Proyecto largo plazo/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:8688:17)
+    at recursivelyTraversePassiveMountEffects (file://C:/Users/Gastón/Documents/AppSeguimiento,Proyecto largo plazo/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:8676:316)
+    at commitPassiveMountOnFiber (file://C:/Users/Gastón/Documents/AppSeguimiento,Proyecto largo plazo/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:8693:17)
+    at recursivelyTraversePassiveMountEffects (file://C:/Users/Gastón/Documents/AppSeguimiento,Proyecto largo plazo/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:8676:316)
+    at commitPassiveMountOnFiber (file://C:/Users/Gastón/Documents/AppSeguimiento,Proyecto largo plazo/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:8688:17)
+    at recursivelyTraversePassiveMountEffects (file://C:/Users/Gastón/Documents/AppSeguimiento,Proyecto largo plazo/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:8676:316)
+    at commitPassiveMountOnFiber (file://C:/Users/Gastón/Documents/AppSeguimiento,Proyecto largo plazo/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:8688:17)
+    at recursivelyTraversePassiveMountEffects (file://C:/Users/Gastón/Documents/AppSeguimiento,Proyecto largo plazo/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:8676:316)
+    at commitPassiveMountOnFiber (file://C:/Users/Gastón/Documents/AppSeguimiento,Proyecto largo plazo/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:8750:17)
+    at recursivelyTraversePassiveMountEffects (file://C:/Users/Gastón/Documents/AppSeguimiento,Proyecto largo plazo/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:8676:316)
+    at commitPassiveMountOnFiber (file://C:/Users/Gastón/Documents/AppSeguimiento,Proyecto largo plazo/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:8750:17)
+    at recursivelyTraversePassiveMountEffects (file://C:/Users/Gastón/Documents/AppSeguimiento,Proyecto largo plazo/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:8676:316)
+    at commitPassiveMountOnFiber (file://C:/Users/Gastón/Documents/AppSeguimiento,Proyecto largo plazo/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:8688:17)
+    at recursivelyTraversePassiveMountEffects (file://C:/Users/Gastón/Documents/AppSeguimiento,Proyecto largo plazo/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:8676:316)
+    at commitPassiveMountOnFiber (file://C:/Users/Gastón/Documents/AppSeguimiento,Proyecto largo plazo/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:8688:17)
+    at recursivelyTraversePassiveMountEffects (file://C:/Users/Gastón/Documents/AppSeguimiento,Proyecto largo plazo/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:8676:316)
+    at commitPassiveMountOnFiber (file://C:/Users/Gastón/Documents/AppSeguimiento,Proyecto largo plazo/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:8750:17)
+    at recursivelyTraversePassiveMountEffects (file://C:/Users/Gastón/Documents/AppSeguimiento,Proyecto largo plazo/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:8676:316)
+    at commitPassiveMountOnFiber (file://C:/Users/Gastón/Documents/AppSeguimiento,Proyecto largo plazo/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:8750:17)
+    at recursivelyTraversePassiveMountEffects (file://C:/Users/Gastón/Documents/AppSeguimiento,Proyecto largo plazo/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:8676:316)
+    at commitPassiveMountOnFiber (file://C:/Users/Gastón/Documents/AppSeguimiento,Proyecto largo plazo/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:8750:17)
+    at recursivelyTraversePassiveMountEffects (file://C:/Users/Gastón/Documents/AppSeguimiento,Proyecto largo plazo/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:8676:316)
+    at commitPassiveMountOnFiber (file://C:/Users/Gastón/Documents/AppSeguimiento,Proyecto largo plazo/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:8688:17)
+    at recursivelyTraversePassiveMountEffects (file://C:/Users/Gastón/Documents/AppSeguimiento,Proyecto largo plazo/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:8676:316)
+    at SettingsRoute (src\app\settings\page.tsx:4:10)
+  2 |
+  3 | export default function SettingsRoute() {
+> 4 |   return <SettingsPage />;
+    |          ^
+  5 | }
+  6 |
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+✓ Compiled in 51ms
+ GET /settings 200 in 119ms (next.js: 33ms, application-code: 86ms)

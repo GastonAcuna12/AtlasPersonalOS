@@ -46,13 +46,19 @@ If Supabase environment variables are missing, the helper returns `null` instead
 of crashing the app. This keeps local-first mode intact while the project is
 prepared for future cloud work.
 
+## Auth Foundation Status
+
+An inactive auth provider/session context now exists and is mounted near the app
+root. It can detect whether a Supabase session exists without forcing login or
+changing local-first behavior.
+
+Settings now shows read-only Account & Sync status. It does not migrate, upload,
+or sync any module.
+
 ## Next Planned Step
 
-The next technical step should be an auth provider/session context that can
-detect whether a Supabase session exists without forcing login or changing
-local-first behavior.
-
-That should still not migrate any module until RLS and migration flows are
+The next technical step should be optional login/signup UI and an account
+surface, still without migrating any module until RLS and migration flows are
 ready.
 
 ## Security Warning
@@ -73,6 +79,7 @@ correctly enabled and verified on every user-owned table.
 ## Related Documents
 
 - [AUTH_PLAN.md](./AUTH_PLAN.md)
+- [AUTH_FOUNDATION.md](./AUTH_FOUNDATION.md)
 - [SECURITY_AND_PRIVACY.md](./SECURITY_AND_PRIVACY.md)
 - [SUPABASE_PLAN.md](./SUPABASE_PLAN.md)
 - [DATA_ARCHITECTURE.md](./DATA_ARCHITECTURE.md)
