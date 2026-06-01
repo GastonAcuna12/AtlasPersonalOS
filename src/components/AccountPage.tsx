@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { FormEvent, useState } from "react";
 import { useAtlasAuth, useLocalAtlasDataSummary } from "@/lib/auth";
+import { t } from "@/lib/i18n";
+import { useAtlasSettings } from "@/lib/settings";
 import { MigrationDecisionPanel } from "@/components/MigrationDecisionPanel";
 
 type AuthMode = "sign_in" | "sign_up";
@@ -10,6 +12,8 @@ type AuthMode = "sign_in" | "sign_up";
 export function AccountPage() {
   const auth = useAtlasAuth();
   const localDataSummary = useLocalAtlasDataSummary();
+  const { settings } = useAtlasSettings();
+  const language = settings.language;
   const [mode, setMode] = useState<AuthMode>("sign_in");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -26,12 +30,12 @@ export function AccountPage() {
     setError("");
 
     if (!isSupabaseReady) {
-      setError("Cloud sync is not configured yet. Atlas is running locally.");
+      setError(t(language, "account.error.unconfigured"));
       return;
     }
 
     if (!email.trim() || !password) {
-      setError("Enter an email and password.");
+      setError(t(language, "account.error.emailPassword"));
       return;
     }
 
@@ -61,7 +65,7 @@ export function AccountPage() {
 
     try {
       await auth.signOut();
-      setMessage("Signed out. Atlas remains available in local-first mode.");
+      setMessage(t(language, "account.message.signedOut"));
     } finally {
       setIsSubmitting(false);
     }
@@ -73,22 +77,20 @@ export function AccountPage() {
         <header className="flex flex-col gap-4 border-b border-[#27272a] pb-6 md:flex-row md:items-center md:justify-between">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-500">
-              Account
+              {t(language, "account.eyebrow")}
             </p>
             <h1 className="mt-2 text-4xl font-bold tracking-tight text-zinc-100 sm:text-5xl">
-              Account &amp; Sync
+              {t(language, "account.title")}
             </h1>
             <p className="mt-3 max-w-2xl text-sm leading-6 text-zinc-400">
-              Atlas still works locally without an account. Signing in prepares
-              future cloud sync, but existing local data is not uploaded
-              automatically and migration will be added later.
+              {t(language, "account.description")}
             </p>
           </div>
           <Link
             href="/settings"
             className="w-fit rounded-lg border border-[#27272a] bg-[#18181b] px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-zinc-300 transition hover:bg-zinc-800 hover:text-white"
           >
-            Settings
+            {t(language, "account.settings")}
           </Link>
         </header>
 
@@ -98,10 +100,10 @@ export function AccountPage() {
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div>
                 <p className="text-[10px] font-bold uppercase tracking-widest text-sky-400">
-                  Supabase Auth
+                  {t(language, "account.auth.eyebrow")}
                 </p>
                 <h2 className="mt-2 text-2xl font-bold tracking-tight text-zinc-100">
-                  Optional sign in
+                  {t(language, "account.auth.title")}
                 </h2>
               </div>
               <span
@@ -111,35 +113,33 @@ export function AccountPage() {
                     : "border-zinc-700 bg-zinc-800/70 text-zinc-300"
                 }`}
               >
-                {isSupabaseReady ? "Configured" : "Local-only"}
+                {isSupabaseReady
+                  ? t(language, "account.auth.configured")
+                  : t(language, "account.auth.localOnly")}
               </span>
             </div>
 
             {!isSupabaseReady ? (
               <div className="mt-6 rounded-lg border border-[#27272a] bg-[#121214] p-5">
                 <p className="text-sm font-semibold text-zinc-100">
-                  Cloud sync is not configured yet. Atlas is running locally.
+                  {t(language, "account.auth.unconfiguredTitle")}
                 </p>
                 <p className="mt-2 text-xs leading-6 text-zinc-500">
-                  Add `NEXT_PUBLIC_SUPABASE_URL` and
-                  `NEXT_PUBLIC_SUPABASE_ANON_KEY` locally when you are ready to
-                  test sign in. No login form is shown without those public
-                  placeholders configured.
+                  {t(language, "account.auth.unconfiguredDescription")}
                 </p>
               </div>
             ) : isSignedIn ? (
               <div className="mt-6 grid gap-4">
                 <div className="rounded-lg border border-emerald-500/25 bg-emerald-500/10 p-5">
                   <p className="text-sm font-semibold text-emerald-300">
-                    Cloud session detected
+                    {t(language, "account.auth.sessionDetected")}
                   </p>
                   <p className="mt-2 text-xs leading-6 text-zinc-400">
-                    Signed in as{" "}
+                    {t(language, "account.auth.signedInAs")}{" "}
                     <span className="font-semibold text-zinc-100">
-                      {auth.user?.email ?? "this Supabase user"}
+                      {auth.user?.email ?? t(language, "account.auth.thisUser")}
                     </span>
-                    . No Atlas data is synced yet. Migration will be added
-                    later.
+                    . {t(language, "account.auth.noSyncYet")}
                   </p>
                 </div>
                 <button
@@ -148,7 +148,9 @@ export function AccountPage() {
                   onClick={handleSignOut}
                   className="w-fit rounded-lg border border-[#27272a] bg-[#121214] px-4 py-3 text-xs font-bold uppercase tracking-wider text-zinc-200 transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  {isSubmitting ? "Signing out..." : "Sign out"}
+                  {isSubmitting
+                    ? t(language, "account.auth.signingOut")
+                    : t(language, "account.auth.signOut")}
                 </button>
               </div>
             ) : (
@@ -169,13 +171,15 @@ export function AccountPage() {
                           : "text-zinc-400 hover:text-zinc-100"
                       }`}
                     >
-                      {item === "sign_in" ? "Sign in" : "Sign up"}
+                      {item === "sign_in"
+                        ? t(language, "account.auth.signIn")
+                        : t(language, "account.auth.signUp")}
                     </button>
                   ))}
                 </div>
 
                 <label className="grid gap-2 text-xs font-semibold text-zinc-400">
-                  Email
+                  {t(language, "account.auth.email")}
                   <input
                     type="email"
                     value={email}
@@ -186,7 +190,7 @@ export function AccountPage() {
                 </label>
 
                 <label className="grid gap-2 text-xs font-semibold text-zinc-400">
-                  Password
+                  {t(language, "account.auth.password")}
                   <input
                     type="password"
                     value={password}
@@ -204,10 +208,10 @@ export function AccountPage() {
                   className="mt-2 rounded-lg bg-amber-500 px-4 py-3 text-xs font-bold uppercase tracking-wider text-zinc-950 transition hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {isSubmitting
-                    ? "Working..."
+                    ? t(language, "account.auth.working")
                     : mode === "sign_in"
-                      ? "Sign in"
-                      : "Create account"}
+                      ? t(language, "account.auth.signIn")
+                      : t(language, "account.auth.createAccount")}
                 </button>
               </form>
             )}
@@ -230,29 +234,29 @@ export function AccountPage() {
           <aside className="grid gap-6 content-start">
             <div className="rounded-xl border border-[#27272a] bg-[#18181b] p-6 shadow-xl">
               <p className="text-[10px] font-bold uppercase tracking-widest text-amber-500">
-                Local-first rules
+                {t(language, "account.localRules.eyebrow")}
               </p>
               <div className="mt-4 grid gap-3 text-xs leading-6 text-zinc-400">
-                <p>Atlas works locally without an account.</p>
-                <p>Signing in does not sync existing local data yet.</p>
-                <p>No local records are uploaded automatically.</p>
-                <p>Migration and merge choices will be implemented later.</p>
+                <p>{t(language, "account.localRules.title1")}</p>
+                <p>{t(language, "account.localRules.title2")}</p>
+                <p>{t(language, "account.localRules.title3")}</p>
+                <p>{t(language, "account.localRules.title4")}</p>
               </div>
             </div>
 
             <div className="rounded-xl border border-[#27272a] bg-[#18181b] p-6 shadow-xl">
               <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">
-                Local Workspace
+                {t(language, "account.workspace.eyebrow")}
               </p>
               <p className="mt-3 text-sm font-semibold text-zinc-100">
                 {localDataSummary.hasLocalData
-                  ? "Local data detected"
-                  : "No local records detected"}
+                  ? t(language, "account.workspace.localDetected")
+                  : t(language, "account.workspace.noRecords")}
               </p>
               <p className="mt-2 text-xs leading-6 text-zinc-500">
                 {localDataSummary.hasLocalData
                   ? `${localDataSummary.approximateRecordCount} approximate records across ${localDataSummary.populatedKeyCount} Atlas storage keys.`
-                  : "Atlas will continue using this browser as a local workspace."}
+                  : t(language, "account.workspace.noRecordsDescription")}
               </p>
             </div>
           </aside>

@@ -221,6 +221,7 @@ export function migrateAtlasStorage() {
         if (!appSettingsExists) {
           const appSettings = {
             dayMode: parsed.dayMode ?? "Normal Day",
+            language: parsed.language ?? "en",
             gymWeeklyTarget: parsed.gymWeeklyTarget ?? 4,
           };
           window.localStorage.setItem(ATLAS_STORAGE_KEYS.appSettings, JSON.stringify(appSettings));

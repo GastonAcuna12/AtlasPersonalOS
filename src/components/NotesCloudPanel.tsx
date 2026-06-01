@@ -8,6 +8,8 @@ import {
   listCloudNotes,
 } from "@/lib/supabase/notes";
 import type { Note, NoteDraft } from "@/types/atlas";
+import { t } from "@/lib/i18n";
+import { useAtlasSettings } from "@/lib/settings";
 
 type CloudAction = "load" | "create" | "upload" | null;
 
@@ -22,6 +24,8 @@ function getSelectedNote(localNotes: Note[], selectedNoteId: string) {
 
 export function NotesCloudPanel({ localNotes }: NotesCloudPanelProps) {
   const auth = useAtlasAuth();
+  const { settings } = useAtlasSettings();
+  const language = settings.language;
   const [cloudNotes, setCloudNotes] = useState<Note[]>([]);
   const [hasLoadedCloudNotes, setHasLoadedCloudNotes] = useState(false);
   const [selectedNoteId, setSelectedNoteId] = useState("");
@@ -84,12 +88,16 @@ export function NotesCloudPanel({ localNotes }: NotesCloudPanelProps) {
 
   async function handleUploadSelectedNote() {
     if (!selectedNote) {
-      setError("Choose a local note before uploading one cloud copy.");
+      setError(t(language, "cloud.chooseLocalNote"));
       return;
     }
 
     const confirmed = window.confirm(
-      "Upload this selected local note to Supabase Cloud Notes? This sends its title, content, area, and tags. The local note will remain unchanged.",
+      t(
+        language,
+        "cloud.notes.confirmUpload",
+        "Upload this selected local note to Supabase Cloud Notes? This sends its title, content, area, and tags. The local note will remain unchanged.",
+      ),
     );
 
     if (!confirmed) {
@@ -107,7 +115,7 @@ export function NotesCloudPanel({ localNotes }: NotesCloudPanelProps) {
         setCloudNotes((current) => [result.data as Note, ...current]);
         setHasLoadedCloudNotes(true);
         setMessage(
-          "Uploaded one selected local note to Cloud Notes. Local notes were not changed.",
+          t(language, "cloud.uploadedNote"),
         );
       } else if (!result.ok) {
         setError(result.error);
@@ -123,14 +131,14 @@ export function NotesCloudPanel({ localNotes }: NotesCloudPanelProps) {
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">
-              Notes Cloud POC
+              {t(language, "cloud.notes.title")}
             </p>
             <p className="mt-1 text-sm font-semibold text-zinc-100">
-              Local-only notes
+              {t(language, "cloud.localNotes")}
             </p>
           </div>
           <span className="w-fit rounded-full border border-zinc-700 bg-zinc-800/70 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-zinc-300">
-            Supabase not configured
+            {t(language, "settings.accountSync.notConfigured.status")}
           </span>
         </div>
       </section>
@@ -143,21 +151,20 @@ export function NotesCloudPanel({ localNotes }: NotesCloudPanelProps) {
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-[10px] font-bold uppercase tracking-widest text-sky-400">
-              Notes Cloud POC
+              {t(language, "cloud.notes.title")}
             </p>
             <p className="mt-2 text-sm font-semibold text-zinc-100">
-              Notes are stored locally.
+              {t(language, "cloud.localNotes")}
             </p>
             <p className="mt-1 text-xs leading-6 text-zinc-500">
-              Sign in from Account to enable manual cloud notes testing later.
-              Local notes keep working without an account.
+              {t(language, "cloud.notes.signIn")}
             </p>
           </div>
           <Link
             href="/account"
             className="w-fit rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-zinc-300 transition hover:bg-zinc-800 hover:text-white"
           >
-            Account
+            {t(language, "account.eyebrow")}
           </Link>
         </div>
       </section>
@@ -169,18 +176,17 @@ export function NotesCloudPanel({ localNotes }: NotesCloudPanelProps) {
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div>
           <p className="text-[10px] font-bold uppercase tracking-widest text-sky-400">
-            Notes Cloud POC
+            {t(language, "cloud.notes.title")}
           </p>
           <h2 className="mt-2 text-2xl font-bold tracking-tight text-zinc-100">
-            Cloud Notes POC available
+            {t(language, "cloud.notes.available")}
           </h2>
           <p className="mt-2 max-w-2xl text-xs leading-6 text-zinc-400">
-            Cloud actions are manual. Atlas will not upload, merge, replace, or
-            delete local notes automatically.
+            {t(language, "common.manualCloudPreview")}. {t(language, "common.cloudDataSeparate")}
           </p>
         </div>
         <span className="w-fit rounded-full border border-emerald-500/25 bg-emerald-500/10 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-emerald-400">
-          Signed in
+          {t(language, "settings.accountSync.signedIn")}
         </span>
       </div>
 
@@ -192,7 +198,7 @@ export function NotesCloudPanel({ localNotes }: NotesCloudPanelProps) {
             disabled={activeAction !== null}
             className="rounded-lg border border-[#27272a] bg-[#121214] px-4 py-3 text-xs font-bold uppercase tracking-wider text-zinc-300 transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {activeAction === "load" ? "Loading..." : "Load cloud notes"}
+            {activeAction === "load" ? t(language, "common.loading") : t(language, "cloud.loadNotes")}
           </button>
           <button
             type="button"
@@ -201,8 +207,8 @@ export function NotesCloudPanel({ localNotes }: NotesCloudPanelProps) {
             className="rounded-lg border border-sky-500/25 bg-sky-500/10 px-4 py-3 text-xs font-bold uppercase tracking-wider text-sky-300 transition hover:bg-sky-500/20 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {activeAction === "create"
-              ? "Creating..."
-              : "Create test cloud note"}
+              ? t(language, "common.creating")
+              : t(language, "cloud.createNote")}
           </button>
         </div>
 
@@ -211,16 +217,16 @@ export function NotesCloudPanel({ localNotes }: NotesCloudPanelProps) {
           disabled
           className="rounded-lg border border-[#27272a] bg-[#121214]/70 px-4 py-3 text-xs font-bold uppercase tracking-wider text-zinc-500 opacity-60"
         >
-          Upload all local notes
+          {t(language, "cloud.uploadAllNotes")}
           <span className="ml-2 rounded-full border border-zinc-700 bg-zinc-800 px-2 py-0.5 text-[9px] text-zinc-400">
-            Coming soon
+            {t(language, "common.comingSoon")}
           </span>
         </button>
       </div>
 
       <div className="mt-4 grid gap-3 md:grid-cols-[1fr_auto]">
         <label className="grid gap-1.5 text-xs font-semibold text-zinc-400">
-          Upload one selected local note
+          {t(language, "cloud.uploadNote")}
           <select
             value={selectedValue}
             onChange={(event) => setSelectedNoteId(event.target.value)}
@@ -228,7 +234,7 @@ export function NotesCloudPanel({ localNotes }: NotesCloudPanelProps) {
             className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2.5 text-zinc-100 focus:outline-none focus:border-sky-500/50 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {localNotes.length === 0 ? (
-              <option value="">No local notes available</option>
+              <option value="">{t(language, "cloud.noLocalNotes", "No local notes available")}</option>
             ) : (
               localNotes.map((note) => (
                 <option key={note.id} value={note.id}>
@@ -244,7 +250,7 @@ export function NotesCloudPanel({ localNotes }: NotesCloudPanelProps) {
           disabled={!selectedNote || activeAction !== null}
           className="self-end rounded-lg border border-amber-500/25 bg-amber-500/10 px-4 py-3 text-xs font-bold uppercase tracking-wider text-amber-400 transition hover:bg-amber-500/20 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {activeAction === "upload" ? "Uploading..." : "Upload selected"}
+          {activeAction === "upload" ? t(language, "common.uploading") : t(language, "cloud.uploadNote")}
         </button>
       </div>
 
@@ -265,14 +271,14 @@ export function NotesCloudPanel({ localNotes }: NotesCloudPanelProps) {
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">
-                Cloud Notes
+                {t(language, "cloud.notes.title")}
               </p>
               <p className="mt-1 text-sm font-semibold text-zinc-100">
-                Separate cloud-only preview
+                {t(language, "common.manualCloudPreview")}
               </p>
             </div>
             <span className="w-fit rounded-full border border-[#27272a] bg-[#18181b] px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-zinc-400">
-              {cloudNotes.length} loaded
+              {cloudNotes.length} {t(language, "cloud.loaded", "loaded")}
             </span>
           </div>
 
@@ -289,7 +295,7 @@ export function NotesCloudPanel({ localNotes }: NotesCloudPanelProps) {
                         {note.title}
                       </h3>
                       <p className="mt-1 text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
-                        {note.area || "Personal"} · Updated{" "}
+                        {note.area || t(language, "common.personal")} · {t(language, "cloud.updated", "Updated")}{" "}
                         {note.updatedAt.slice(0, 10)}
                       </p>
                     </div>
@@ -307,14 +313,14 @@ export function NotesCloudPanel({ localNotes }: NotesCloudPanelProps) {
                     ) : null}
                   </div>
                   <p className="mt-3 line-clamp-3 whitespace-pre-wrap text-xs leading-6 text-zinc-400">
-                    {note.content || "No content."}
+                    {note.content || t(language, "common.noContent")}
                   </p>
                 </article>
               ))}
             </div>
           ) : (
             <p className="mt-4 rounded-lg border border-[#27272a] bg-[#18181b] p-4 text-xs leading-6 text-zinc-500">
-              No cloud notes returned. Local notes are still unchanged.
+              {t(language, "cloud.notes.empty", "No cloud notes returned. Local notes are still unchanged.")}
             </p>
           )}
         </div>

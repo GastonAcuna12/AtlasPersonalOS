@@ -6,10 +6,14 @@ import { useTasks, todayISO } from "@/lib/tasks";
 import { useWorkItems } from "@/lib/work";
 import { useGoals } from "@/lib/goals";
 import { useWorkoutLogs } from "@/lib/gym";
-import { useDailyWraps } from "@/lib/dailyWraps";
+import { generateDailyWrapSummary, useDailyWraps } from "@/lib/dailyWraps";
 import { useWeeklyReviews } from "@/lib/reviews";
+import { useAtlasSettings } from "@/lib/settings";
+import { getLanguageLocale, t } from "@/lib/i18n";
 
 export function CalendarPage() {
+  const { settings } = useAtlasSettings();
+  const language = settings.language;
   const { tasks } = useTasks();
   const { workItems } = useWorkItems();
   const { goals } = useGoals();
@@ -30,10 +34,12 @@ export function CalendarPage() {
   const dayNumbers = Array.from({ length: daysInMonth }, (_, i) => i + 1);
   const calendarCells = [...blanks, ...dayNumbers];
 
-  const monthNames = [
-    "January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December"
-  ];
+  const monthLabel = useMemo(() => {
+    return new Intl.DateTimeFormat(getLanguageLocale(language), {
+      month: "long",
+      timeZone: "UTC",
+    }).format(new Date(Date.UTC(year, monthIndex, 1)));
+  }, [language, monthIndex, year]);
 
   const prevMonth = () => {
     setCurrentDate(new Date(year, monthIndex - 1, 1));
@@ -145,14 +151,15 @@ export function CalendarPage() {
   const selectedDateLabel = useMemo(() => {
     const [y, m, d] = selectedDateStr.split("-").map(Number);
     if (!y || !m || !d) return selectedDateStr;
-    const dateObj = new Date(y, m - 1, d);
-    return new Intl.DateTimeFormat("en", {
+    const dateObj = new Date(Date.UTC(y, m - 1, d, 12));
+    return new Intl.DateTimeFormat(getLanguageLocale(language), {
+      timeZone: "UTC",
       weekday: "long",
       year: "numeric",
       month: "long",
       day: "numeric",
     }).format(dateObj);
-  }, [selectedDateStr]);
+  }, [language, selectedDateStr]);
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8 text-zinc-100 animate-fade-in-up">
@@ -160,17 +167,17 @@ export function CalendarPage() {
       <header className="flex flex-col gap-4 border-b border-[#27272a] pb-6 md:flex-row md:items-center md:justify-between">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-500">
-            Unified Time Engine
+            {t(language, "calendar.eyebrow", "Unified Time Engine")}
           </p>
           <h1 className="mt-2 text-4xl font-bold tracking-tight text-zinc-100 sm:text-5xl">
-            Atlas Calendar
+            {t(language, "calendar.title", "Atlas Calendar")}
           </h1>
         </div>
         <Link
           href="/"
           className="w-fit rounded-lg border border-[#27272a] bg-[#18181b] px-4 py-2 text-xs font-bold uppercase tracking-wider text-zinc-300 transition hover:bg-zinc-800 hover:text-white"
         >
-          Dashboard
+          {t(language, "common.dashboard")}
         </Link>
       </header>
 
@@ -182,37 +189,37 @@ export function CalendarPage() {
           <div className="sticky top-0 bg-[#18181b] z-20 pb-3 border-b border-[#27272a]/60 -mx-6 px-6 pt-1">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-base font-bold text-zinc-100">Schedule Grid</h2>
-                <p className="text-xs text-zinc-400 mt-1">Select a date to audit logged events.</p>
+                <h2 className="text-base font-bold text-zinc-100">{t(language, "calendar.scheduleGrid", "Schedule Grid")}</h2>
+                <p className="text-xs text-zinc-400 mt-1">{t(language, "calendar.scheduleDescription", "Select a date to audit logged events.")}</p>
               </div>
               <div className="flex items-center gap-2">
                 <button
                   onClick={prevMonth}
                   className="p-2 rounded-lg border border-[#27272a] bg-[#121214] hover:bg-zinc-800 transition text-zinc-400 hover:text-white text-xs font-bold cursor-pointer"
                 >
-                  &larr; Prev
+                  &larr; {t(language, "gym.prev", "Prev")}
                 </button>
                 <span className="text-xs font-bold uppercase tracking-wider px-3 text-zinc-200 min-w-[120px] text-center">
-                  {monthNames[monthIndex]} {year}
+                  {monthLabel} {year}
                 </span>
                 <button
                   onClick={nextMonth}
                   className="p-2 rounded-lg border border-[#27272a] bg-[#121214] hover:bg-zinc-800 transition text-zinc-400 hover:text-white text-xs font-bold cursor-pointer"
                 >
-                  Next &rarr;
+                  {t(language, "gym.next", "Next")} &rarr;
                 </button>
               </div>
             </div>
 
             {/* Calendar Grid Header */}
             <div className="mt-5 grid grid-cols-7 gap-1 text-center text-xs font-bold uppercase tracking-wider text-zinc-500">
-              <div>Sun</div>
-              <div>Mon</div>
-              <div>Tue</div>
-              <div>Wed</div>
-              <div>Thu</div>
-              <div>Fri</div>
-              <div>Sat</div>
+              <div>{t(language, "calendar.day.sun", "Sun")}</div>
+              <div>{t(language, "calendar.day.mon", "Mon")}</div>
+              <div>{t(language, "calendar.day.tue", "Tue")}</div>
+              <div>{t(language, "calendar.day.wed", "Wed")}</div>
+              <div>{t(language, "calendar.day.thu", "Thu")}</div>
+              <div>{t(language, "calendar.day.fri", "Fri")}</div>
+              <div>{t(language, "calendar.day.sat", "Sat")}</div>
             </div>
           </div>
 
@@ -247,25 +254,25 @@ export function CalendarPage() {
                   {dayData && dayData.count > 0 && (
                     <div className="flex flex-wrap gap-1 mt-auto w-full">
                       {dayData.tasks.some(t => t.area === "Academic") && (
-                        <span className="h-1.5 w-1.5 rounded-full bg-indigo-500" title="Academic Deadline" />
+                        <span className="h-1.5 w-1.5 rounded-full bg-indigo-500" title={t(language, "calendar.dot.academicDeadline")} />
                       )}
                       {dayData.tasks.some(t => t.area !== "Academic") && (
-                        <span className="h-1.5 w-1.5 rounded-full bg-zinc-400" title="General Task" />
+                        <span className="h-1.5 w-1.5 rounded-full bg-zinc-400" title={t(language, "calendar.dot.generalTask")} />
                       )}
                       {dayData.workItems.length > 0 && (
-                        <span className="h-1.5 w-1.5 rounded-full bg-amber-500" title="Freelance Work" />
+                        <span className="h-1.5 w-1.5 rounded-full bg-amber-500" title={t(language, "calendar.dot.freelanceWork")} />
                       )}
                       {dayData.goals.length > 0 && (
-                        <span className="h-1.5 w-1.5 rounded-full bg-cyan-500" title="Goal Deadline" />
+                        <span className="h-1.5 w-1.5 rounded-full bg-cyan-500" title={t(language, "calendar.dot.goalDeadline")} />
                       )}
                       {dayData.workouts.length > 0 && (
-                        <span className="h-1.5 w-1.5 rounded-full bg-rose-500" title="Gym Workout" />
+                        <span className="h-1.5 w-1.5 rounded-full bg-rose-500" title={t(language, "calendar.dot.gymWorkout")} />
                       )}
                       {dayData.wraps.length > 0 && (
-                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" title="Daily Wrap Completed" />
+                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" title={t(language, "calendar.dot.dailyWrapCompleted")} />
                       )}
                       {dayData.reviews.length > 0 && (
-                        <span className="h-1.5 w-1.5 rounded-full bg-violet-500" title="Weekly Review Logged" />
+                        <span className="h-1.5 w-1.5 rounded-full bg-violet-500" title={t(language, "calendar.dot.weeklyReviewLogged")} />
                       )}
                     </div>
                   )}
@@ -279,7 +286,7 @@ export function CalendarPage() {
         <div className="rounded-xl border border-[#27272a] bg-[#18181b] p-6 shadow-xl min-h-[400px] flex flex-col">
           <div className="border-b border-[#27272a] pb-4 flex justify-between items-start">
             <div>
-              <h3 className="text-base font-bold text-zinc-100">Schedule Agenda</h3>
+              <h3 className="text-base font-bold text-zinc-100">{t(language, "calendar.scheduleAgenda", "Schedule Agenda")}</h3>
               <p className="text-xs text-zinc-400 mt-1">{selectedDateLabel}</p>
             </div>
             {selectedDateStr === todayISO() && (
@@ -287,7 +294,7 @@ export function CalendarPage() {
                 href="/today"
                 className="rounded-lg bg-amber-500 hover:bg-amber-400 text-zinc-950 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider transition"
               >
-                Go to Today
+                {t(language, "calendar.goToday", "Go to Today")}
               </Link>
             )}
           </div>
@@ -295,7 +302,7 @@ export function CalendarPage() {
           <div className="mt-6 flex-1 overflow-y-auto space-y-4 pr-1">
             {selectedDayItems.count === 0 && (
               <p className="text-xs text-zinc-500 italic py-8 text-center">
-                No events, deadlines, wraps, or logs recorded for this day.
+                {t(language, "calendar.emptyDay", "No events, deadlines, wraps, or logs recorded for this day.")}
               </p>
             )}
 
@@ -303,7 +310,7 @@ export function CalendarPage() {
             {selectedDayItems.workItems.length > 0 && (
               <div>
                 <h4 className="text-[10px] font-bold uppercase tracking-widest text-amber-500 border-b border-[#27272a]/60 pb-1 mb-2">
-                  Freelance Work Items
+                  {t(language, "calendar.freelanceItems", "Freelance Work Items")}
                 </h4>
                 <div className="space-y-2">
                   {selectedDayItems.workItems.map((wi) => (
@@ -312,7 +319,7 @@ export function CalendarPage() {
                         <div>
                           <p className="font-bold text-zinc-100">{wi.title}</p>
                           <p className="text-[10px] text-zinc-400 mt-0.5 uppercase tracking-wide">
-                            {wi.type} &middot; Status: {wi.status.replace("_", " ")}
+                            {t(language, `work.type.${wi.type}`, wi.type)} &middot; {t(language, "common.status")}: {t(language, `work.status.${wi.status}`, wi.status.replace("_", " "))}
                           </p>
                         </div>
                         {wi.value !== undefined && (
@@ -329,7 +336,7 @@ export function CalendarPage() {
                             rel="noopener noreferrer"
                             className="inline-flex items-center gap-1 text-[9px] font-bold text-amber-500 hover:text-amber-400 transition hover:underline cursor-pointer"
                           >
-                            🔗 Open reference
+                            🔗 {t(language, "today.work.openReference")}
                           </a>
                         </div>
                       )}
@@ -340,24 +347,24 @@ export function CalendarPage() {
             )}
 
             {/* Academic tasks list */}
-            {selectedDayItems.tasks.filter(t => t.area === "Academic").length > 0 && (
+            {selectedDayItems.tasks.filter((task) => task.area === "Academic").length > 0 && (
               <div>
                 <h4 className="text-[10px] font-bold uppercase tracking-widest text-indigo-400 border-b border-[#27272a]/60 pb-1 mb-2">
-                  Academic Tasks &amp; Exams
+                  {t(language, "calendar.academicTasks", "Academic Tasks & Exams")}
                 </h4>
                 <div className="space-y-2">
-                  {selectedDayItems.tasks.filter(t => t.area === "Academic").map((t) => (
-                    <div key={t.id} className="rounded-lg bg-[#121214] border border-[#27272a] p-3 text-xs flex justify-between items-center">
+                  {selectedDayItems.tasks.filter((task) => task.area === "Academic").map((task) => (
+                    <div key={task.id} className="rounded-lg bg-[#121214] border border-[#27272a] p-3 text-xs flex justify-between items-center">
                       <div>
-                        <p className="font-bold text-zinc-100">{t.title}</p>
+                        <p className="font-bold text-zinc-100">{task.title}</p>
                         <p className="text-[10px] text-zinc-400 mt-0.5 uppercase tracking-wide">
-                          {t.academicType || "Assignment"} &middot; {t.priority} priority
+                          {t(language, `academics.type.${task.academicType ?? "Assignment"}`, task.academicType ?? "Assignment")} &middot; {t(language, `enum.priority.${task.priority}`, task.priority)} {t(language, "common.priority").toLowerCase()}
                         </p>
                       </div>
-                      {t.status === "completed" ? (
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-500">Completed</span>
+                      {task.status === "completed" ? (
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-500">{t(language, "common.completed")}</span>
                       ) : (
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-amber-500">Pending</span>
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-amber-500">{t(language, "common.pending")}</span>
                       )}
                     </div>
                   ))}
@@ -366,24 +373,24 @@ export function CalendarPage() {
             )}
 
             {/* General tasks list */}
-            {selectedDayItems.tasks.filter(t => t.area !== "Academic").length > 0 && (
+            {selectedDayItems.tasks.filter((task) => task.area !== "Academic").length > 0 && (
               <div>
                 <h4 className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 border-b border-[#27272a]/60 pb-1 mb-2">
-                  Agenda Tasks
+                  {t(language, "calendar.agendaTasks", "Agenda Tasks")}
                 </h4>
                 <div className="space-y-2">
-                  {selectedDayItems.tasks.filter(t => t.area !== "Academic").map((t) => (
-                    <div key={t.id} className="rounded-lg bg-[#121214] border border-[#27272a] p-3 text-xs flex justify-between items-center">
+                  {selectedDayItems.tasks.filter((task) => task.area !== "Academic").map((task) => (
+                    <div key={task.id} className="rounded-lg bg-[#121214] border border-[#27272a] p-3 text-xs flex justify-between items-center">
                       <div>
-                        <p className="font-bold text-zinc-100">{t.title}</p>
+                        <p className="font-bold text-zinc-100">{task.title}</p>
                         <p className="text-[10px] text-zinc-500 mt-0.5 uppercase tracking-wide">
-                          {t.area} &middot; {t.taskType} &middot; {t.priority}
+                          {t(language, `enum.taskArea.${task.area}`, task.area)} &middot; {t(language, `enum.taskType.${task.taskType}`, task.taskType)} &middot; {t(language, `enum.priority.${task.priority}`, task.priority)}
                         </p>
                       </div>
-                      {t.status === "completed" ? (
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-500">Completed</span>
+                      {task.status === "completed" ? (
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-500">{t(language, "common.completed")}</span>
                       ) : (
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-amber-500">Pending</span>
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-amber-500">{t(language, "common.pending")}</span>
                       )}
                     </div>
                   ))}
@@ -395,7 +402,7 @@ export function CalendarPage() {
             {selectedDayItems.workouts.length > 0 && (
               <div>
                 <h4 className="text-[10px] font-bold uppercase tracking-widest text-rose-500 border-b border-[#27272a]/60 pb-1 mb-2">
-                  Gym Workouts
+                  {t(language, "calendar.gymWorkouts", "Gym Workouts")}
                 </h4>
                 <div className="space-y-2">
                   {selectedDayItems.workouts.map((w) => {
@@ -403,11 +410,11 @@ export function CalendarPage() {
                     return (
                       <div key={w.id} className="rounded-lg bg-[#121214] border border-[#27272a] p-3 text-xs">
                         <div className="flex justify-between items-center">
-                          <p className="font-bold text-zinc-100">{w.workoutType} Session</p>
-                          <span className="text-[10px] text-zinc-400">{isRest ? "Rest day" : `${w.duration} min`}</span>
+                          <p className="font-bold text-zinc-100">{t(language, `gym.workoutType.${w.workoutType}`, w.workoutType)} {t(language, "calendar.session", "Session")}</p>
+                          <span className="text-[10px] text-zinc-400">{isRest ? t(language, "gym.restDay", "Rest day") : `${w.duration} ${t(language, "common.minutes").toLowerCase()}`}</span>
                         </div>
                         <p className="text-[10px] text-zinc-500 mt-1">
-                          Energy: {w.energy}/10 &middot; Intensity: {w.intensity}/10
+                          {t(language, "common.energy")}: {w.energy}/10 &middot; {t(language, "common.intensity")}: {w.intensity}/10
                         </p>
                         {w.notes && <p className="text-[11px] text-zinc-400 mt-1 italic">&ldquo;{w.notes}&rdquo;</p>}
                       </div>
@@ -421,7 +428,7 @@ export function CalendarPage() {
             {selectedDayItems.goals.length > 0 && (
               <div>
                 <h4 className="text-[10px] font-bold uppercase tracking-widest text-cyan-400 border-b border-[#27272a]/60 pb-1 mb-2">
-                  Goal Target Milestones
+                  {t(language, "calendar.goalMilestones", "Goal Target Milestones")}
                 </h4>
                 <div className="space-y-2">
                   {selectedDayItems.goals.map((g) => (
@@ -431,7 +438,7 @@ export function CalendarPage() {
                         <span className="text-[10px] font-bold uppercase tracking-wider text-cyan-500">{g.area}</span>
                       </div>
                       <p className="text-[10px] text-zinc-400 mt-1">
-                        Target: {g.targetValue.toLocaleString()} {g.unit || ""}
+                        {t(language, "dashboard.target")}: {g.targetValue.toLocaleString()} {g.unit || ""}
                       </p>
                     </div>
                   ))}
@@ -443,29 +450,33 @@ export function CalendarPage() {
             {selectedDayItems.wraps.length > 0 && (
               <div>
                 <h4 className="text-[10px] font-bold uppercase tracking-widest text-emerald-500 border-b border-[#27272a]/60 pb-1 mb-2">
-                  Daily Wrap Reflection
+                  {t(language, "calendar.dailyWrapReflection", "Daily Wrap Reflection")}
                 </h4>
                 <div className="space-y-2">
                   {selectedDayItems.wraps.map((dw) => (
                     <div key={dw.id} className="rounded-lg bg-[#121214] border border-[#27272a] p-3.5 text-xs">
-                      <p className="font-bold text-zinc-200">Deterministically Summarized Day</p>
-                      <p className="text-[11px] text-zinc-400 mt-1 leading-relaxed">{dw.generatedSummary}</p>
+                      <p className="font-bold text-zinc-200">{t(language, "calendar.summarizedDay", "Deterministically Summarized Day")}</p>
+                      <p className="text-[11px] text-zinc-400 mt-1 leading-relaxed">
+                        {dw.generatedSummary
+                          ? generateDailyWrapSummary(dw.statsSnapshot, language)
+                          : t(language, "review.noSummaryCaptured")}
+                      </p>
                       
                       <div className="mt-2.5 flex flex-wrap gap-1.5">
                         {dw.mood !== undefined && (
-                          <span className="rounded bg-zinc-800 px-2 py-0.5 text-[9px] font-bold text-zinc-400">Mood {dw.mood}/10</span>
+                          <span className="rounded bg-zinc-800 px-2 py-0.5 text-[9px] font-bold text-zinc-400">{t(language, "dashboard.mood")} {dw.mood}/10</span>
                         )}
                         {dw.energy !== undefined && (
-                          <span className="rounded bg-zinc-800 px-2 py-0.5 text-[9px] font-bold text-zinc-400">Energy {dw.energy}/10</span>
+                          <span className="rounded bg-zinc-800 px-2 py-0.5 text-[9px] font-bold text-zinc-400">{t(language, "common.energy")} {dw.energy}/10</span>
                         )}
                         {dw.productivity !== undefined && (
-                          <span className="rounded bg-zinc-800 px-2 py-0.5 text-[9px] font-bold text-zinc-400">Prod {dw.productivity}/10</span>
+                          <span className="rounded bg-zinc-800 px-2 py-0.5 text-[9px] font-bold text-zinc-400">{t(language, "dashboard.productivity")} {dw.productivity}/10</span>
                         )}
                       </div>
 
                       {dw.mainTakeaway && (
                         <p className="text-[11px] text-amber-500/90 font-medium mt-2 leading-relaxed">
-                          Takeaway: &ldquo;{dw.mainTakeaway}&rdquo;
+                          {t(language, "calendar.takeaway", "Takeaway")}: &ldquo;{dw.mainTakeaway}&rdquo;
                         </p>
                       )}
                     </div>
@@ -478,15 +489,15 @@ export function CalendarPage() {
             {selectedDayItems.reviews.length > 0 && (
               <div>
                 <h4 className="text-[10px] font-bold uppercase tracking-widest text-violet-500 border-b border-[#27272a]/60 pb-1 mb-2">
-                  Weekly Reviews Logged
+                  {t(language, "calendar.weeklyReviews", "Weekly Reviews Logged")}
                 </h4>
                 <div className="space-y-2">
                   {selectedDayItems.reviews.map((r) => (
                     <div key={r.id} className="rounded-lg bg-[#121214] border border-[#27272a] p-3 text-xs">
-                      <p className="font-bold text-zinc-200">System Review: Week {r.weekStart} to {r.weekEnd}</p>
+                      <p className="font-bold text-zinc-200">{t(language, "calendar.systemReview", "System Review")}: {t(language, "common.week")} {r.weekStart} {t(language, "calendar.to", "to")} {r.weekEnd}</p>
                       {r.wins && (
                         <p className="text-[11px] text-zinc-400 mt-1 leading-relaxed truncate">
-                          Wins: {r.wins}
+                          {t(language, "review.wins", "Wins")}: {r.wins}
                         </p>
                       )}
                     </div>

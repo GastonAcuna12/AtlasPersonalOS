@@ -5,6 +5,8 @@ import { useState } from "react";
 import { useAtlasAuth } from "@/lib/auth";
 import { createCloudGoal, listCloudGoals } from "@/lib/supabase/goals";
 import type { Goal, GoalDraft } from "@/types/atlas";
+import { t } from "@/lib/i18n";
+import { useAtlasSettings } from "@/lib/settings";
 
 type CloudAction = "load" | "create" | "upload" | null;
 
@@ -30,6 +32,8 @@ function getPreviewProgress(goal: Goal) {
 
 export function GoalsCloudPanel({ localGoals }: GoalsCloudPanelProps) {
   const auth = useAtlasAuth();
+  const { settings } = useAtlasSettings();
+  const language = settings.language;
   const [cloudGoals, setCloudGoals] = useState<Goal[]>([]);
   const [hasLoadedCloudGoals, setHasLoadedCloudGoals] = useState(false);
   const [selectedGoalId, setSelectedGoalId] = useState("");
@@ -96,12 +100,16 @@ export function GoalsCloudPanel({ localGoals }: GoalsCloudPanelProps) {
 
   async function handleUploadSelectedGoal() {
     if (!selectedGoal) {
-      setError("Choose a local goal before uploading one cloud copy.");
+      setError(t(language, "cloud.chooseLocalGoal"));
       return;
     }
 
     const confirmed = window.confirm(
-      "Upload this selected local goal copy to Supabase Cloud Goals? This sends its title, notes, area, status, values, unit, currency, deadline, and linked metric. The local goal will remain unchanged.",
+      t(
+        language,
+        "cloud.goals.confirmUpload",
+        "Upload this selected local goal copy to Supabase Cloud Goals? This sends its title, notes, area, status, values, unit, currency, deadline, and linked metric. The local goal will remain unchanged.",
+      ),
     );
 
     if (!confirmed) {
@@ -119,7 +127,7 @@ export function GoalsCloudPanel({ localGoals }: GoalsCloudPanelProps) {
         setCloudGoals((current) => [result.data as Goal, ...current]);
         setHasLoadedCloudGoals(true);
         setMessage(
-          "Uploaded one selected local goal copy to Cloud Goals. Local goals were not changed.",
+          t(language, "cloud.uploadedGoal"),
         );
       } else if (!result.ok) {
         setError(result.error);
@@ -135,14 +143,14 @@ export function GoalsCloudPanel({ localGoals }: GoalsCloudPanelProps) {
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">
-              Goals Cloud POC
+              {t(language, "cloud.goals.title")}
             </p>
             <p className="mt-1 text-sm font-semibold text-zinc-100">
-              Local-only goals
+              {t(language, "cloud.localGoals")}
             </p>
           </div>
           <span className="w-fit rounded-full border border-zinc-700 bg-zinc-800/70 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-zinc-300">
-            Supabase not configured
+            {t(language, "settings.accountSync.notConfigured.status")}
           </span>
         </div>
       </section>
@@ -155,21 +163,20 @@ export function GoalsCloudPanel({ localGoals }: GoalsCloudPanelProps) {
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-[10px] font-bold uppercase tracking-widest text-sky-400">
-              Goals Cloud POC
+              {t(language, "cloud.goals.title")}
             </p>
             <p className="mt-2 text-sm font-semibold text-zinc-100">
-              Goals are stored locally.
+              {t(language, "cloud.localGoals")}
             </p>
             <p className="mt-1 text-xs leading-6 text-zinc-500">
-              Sign in from Account to test cloud goals. Local goals keep
-              working without an account.
+              {t(language, "cloud.goals.signIn")}
             </p>
           </div>
           <Link
             href="/account"
             className="w-fit rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-zinc-300 transition hover:bg-zinc-800 hover:text-white"
           >
-            Account
+            {t(language, "account.eyebrow")}
           </Link>
         </div>
       </section>
@@ -181,19 +188,17 @@ export function GoalsCloudPanel({ localGoals }: GoalsCloudPanelProps) {
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div>
           <p className="text-[10px] font-bold uppercase tracking-widest text-sky-400">
-            Goals Cloud POC
+            {t(language, "cloud.goals.title")}
           </p>
           <h2 className="mt-2 text-2xl font-bold tracking-tight text-zinc-100">
-            Cloud Goals POC available
+            {t(language, "cloud.goals.available")}
           </h2>
           <p className="mt-2 max-w-2xl text-xs leading-6 text-zinc-400">
-            Cloud goal actions are manual and do not affect dashboard, XP,
-            streaks, finances, Savings Vault, deadline widgets, or local goal
-            data.
+            {t(language, "common.manualCloudPreview")}. {t(language, "common.cloudDataSeparate")}
           </p>
         </div>
         <span className="w-fit rounded-full border border-emerald-500/25 bg-emerald-500/10 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-emerald-400">
-          Signed in
+          {t(language, "settings.accountSync.signedIn")}
         </span>
       </div>
 
@@ -205,7 +210,7 @@ export function GoalsCloudPanel({ localGoals }: GoalsCloudPanelProps) {
             disabled={activeAction !== null}
             className="rounded-lg border border-[#27272a] bg-[#121214] px-4 py-3 text-xs font-bold uppercase tracking-wider text-zinc-300 transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {activeAction === "load" ? "Loading..." : "Load cloud goals"}
+            {activeAction === "load" ? t(language, "common.loading") : t(language, "cloud.loadGoals")}
           </button>
           <button
             type="button"
@@ -214,8 +219,8 @@ export function GoalsCloudPanel({ localGoals }: GoalsCloudPanelProps) {
             className="rounded-lg border border-sky-500/25 bg-sky-500/10 px-4 py-3 text-xs font-bold uppercase tracking-wider text-sky-300 transition hover:bg-sky-500/20 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {activeAction === "create"
-              ? "Creating..."
-              : "Create test cloud goal"}
+              ? t(language, "common.creating")
+              : t(language, "cloud.createGoal")}
           </button>
         </div>
 
@@ -224,16 +229,16 @@ export function GoalsCloudPanel({ localGoals }: GoalsCloudPanelProps) {
           disabled
           className="rounded-lg border border-[#27272a] bg-[#121214]/70 px-4 py-3 text-xs font-bold uppercase tracking-wider text-zinc-500 opacity-60"
         >
-          Upload all local goals
+          {t(language, "cloud.uploadAllGoals")}
           <span className="ml-2 rounded-full border border-zinc-700 bg-zinc-800 px-2 py-0.5 text-[9px] text-zinc-400">
-            Coming soon
+            {t(language, "common.comingSoon")}
           </span>
         </button>
       </div>
 
       <div className="mt-4 grid gap-3 md:grid-cols-[1fr_auto]">
         <label className="grid gap-1.5 text-xs font-semibold text-zinc-400">
-          Upload selected local goal copy
+          {t(language, "cloud.uploadGoal")}
           <select
             value={selectedValue}
             onChange={(event) => setSelectedGoalId(event.target.value)}
@@ -241,7 +246,7 @@ export function GoalsCloudPanel({ localGoals }: GoalsCloudPanelProps) {
             className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2.5 text-zinc-100 focus:outline-none focus:border-sky-500/50 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {localGoals.length === 0 ? (
-              <option value="">No local goals available</option>
+              <option value="">{t(language, "cloud.noLocalGoals", "No local goals available")}</option>
             ) : (
               localGoals.map((goal) => (
                 <option key={goal.id} value={goal.id}>
@@ -257,7 +262,7 @@ export function GoalsCloudPanel({ localGoals }: GoalsCloudPanelProps) {
           disabled={!selectedGoal || activeAction !== null}
           className="self-end rounded-lg border border-amber-500/25 bg-amber-500/10 px-4 py-3 text-xs font-bold uppercase tracking-wider text-amber-400 transition hover:bg-amber-500/20 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {activeAction === "upload" ? "Uploading..." : "Upload selected copy"}
+          {activeAction === "upload" ? t(language, "common.uploading") : t(language, "cloud.uploadGoal")}
         </button>
       </div>
 
@@ -278,14 +283,14 @@ export function GoalsCloudPanel({ localGoals }: GoalsCloudPanelProps) {
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">
-                Cloud Goals Preview
+                {t(language, "cloud.goals.title")}
               </p>
               <p className="mt-1 text-sm font-semibold text-zinc-100">
-                Separate cloud-only preview
+                {t(language, "common.manualCloudPreview")}
               </p>
             </div>
             <span className="w-fit rounded-full border border-[#27272a] bg-[#18181b] px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-zinc-400">
-              {cloudGoals.length} loaded
+              {cloudGoals.length} {t(language, "cloud.loaded", "loaded")}
             </span>
           </div>
 
@@ -305,7 +310,7 @@ export function GoalsCloudPanel({ localGoals }: GoalsCloudPanelProps) {
                           {goal.title}
                         </h3>
                         <p className="mt-1 text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
-                          {goal.area || "Personal"} - {goal.status}
+                          {goal.area || t(language, "common.personal")} - {t(language, `goals.status.${goal.status}`, goal.status)}
                         </p>
                       </div>
                       <div className="flex flex-wrap gap-1.5">
@@ -316,12 +321,12 @@ export function GoalsCloudPanel({ localGoals }: GoalsCloudPanelProps) {
                         ) : null}
                         {goal.deadline ? (
                           <span className="rounded-full border border-[#27272a] bg-[#121214] px-2 py-0.5 text-[9px] font-semibold text-zinc-400">
-                            due {goal.deadline}
+                            {t(language, "task.due")} {goal.deadline}
                           </span>
                         ) : null}
                         {goal.linkedFinanceMetric === "savings" ? (
                           <span className="rounded-full border border-emerald-500/25 bg-emerald-500/10 px-2 py-0.5 text-[9px] font-semibold text-emerald-400">
-                            savings linked
+                            {t(language, "goals.savingsLinked", "savings linked")}
                           </span>
                         ) : null}
                       </div>
@@ -339,7 +344,7 @@ export function GoalsCloudPanel({ localGoals }: GoalsCloudPanelProps) {
                           {goal.currentValue} / {goal.targetValue}{" "}
                           {goal.unit || goal.currency || ""}
                         </span>
-                        <span>{progress === null ? "cloud copy" : `${progress}%`}</span>
+                        <span>{progress === null ? t(language, "cloud.localCopy") : `${progress}%`}</span>
                       </div>
                     </div>
 
@@ -354,7 +359,7 @@ export function GoalsCloudPanel({ localGoals }: GoalsCloudPanelProps) {
             </div>
           ) : (
             <p className="mt-4 rounded-lg border border-[#27272a] bg-[#18181b] p-4 text-xs leading-6 text-zinc-500">
-              No cloud goals returned. Local goals are still unchanged.
+              {t(language, "cloud.goals.empty", "No cloud goals returned. Local goals are still unchanged.")}
             </p>
           )}
         </div>

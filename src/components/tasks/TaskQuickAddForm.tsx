@@ -13,6 +13,8 @@ import {
   type TaskPriority,
   type TaskType,
 } from "@/lib/tasks";
+import { t } from "@/lib/i18n";
+import { useAtlasSettings } from "@/lib/settings";
 
 type TaskQuickAddFormProps = {
   defaultArea?: TaskArea;
@@ -43,6 +45,8 @@ export function TaskQuickAddForm({
   defaultTaskType,
   onAddTask,
 }: TaskQuickAddFormProps) {
+  const { settings } = useAtlasSettings();
+  const language = settings.language;
   const [draft, setDraft] = useState(() =>
     createInitialDraft(defaultArea, defaultTaskType),
   );
@@ -62,12 +66,12 @@ export function TaskQuickAddForm({
     event.preventDefault();
 
     if (!draft.title.trim()) {
-      setError("Please add a task title.");
+      setError(t(language, "task.errorTitle"));
       return;
     }
 
     if (!draft.estimatedMinutes || draft.estimatedMinutes <= 0) {
-      setError("Estimated minutes must be greater than 0.");
+      setError(t(language, "task.errorMinutes"));
       return;
     }
 
@@ -85,14 +89,14 @@ export function TaskQuickAddForm({
       onSubmit={handleSubmit}
       className="rounded-xl border border-[#27272a] bg-[#18181b] p-6 shadow-xl text-zinc-100"
     >
-      <p className="text-[10px] font-bold uppercase tracking-widest text-amber-500">Quick capture</p>
-      <h3 className="text-lg font-bold text-zinc-100 mt-1">Add Agenda Task</h3>
+      <p className="text-[10px] font-bold uppercase tracking-widest text-amber-500">{t(language, "task.quickCapture")}</p>
+      <h3 className="text-lg font-bold text-zinc-100 mt-1">{t(language, "task.addAgenda")}</h3>
       
       <div className="mt-4 grid gap-4">
         <label className="grid gap-1.5 text-xs font-semibold text-zinc-400">
-          Task Title *
+          {t(language, "task.title")}
           <input
-            placeholder="e.g. Prepare lecture notes"
+            placeholder={t(language, "task.titlePlaceholder")}
             value={draft.title}
             onChange={(event) => updateDraft("title", event.target.value)}
             className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2.5 text-sm text-zinc-100 focus:outline-none focus:border-amber-500/50 font-bold"
@@ -101,9 +105,9 @@ export function TaskQuickAddForm({
         </label>
 
         <label className="grid gap-1.5 text-xs font-semibold text-zinc-400">
-          Notes / Details
+          {t(language, "task.notesDetails")}
           <textarea
-            placeholder="Add links, focus details, or guides..."
+            placeholder={t(language, "task.notesPlaceholder")}
             rows={3}
             value={draft.description}
             onChange={(event) => updateDraft("description", event.target.value)}
@@ -113,7 +117,7 @@ export function TaskQuickAddForm({
 
         <div className="grid gap-3 md:grid-cols-2">
           <label className="grid gap-1.5 text-xs font-semibold text-zinc-400">
-            Area
+            {t(language, "common.area")}
             <select
               value={draft.area}
               onChange={(event) =>
@@ -123,13 +127,13 @@ export function TaskQuickAddForm({
             >
               {TASK_AREAS.map((area) => (
                 <option key={area} value={area}>
-                  {area}
+                  {t(language, `enum.taskArea.${area}`, area)}
                 </option>
               ))}
             </select>
           </label>
           <label className="grid gap-1.5 text-xs font-semibold text-zinc-400">
-            Task Type
+            {t(language, "task.taskType")}
             <select
               value={draft.taskType}
               onChange={(event) =>
@@ -139,7 +143,7 @@ export function TaskQuickAddForm({
             >
               {TASK_TYPES.map((type) => (
                 <option key={type} value={type}>
-                  {type}
+                  {t(language, `enum.taskType.${type}`, type)}
                 </option>
               ))}
             </select>
@@ -148,7 +152,7 @@ export function TaskQuickAddForm({
 
         <div className="grid gap-3 grid-cols-2">
           <label className="grid gap-1.5 text-xs font-semibold text-zinc-400">
-            Priority
+            {t(language, "common.priority")}
             <select
               value={draft.priority}
               onChange={(event) =>
@@ -158,13 +162,13 @@ export function TaskQuickAddForm({
             >
               {TASK_PRIORITIES.map((priority) => (
                 <option key={priority} value={priority}>
-                  {priority}
+                  {t(language, `enum.priority.${priority}`, priority)}
                 </option>
               ))}
             </select>
           </label>
           <label className="grid gap-1.5 text-xs font-semibold text-zinc-400">
-            Energy
+            {t(language, "common.energy")}
             <select
               value={draft.energyRequired}
               onChange={(event) =>
@@ -174,7 +178,7 @@ export function TaskQuickAddForm({
             >
               {TASK_ENERGY_LEVELS.map((energy) => (
                 <option key={energy} value={energy}>
-                  {energy}
+                  {t(language, `enum.energy.${energy}`, energy)}
                 </option>
               ))}
             </select>
@@ -182,7 +186,7 @@ export function TaskQuickAddForm({
         </div>
 
         <label className="grid gap-1.5 text-xs font-semibold text-zinc-400">
-          Estimated Duration (Minutes)
+          {t(language, "task.estimatedDuration")}
           <input
             type="number"
             min="1"
@@ -196,7 +200,7 @@ export function TaskQuickAddForm({
 
         <div className="grid gap-3 md:grid-cols-2">
           <label className="grid gap-1.5 text-xs font-semibold text-zinc-400">
-            Planned Date
+            {t(language, "task.plannedDate")}
             <input
               type="date"
               value={draft.plannedDate}
@@ -205,7 +209,7 @@ export function TaskQuickAddForm({
             />
           </label>
           <label className="grid gap-1.5 text-xs font-semibold text-zinc-400">
-            Due Date (Optional)
+            {t(language, "task.dueDateOptional")}
             <input
               type="date"
               value={draft.dueDate}
@@ -226,7 +230,7 @@ export function TaskQuickAddForm({
         type="submit"
         className="mt-6 w-full rounded-lg bg-amber-500 text-zinc-950 px-4 py-3 text-xs font-bold uppercase tracking-wider hover:bg-amber-400 transition"
       >
-        Add Task
+        {t(language, "task.addTask")}
       </button>
     </form>
   );

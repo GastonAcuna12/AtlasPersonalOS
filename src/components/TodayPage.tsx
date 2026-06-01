@@ -38,20 +38,22 @@ import {
   getOverdueStats,
   generateDailyWrapSummary,
 } from "@/lib/dailyWraps";
+import { getLanguageLocale, t } from "@/lib/i18n";
 
-const sectionLabels: Record<TaskSection, string> = {
-  priorityFocus: "Priority Focus",
-  quickWins: "Quick Wins",
-  academic: "University / Academic",
-  work: "Client / Work",
-  personal: "Personal Maintenance",
-  backlog: "Backlog Suggestions",
+const sectionLabelKeys: Record<TaskSection, string> = {
+  priorityFocus: "today.section.priorityFocus",
+  quickWins: "today.section.quickWins",
+  academic: "today.section.academic",
+  work: "today.section.work",
+  personal: "today.section.personal",
+  backlog: "today.section.backlog",
 };
 
 export function TodayPage() {
   const { tasks, addTask, updateTask, deleteTask } = useTasks();
   const { reviews } = useWeeklyReviews();
   const { settings, setDayMode } = useAtlasSettings();
+  const language = settings.language;
   const dayMode = settings.dayMode;
   const xp = useXP();
   const { workItems, completeWorkItem: finishWorkItem } = useWorkItems();
@@ -98,10 +100,10 @@ export function TodayPage() {
         ...overdueStats,
       };
 
-      const summary = generateDailyWrapSummary(snapshot);
+      const summary = generateDailyWrapSummary(snapshot, language);
       return { snapshot, summary };
     };
-  }, [tasks, workItems, transactions, workouts, notes, settings, xp.activity, today]);
+  }, [tasks, workItems, transactions, workouts, notes, settings, xp.activity, today, language]);
 
   // Initial States Setup via Mount-Time Closures
   const [statsSnapshot, setStatsSnapshot] = useState<DailyWrapStatsSnapshot>(() => {
@@ -157,8 +159,14 @@ export function TodayPage() {
       ...overdueStats,
     };
 
-    return generateDailyWrapSummary(snapshot);
+    return generateDailyWrapSummary(snapshot, language);
   });
+
+  const displayGeneratedSummary = useMemo(() => {
+    return statsSnapshot
+      ? generateDailyWrapSummary(statsSnapshot, language)
+      : generatedSummary;
+  }, [generatedSummary, language, statsSnapshot]);
 
   const [mood, setMood] = useState<number>(() => {
     const saved = getDailyWrapForDate(todayISO());
@@ -204,7 +212,7 @@ export function TodayPage() {
 
     saveDailyWrap(
       today,
-      generatedSummary,
+      displayGeneratedSummary,
       statsSnapshot,
       {
         mood,
@@ -221,7 +229,7 @@ export function TodayPage() {
         });
       }
     );
-    setSuccessWrapMessage("Daily Wrap successfully saved! (+20 XP!)");
+    setSuccessWrapMessage(t(language, "today.wrap.saved"));
     setTimeout(() => setSuccessWrapMessage(""), 4000);
   }
 
@@ -258,14 +266,15 @@ export function TodayPage() {
       <header className="flex flex-col gap-4 border-b border-[#27272a] pb-6 md:flex-row md:items-center md:justify-between">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-500">
-            Daily Agenda
+            {t(language, "today.eyebrow")}
           </p>
           <h1 className="mt-2 text-4xl font-bold tracking-tight text-zinc-100 sm:text-5xl">
-            Today
+            {t(language, "today.title")}
           </h1>
           <div className="mt-2.5 flex flex-wrap items-center gap-2.5">
             <p className="text-xs text-zinc-400 font-bold uppercase tracking-wider">
-              {new Intl.DateTimeFormat("en", {
+              {new Intl.DateTimeFormat(getLanguageLocale(language), {
+                timeZone: "America/Asuncion",
                 weekday: "long",
                 month: "long",
                 day: "numeric",
@@ -281,7 +290,7 @@ export function TodayPage() {
                 ? "bg-blue-500/10 border-blue-500/25 text-blue-400"
                 : "bg-zinc-800 border-[#27272a] text-zinc-400"
             }`}>
-              {isCompletedToday ? "Planning Complete" : currentPlanStatus.replace("_", " ")}
+              {isCompletedToday ? t(language, "today.planningComplete") : currentPlanStatus.replace("_", " ")}
             </span>
           </div>
         </div>
@@ -294,7 +303,7 @@ export function TodayPage() {
           >
             {DAY_MODES.map((mode) => (
               <option key={mode} value={mode}>
-                {mode} Mode
+                {t(language, `enum.dayMode.${mode}`, mode)}
               </option>
             ))}
           </select>
@@ -315,7 +324,7 @@ export function TodayPage() {
             }
             className="rounded-lg border border-[#27272a] bg-[#18181b] px-4 py-2 text-xs font-bold uppercase tracking-wider text-zinc-300 transition hover:bg-zinc-800 hover:text-white"
           >
-            Export Today plan
+            {t(language, "today.exportPlan")}
           </button>
 
           {!isCompletedToday && (currentPlanStatus === "planned" || currentPlanStatus === "in_progress") && (
@@ -331,7 +340,7 @@ export function TodayPage() {
               }}
               className="rounded-lg bg-emerald-500 hover:bg-emerald-400 text-zinc-950 px-4 py-2 text-xs font-bold uppercase tracking-wider transition"
             >
-              Complete Planning (+25 XP)
+              {t(language, "today.completePlanning")}
             </button>
           )}
 
@@ -339,7 +348,7 @@ export function TodayPage() {
             href="/"
             className="rounded-lg border border-[#27272a] bg-[#18181b] px-4 py-2 text-xs font-bold uppercase tracking-wider text-zinc-300 transition hover:bg-zinc-800 hover:text-white"
           >
-            Dashboard
+            {t(language, "common.dashboard")}
           </Link>
         </div>
       </header>
@@ -354,16 +363,16 @@ export function TodayPage() {
           
           {/* Today Stats */}
           <div className="rounded-xl border border-[#27272a] bg-[#18181b] p-6 shadow-xl">
-            <h3 className="text-sm font-bold text-zinc-100 uppercase tracking-wider">Today Statistics</h3>
-            <p className="text-[10px] text-zinc-500 mt-1">Direct feedback from your agenda ledger.</p>
+            <h3 className="text-sm font-bold text-zinc-100 uppercase tracking-wider">{t(language, "today.stats.title")}</h3>
+            <p className="text-[10px] text-zinc-500 mt-1">{t(language, "today.stats.description")}</p>
             
             <div className="mt-4 grid gap-3">
               {[
-                ["Planned today", stats.plannedCount],
-                ["Completed today", stats.completedTodayCount],
-                ["Minutes remaining", `${stats.estimatedMinutesRemaining}m`],
-                ["XP available", `+${stats.xpAvailableToday} XP`],
-                ["Daily load level", stats.dailyLoad],
+                [t(language, "today.stats.planned"), stats.plannedCount],
+                [t(language, "today.stats.completed"), stats.completedTodayCount],
+                [t(language, "today.stats.minutes"), `${stats.estimatedMinutesRemaining}m`],
+                [t(language, "today.stats.xp"), `+${stats.xpAvailableToday} XP`],
+                [t(language, "today.stats.load"), stats.dailyLoad],
               ].map(([label, value]) => (
                 <div
                   key={label}
@@ -383,17 +392,17 @@ export function TodayPage() {
             <section className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-5 shadow-lg flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <p className="text-sm font-bold text-amber-500 uppercase tracking-wide">
-                  Weekly Review Pending
+                  {t(language, "today.review.pending")}
                 </p>
                 <p className="mt-1 text-xs text-zinc-350 leading-relaxed">
-                  Take a few minutes to complete your weekly reflection, calculate XP metrics, and sync your private vault targets.
+                  {t(language, "today.review.description")}
                 </p>
               </div>
               <Link
                 href="/review"
                 className="rounded-lg bg-amber-500 hover:bg-amber-400 text-zinc-950 px-4 py-2.5 text-xs font-bold uppercase tracking-wider transition shrink-0"
               >
-                Launch review &rarr;
+                {t(language, "today.review.launch")} &rarr;
               </Link>
             </section>
           )}
@@ -405,7 +414,7 @@ export function TodayPage() {
             >
               <div className="flex items-center justify-between gap-4 border-b border-[#27272a]/60 pb-2.5 mb-4">
                 <h3 className="text-base font-bold text-zinc-100">
-                  {sectionLabels[sectionKey as TaskSection]}
+                  {t(language, sectionLabelKeys[sectionKey as TaskSection])}
                 </h3>
                 <span className="rounded-full bg-[#18181b] border border-[#27272a] px-2.5 py-0.5 text-xs font-bold text-amber-500">
                   {sectionTasks.length + (sectionKey === "work" ? todayWorkItems.length : 0)}
@@ -417,10 +426,10 @@ export function TodayPage() {
                 {sectionKey === "work" && todayWorkItems.length > 0 && (
                   <div className="flex flex-col gap-3 mb-3 border-b border-[#27272a]/80 pb-4">
                     <p className="text-[10px] font-bold text-amber-500 uppercase tracking-widest leading-none mb-1">
-                      Active Freelance Tasks Due Today
+                      {t(language, "today.work.dueToday")}
                     </p>
                     {todayWorkItems.map((item) => {
-                      const clientName = clients.find((c) => c.id === item.clientId)?.name ?? "Client";
+                      const clientName = clients.find((c) => c.id === item.clientId)?.name ?? t(language, "today.work.client");
                       return (
                         <div
                           key={item.id}
@@ -438,7 +447,7 @@ export function TodayPage() {
                                 <span className={`text-[8px] font-bold uppercase ${
                                   item.priority === "critical" || item.priority === "high" ? "text-red-400" : "text-zinc-500"
                                 }`}>
-                                  {item.priority}
+                                  {t(language, `enum.priority.${item.priority}`, item.priority)}
                                 </span>
                               </div>
                               <h4 className="font-bold text-zinc-150 mt-1">{item.title}</h4>
@@ -447,7 +456,7 @@ export function TodayPage() {
                               <div className="mt-2 flex flex-wrap gap-2 text-[9px] text-zinc-500 font-medium">
                                 {item.deadline && (
                                   <span className={item.deadline < today ? "text-red-400 font-bold" : "text-zinc-400"}>
-                                    📅 Deadline: {item.deadline} {item.deadline < today && "(Overdue)"}
+                                    📅 {t(language, "today.work.deadline")}: {item.deadline} {item.deadline < today && `(${t(language, "common.overdue")})`}
                                   </span>
                                 )}
                                 {item.estimatedMinutes && (
@@ -466,7 +475,7 @@ export function TodayPage() {
                                   rel="noopener noreferrer"
                                   className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-500 hover:text-amber-400 transition hover:underline mt-2.5 cursor-pointer"
                                 >
-                                  🔗 Open reference
+                                  🔗 {t(language, "today.work.openReference")}
                                 </a>
                               )}
                             </div>
@@ -484,7 +493,7 @@ export function TodayPage() {
                               }}
                               className="rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-[#27272a] px-3.5 py-1.5 text-[10px] font-bold uppercase tracking-wider transition shrink-0 cursor-pointer"
                             >
-                              Complete
+                              {t(language, "task.complete")}
                             </button>
                           </div>
                         </div>
@@ -507,7 +516,7 @@ export function TodayPage() {
                   ))
                 ) : todayWorkItems.length === 0 || sectionKey !== "work" ? (
                   <p className="text-xs text-zinc-550 italic py-4 bg-[#121214]/10 rounded-lg border border-dashed border-[#27272a]/60 text-center">
-                    No active tasks currently planned in this category.
+                    {t(language, "today.task.empty")}
                   </p>
                 ) : null}
               </div>
@@ -523,16 +532,16 @@ export function TodayPage() {
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-[#27272a] pb-4 mb-6">
               <div>
                 <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-400">
-                  End of Day Reflection
+                  {t(language, "today.wrap.eyebrow")}
                 </p>
                 <h2 className="text-2xl font-bold text-zinc-100 mt-1">
-                  Daily Closing Wrap
+                  {t(language, "today.wrap.title")}
                 </h2>
               </div>
               <div className="flex gap-2">
                 {todayWrap && (
                   <span className="rounded-full bg-emerald-500/10 border border-emerald-500/30 px-3.5 py-1 text-xs font-bold text-emerald-400 flex items-center gap-1.5">
-                    <span>✓</span> Closed &amp; Reflection Logged (+20 XP)
+                    <span>✓</span> {t(language, "today.wrap.logged")}
                   </span>
                 )}
                 {!todayWrap && (
@@ -540,7 +549,7 @@ export function TodayPage() {
                     onClick={handleRefreshSummary}
                     className="rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2 text-xs font-bold text-zinc-300 transition hover:bg-zinc-800"
                   >
-                    Refresh summary
+                    {t(language, "today.wrap.refresh")}
                   </button>
                 )}
               </div>
@@ -555,10 +564,10 @@ export function TodayPage() {
             {/* 1. Generated summary digest */}
             <div className="rounded-lg border border-amber-500/20 bg-amber-500/5 p-4.5 mb-6 leading-relaxed">
               <p className="text-[9px] font-bold text-amber-500 uppercase tracking-widest mb-1.5">
-                Activity Digest Summary (Deterministic)
+                {t(language, "today.wrap.digest")}
               </p>
               <p className="text-sm font-semibold text-zinc-200">
-                {generatedSummary || "No today activity processed."}
+                {displayGeneratedSummary || t(language, "today.wrap.noActivity")}
               </p>
             </div>
 
@@ -566,17 +575,17 @@ export function TodayPage() {
             {statsSnapshot && (
               <div className="mb-8">
                 <p className="text-xs font-bold text-zinc-400 uppercase tracking-widest mb-3">
-                  Operational Snapshots
+                  {t(language, "today.wrap.snapshots")}
                 </p>
                 <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
                   {[
-                    { label: "Tasks", val: `${statsSnapshot.completedTasks}/${statsSnapshot.plannedTasks}` },
-                    { label: "Freelance", val: `${statsSnapshot.completedWorkItems} done` },
-                    { label: "Gym Status", val: statsSnapshot.gymLogged ? `✓ ${statsSnapshot.workoutType ?? "Active"}` : "Rest day" },
-                    { label: "Cash Flow", val: statsSnapshot.dailyExpenses > 0 ? `${settings.baseCurrency} ${statsSnapshot.dailyExpenses.toLocaleString()}` : "0 spent" },
-                    { label: "Notes Base", val: `${statsSnapshot.notesCreated} captured` },
-                    { label: "Momentum", val: `+${statsSnapshot.xpEarnedToday} XP` },
-                    { label: "Tomorrow Due", val: `${statsSnapshot.upcomingDeadlinesTomorrow}` },
+                    { label: t(language, "today.wrap.tasks"), val: `${statsSnapshot.completedTasks}/${statsSnapshot.plannedTasks}` },
+                    { label: t(language, "today.wrap.freelance"), val: `${statsSnapshot.completedWorkItems} ${t(language, "today.wrap.done")}` },
+                    { label: t(language, "today.wrap.gymStatus"), val: statsSnapshot.gymLogged ? `✓ ${statsSnapshot.workoutType ?? t(language, "today.wrap.active")}` : t(language, "today.wrap.restDay") },
+                    { label: t(language, "today.wrap.cashFlow"), val: statsSnapshot.dailyExpenses > 0 ? `${settings.baseCurrency} ${statsSnapshot.dailyExpenses.toLocaleString()}` : `0 ${t(language, "today.wrap.spent")}` },
+                    { label: t(language, "today.wrap.notesBase"), val: `${statsSnapshot.notesCreated} ${t(language, "today.wrap.captured")}` },
+                    { label: t(language, "today.wrap.momentum"), val: `+${statsSnapshot.xpEarnedToday} XP` },
+                    { label: t(language, "today.wrap.tomorrowDue"), val: `${statsSnapshot.upcomingDeadlinesTomorrow}` },
                   ].map((stat, idx) => (
                     <div key={idx} className="rounded-lg border border-[#27272a] bg-[#121214] p-3 text-center">
                       <span className="block text-[9px] font-bold text-zinc-500 uppercase tracking-wider truncate">
@@ -597,7 +606,7 @@ export function TodayPage() {
                 {/* Mood Slider */}
                 <div className="rounded-lg border border-[#27272a] bg-[#121214] p-4.5 flex flex-col justify-between">
                   <div className="flex justify-between items-center text-xs font-bold text-zinc-400 uppercase tracking-wider mb-2">
-                    <span>Day Mood</span>
+                    <span>{t(language, "today.wrap.dayMood")}</span>
                     <span className="text-sm font-bold text-amber-500">{mood}/10</span>
                   </div>
                   <input
@@ -613,7 +622,7 @@ export function TodayPage() {
                 {/* Energy Slider */}
                 <div className="rounded-lg border border-[#27272a] bg-[#121214] p-4.5 flex flex-col justify-between">
                   <div className="flex justify-between items-center text-xs font-bold text-zinc-400 uppercase tracking-wider mb-2">
-                    <span>Energy level</span>
+                    <span>{t(language, "today.wrap.energyLevel")}</span>
                     <span className="text-sm font-bold text-amber-500">{energy}/10</span>
                   </div>
                   <input
@@ -629,7 +638,7 @@ export function TodayPage() {
                 {/* Productivity Slider */}
                 <div className="rounded-lg border border-[#27272a] bg-[#121214] p-4.5 flex flex-col justify-between">
                   <div className="flex justify-between items-center text-xs font-bold text-zinc-400 uppercase tracking-wider mb-2">
-                    <span>Productivity</span>
+                    <span>{t(language, "today.wrap.productivity")}</span>
                     <span className="text-sm font-bold text-amber-500">{productivity}/10</span>
                   </div>
                   <input
@@ -645,9 +654,9 @@ export function TodayPage() {
 
               <div className="grid gap-5 sm:grid-cols-2">
                 <label className="grid gap-2 text-xs font-bold text-zinc-400 uppercase tracking-wider">
-                  Main Takeaway / High Agency Learning
+                  {t(language, "today.wrap.takeaway")}
                   <input
-                    placeholder="E.g., Batching clients emails early cleared 2 hours of focus time."
+                    placeholder={t(language, "today.wrap.takeawayPlaceholder")}
                     value={mainTakeaway}
                     onChange={(e) => setMainTakeaway(e.target.value)}
                     className="rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2.5 text-zinc-150 text-xs focus:border-amber-500 focus:outline-none"
@@ -655,9 +664,9 @@ export function TodayPage() {
                 </label>
 
                 <label className="grid gap-2 text-xs font-bold text-zinc-400 uppercase tracking-wider">
-                  Tomorrow&apos;s Critical Objective Focus
+                  {t(language, "today.wrap.tomorrowFocus")}
                   <input
-                    placeholder="E.g., Complete wireframes for Client X before 12 PM."
+                    placeholder={t(language, "today.wrap.tomorrowFocusPlaceholder")}
                     value={tomorrowFocus}
                     onChange={(e) => setTomorrowFocus(e.target.value)}
                     className="rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2.5 text-zinc-150 text-xs focus:border-amber-500 focus:outline-none"
@@ -666,9 +675,9 @@ export function TodayPage() {
               </div>
 
               <label className="grid gap-2 text-xs font-bold text-zinc-400 uppercase tracking-wider">
-                Qualitative Reflection / Offline Notes
+                {t(language, "today.wrap.qualitative")}
                 <textarea
-                  placeholder="Log details, thoughts, private references..."
+                  placeholder={t(language, "today.wrap.qualitativePlaceholder")}
                   rows={3}
                   value={reflectionNotes}
                   onChange={(e) => setReflectionNotes(e.target.value)}
@@ -680,16 +689,16 @@ export function TodayPage() {
                 type="submit"
                 className="rounded-lg bg-amber-500 hover:bg-amber-400 text-zinc-950 px-4 py-3.5 text-xs font-bold uppercase tracking-wider transition w-full shadow-lg"
               >
-                {todayWrap ? "Update Day Close reflection" : "Close Day & Save reflection (+20 XP!)"}
+                {todayWrap ? t(language, "today.wrap.update") : t(language, "today.wrap.closeSave")}
               </button>
             </form>
           </div>
         ) : (
           <div className="rounded-xl border border-[#27272a] bg-[#18181b]/40 p-10 shadow-xl text-center">
             <span className="text-3xl">🔒</span>
-            <h3 className="mt-3 text-lg font-bold text-zinc-350">Daily Closing Wrap Locked</h3>
+            <h3 className="mt-3 text-lg font-bold text-zinc-350">{t(language, "today.wrap.locked")}</h3>
             <p className="text-xs text-zinc-500 mt-2 max-w-sm mx-auto leading-relaxed">
-              Complete Daily Intentions first to unlock today’s wrap and capture your daily reflection metrics.
+              {t(language, "today.wrap.lockedDescription")}
             </p>
             <button
               onClick={() => {
@@ -697,7 +706,7 @@ export function TodayPage() {
               }}
               className="mt-5 rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-2 text-xs font-bold uppercase tracking-wider text-amber-500 hover:bg-amber-500/15 transition cursor-pointer"
             >
-              Start Planning Now
+              {t(language, "today.wrap.startPlanning")}
             </button>
           </div>
         )}

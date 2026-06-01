@@ -281,6 +281,7 @@ export type DayMode =
 
 export type AtlasSettings = {
   dayMode: DayMode;
+  language: "en" | "es";
   gymWeeklyTarget: number;
   baseCurrency?: Currency;
   exchangeRateUsdToPyg?: number;
@@ -457,4 +458,3 @@ export type XPEvent = XPActivity;
 export type DailyPlan = DailyPlanRecord;
 export type Savings = SavingsState;
 export type AcademicTask = AtlasTask;
-

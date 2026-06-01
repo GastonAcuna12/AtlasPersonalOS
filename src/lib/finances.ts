@@ -31,7 +31,7 @@ const INITIAL_TRANSACTIONS: Transaction[] = [];
 const INITIAL_SAVINGS: SavingsState = {
   currentAmount: 0,
   currency: "PYG",
-  updatedAt: new Date().toISOString(),
+  updatedAt: "",
 };
 
 export const FINANCE_CATEGORIES = [
@@ -108,7 +108,7 @@ function normalizeSavings(value: unknown): SavingsState {
         ? candidate.currentAmount
         : 0,
     currency: candidate.currency === "USD" ? "USD" : "PYG",
-    updatedAt: candidate.updatedAt ?? new Date().toISOString(),
+    updatedAt: candidate.updatedAt ?? INITIAL_SAVINGS.updatedAt,
   };
 }
 

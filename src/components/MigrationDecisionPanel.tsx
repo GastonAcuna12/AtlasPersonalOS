@@ -7,30 +7,32 @@ import {
   useLocalAtlasDataSummary,
   type AuthMigrationChoice,
 } from "@/lib/auth";
+import { t, type Language } from "@/lib/i18n";
+import { useAtlasSettings } from "@/lib/settings";
 import type { AtlasStorageDomain } from "@/lib/storage";
 
 const MIGRATION_PROMPT_DISMISSED_KEY = "atlas.migrationPromptDismissed";
 const MIGRATION_PROMPT_DISMISSED_EVENT = "atlas:migrationPromptDismissed";
 
-const DOMAIN_AREA_LABELS: Record<AtlasStorageDomain, string> = {
-  transactions: "finances",
-  savings: "goals",
-  financeSettings: "finances",
-  gymLogs: "gym",
-  tasks: "tasks",
-  dailyPlans: "today",
-  dailyWraps: "daily wraps",
-  subjects: "academics",
-  academicTasks: "academics",
-  studySessions: "academics",
-  notes: "notes",
-  goals: "goals",
-  weeklyReviews: "reviews",
-  clients: "work",
-  workItems: "work",
-  xp: "XP",
-  xpEvents: "XP",
-  appSettings: "settings",
+const DOMAIN_AREA_KEYS: Record<AtlasStorageDomain, string> = {
+  transactions: "migration.area.finances",
+  savings: "migration.area.goals",
+  financeSettings: "migration.area.finances",
+  gymLogs: "migration.area.gym",
+  tasks: "migration.area.tasks",
+  dailyPlans: "migration.area.today",
+  dailyWraps: "migration.area.dailyWraps",
+  subjects: "migration.area.academics",
+  academicTasks: "migration.area.academics",
+  studySessions: "migration.area.academics",
+  notes: "migration.area.notes",
+  goals: "migration.area.goals",
+  weeklyReviews: "migration.area.reviews",
+  clients: "migration.area.work",
+  workItems: "migration.area.work",
+  xp: "migration.area.xp",
+  xpEvents: "migration.area.xp",
+  appSettings: "migration.area.settings",
 };
 
 function canUseLocalStorage() {
@@ -94,15 +96,21 @@ function subscribeToDismissedState(onStoreChange: () => void) {
   };
 }
 
-function getAreaSummary(domains: AtlasStorageDomain[]) {
+function getAreaSummary(domains: AtlasStorageDomain[], language: Language) {
   const areas = Array.from(
-    new Set(domains.map((domain) => DOMAIN_AREA_LABELS[domain])),
+    new Set(domains.map((domain) => t(language, DOMAIN_AREA_KEYS[domain]))),
   );
 
   return {
     count: areas.length,
-    label: areas.length > 0 ? areas.join(", ") : "local Atlas data",
-    noun: areas.length === 1 ? "area" : "areas",
+    label:
+      areas.length > 0
+        ? areas.join(", ")
+        : t(language, "migration.area.localData"),
+    noun:
+      areas.length === 1
+        ? t(language, "migration.summary.area")
+        : t(language, "migration.summary.areas"),
   };
 }
 
@@ -114,7 +122,20 @@ function isDisabledMigrationChoice(choice: AuthMigrationChoice) {
   );
 }
 
+function getMigrationChoiceLabel(language: Language, choice: AuthMigrationChoice) {
+  return t(language, `migration.choice.${choice}`);
+}
+
+function getMigrationChoiceDescription(
+  language: Language,
+  choice: AuthMigrationChoice,
+) {
+  return t(language, `migration.choice.${choice}.description`);
+}
+
 export function MigrationDecisionPanel() {
+  const { settings } = useAtlasSettings();
+  const language = settings.language;
   const auth = useAtlasAuth();
   const localDataSummary = useLocalAtlasDataSummary();
   const isDismissed = useSyncExternalStore(
@@ -124,8 +145,8 @@ export function MigrationDecisionPanel() {
   );
 
   const areaSummary = useMemo(
-    () => getAreaSummary(localDataSummary.domainsDetected),
-    [localDataSummary.domainsDetected],
+    () => getAreaSummary(localDataSummary.domainsDetected, language),
+    [language, localDataSummary.domainsDetected],
   );
 
   const shouldShow =
@@ -153,14 +174,13 @@ export function MigrationDecisionPanel() {
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">
-              Migration Decision
+              {t(language, "migration.eyebrow")}
             </p>
             <p className="mt-2 text-sm font-semibold text-zinc-100">
-              Migration choices are hidden locally.
+              {t(language, "migration.hiddenTitle")}
             </p>
             <p className="mt-1 text-xs leading-6 text-zinc-500">
-              Atlas is still local-first. No data has been uploaded, synced, or
-              migrated.
+              {t(language, "migration.hiddenDescription")}
             </p>
           </div>
           <button
@@ -168,7 +188,7 @@ export function MigrationDecisionPanel() {
             onClick={restorePanel}
             className="w-fit rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-zinc-300 transition hover:bg-zinc-800 hover:text-white"
           >
-            Show Choices
+            {t(language, "migration.showChoices")}
           </button>
         </div>
       </section>
@@ -180,32 +200,32 @@ export function MigrationDecisionPanel() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <p className="text-[10px] font-bold uppercase tracking-widest text-amber-500">
-            Migration Decision
+            {t(language, "migration.eyebrow")}
           </p>
           <h2 className="mt-2 text-2xl font-bold tracking-tight text-zinc-100">
-            Local data found
+            {t(language, "migration.foundTitle")}
           </h2>
           <p className="mt-2 text-xs leading-6 text-zinc-400">
-            Atlas found local data on this browser. Cloud migration is not
-            active yet.
+            {t(language, "migration.foundDescription")}
           </p>
         </div>
         <span className="w-fit rounded-full border border-amber-500/25 bg-amber-500/10 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-amber-400">
-          Placeholder
+          {t(language, "migration.placeholder")}
         </span>
       </div>
 
       <div className="mt-5 rounded-lg border border-[#27272a] bg-[#121214] p-4">
         <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">
-          Safe Local Summary
+          {t(language, "migration.safeSummary")}
         </p>
         <p className="mt-2 text-sm font-semibold text-zinc-100">
-          {localDataSummary.approximateRecordCount} approximate records across{" "}
+          {localDataSummary.approximateRecordCount}{" "}
+          {t(language, "migration.summary.approximateRecords")}{" "}
           {areaSummary.count} {areaSummary.noun}
         </p>
         <p className="mt-1 text-xs leading-6 text-zinc-500">
-          Local data detected across: {areaSummary.label}. Atlas does not show
-          amounts, note titles, client names, or private content here.
+          {t(language, "migration.summary.detectedAcross")} {areaSummary.label}.{" "}
+          {t(language, "migration.summary.privateDataHidden")}
         </p>
       </div>
 
@@ -227,20 +247,20 @@ export function MigrationDecisionPanel() {
             >
               <span className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <span className="text-sm font-semibold text-zinc-100">
-                  {choice.label}
+                  {getMigrationChoiceLabel(language, choice.value)}
                 </span>
                 {isDisabled ? (
                   <span className="w-fit rounded-full border border-zinc-700 bg-zinc-800 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-zinc-400">
-                    Coming soon
+                    {t(language, "common.comingSoon")}
                   </span>
                 ) : (
                   <span className="w-fit rounded-full border border-emerald-500/25 bg-emerald-500/10 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-emerald-400">
-                    Local only
+                    {t(language, "common.localOnly")}
                   </span>
                 )}
               </span>
               <span className="mt-1 block text-xs leading-5 text-zinc-500">
-                {choice.description}
+                {getMigrationChoiceDescription(language, choice.value)}
               </span>
             </button>
           );
@@ -248,9 +268,7 @@ export function MigrationDecisionPanel() {
       </div>
 
       <p className="mt-4 text-[10px] leading-5 text-zinc-500">
-        Upload, merge, and replace are disabled until Atlas has tested cloud
-        tables, RLS policies, and migration safeguards. These controls do not
-        write to Supabase.
+        {t(language, "migration.disabledNote")}
       </p>
     </section>
   );

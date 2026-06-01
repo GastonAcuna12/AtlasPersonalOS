@@ -6,6 +6,7 @@ import {
   useAtlasAuth,
   useLocalAtlasDataSummary,
 } from "@/lib/auth";
+import { t, type Language } from "@/lib/i18n";
 import {
   downloadAcademicWeekMarkdown,
   downloadAllNotesMarkdown,
@@ -41,6 +42,7 @@ import { useXP } from "@/lib/xp";
 import { useDailyWraps } from "@/lib/dailyWraps";
 import type { Currency, DayMode } from "@/types/atlas";
 import { loadSampleData } from "@/lib/sampleData";
+import { CloudQAChecklist } from "@/components/CloudQAChecklist";
 import { MigrationDecisionPanel } from "@/components/MigrationDecisionPanel";
 
 export function SettingsPage() {
@@ -69,8 +71,10 @@ export function SettingsPage() {
     setDayMode,
     setBaseCurrency,
     setExchangeRate,
+    setLanguage,
     setGymWeeklyTarget,
   } = useAtlasSettings();
+  const language = settings.language;
   
   const latestReview = getLatestReview(reviews);
   const today = todayISO();
@@ -80,61 +84,61 @@ export function SettingsPage() {
   const accountSyncState = (() => {
     if (!auth.isConfigured) {
       return {
-        status: "Cloud sync not configured",
-        mode: "Local-only",
-        message: "Atlas is running fully locally on this browser.",
+        status: t(language, "settings.accountSync.notConfigured.status"),
+        mode: t(language, "settings.accountSync.notConfigured.mode"),
+        message: t(language, "settings.accountSync.notConfigured.message"),
         badgeClass: "border-zinc-700 bg-zinc-800/70 text-zinc-300",
       };
     }
 
     if (auth.status === "signed_in") {
       return {
-        status: "Cloud session detected",
-        mode: "Cloud-ready",
-        message: "No data is synced yet. Migration will be added later.",
+        status: t(language, "settings.accountSync.signedIn.status"),
+        mode: t(language, "settings.accountSync.signedIn.mode"),
+        message: t(language, "settings.accountSync.signedIn.message"),
         badgeClass: "border-emerald-500/30 bg-emerald-500/10 text-emerald-400",
       };
     }
 
     if (auth.status === "error") {
       return {
-        status: "Cloud session check failed",
-        mode: "Local-only",
+        status: t(language, "settings.accountSync.error.status"),
+        mode: t(language, "settings.accountSync.notConfigured.mode"),
         message:
           auth.errorMessage ||
-          "Atlas remains local-only while the cloud session is unavailable.",
+          t(language, "settings.accountSync.error.message"),
         badgeClass: "border-red-500/30 bg-red-500/10 text-red-300",
       };
     }
 
     if (auth.status === "loading") {
       return {
-        status: "Checking cloud session",
-        mode: "Local-only",
-        message: "Atlas remains local-only while account state is checked.",
+        status: t(language, "settings.accountSync.loading.status"),
+        mode: t(language, "settings.accountSync.notConfigured.mode"),
+        message: t(language, "settings.accountSync.loading.message"),
         badgeClass: "border-amber-500/30 bg-amber-500/10 text-amber-400",
       };
     }
 
     return {
-      status: "Cloud sync available",
-      mode: "Local-only",
-      message: "Sign in is available on the Account page. No data is synced yet.",
+      status: t(language, "settings.accountSync.available.status"),
+      mode: t(language, "settings.accountSync.notConfigured.mode"),
+      message: t(language, "settings.accountSync.available.message"),
       badgeClass: "border-sky-500/30 bg-sky-500/10 text-sky-300",
     };
   })();
 
   const accountSessionHint =
     auth.status === "signed_in"
-      ? "Use Account to sign out. No migration controls are active."
+      ? t(language, "settings.accountSync.hintSignedIn")
       : auth.isConfigured
-        ? "Sign in to prepare sync. No data will upload."
-        : "Configure Supabase env vars to enable sign-in.";
+        ? t(language, "settings.accountSync.hintConfigured")
+        : t(language, "settings.accountSync.hintUnconfigured");
 
   function exportData() {
     setError("");
     downloadAtlasBackup();
-    setMessage("Atlas data exported as a local JSON backup file successfully.");
+    setMessage(t(language, "settings.data.exported"));
   }
 
   async function importData(event: ChangeEvent<HTMLInputElement>) {
@@ -149,19 +153,19 @@ export function SettingsPage() {
       const parsed = JSON.parse(text);
 
       if (!validateAtlasBackup(parsed)) {
-        setError("Invalid backup schema. This file does not look like a valid Atlas backup JSON.");
+        setError(t(language, "settings.data.invalidSchema"));
         return;
       }
 
       if (!importAtlasBackup(parsed)) {
-        setError("Import failed. Atlas could not import this backup file.");
+        setError(t(language, "settings.data.importFailed"));
         return;
       }
 
-      setMessage("Atlas backup imported successfully. Syncing state...");
+      setMessage(t(language, "settings.data.imported"));
       window.location.reload();
     } catch {
-      setError("Error parsing file. Atlas could not read that JSON file.");
+      setError(t(language, "settings.data.parseError"));
     } finally {
       event.target.value = "";
     }
@@ -169,18 +173,18 @@ export function SettingsPage() {
 
   function handleResetWorkspace() {
     const confirmed = window.confirm(
-      "CRITICAL WARNING: This will permanently wipe out your entire Atlas workspace. All configurations, habits, streaks, finances, tasks, client logs, academic logs, daily wraps, weekly reviews, and settings will be lost. This action is irreversible. Do you wish to proceed?"
+      t(language, "settings.data.resetConfirm"),
     );
     if (!confirmed) return;
 
     try {
       clearAtlasLocalData();
-      setMessage("Atlas workspace reset to empty successfully. Syncing state...");
+      setMessage(t(language, "settings.data.resetSuccess"));
       window.setTimeout(() => {
         window.location.reload();
       }, 600);
     } catch {
-      setError("Failed to clear local workspace storage.");
+      setError(t(language, "settings.data.resetFailed"));
     }
   }
 
@@ -200,20 +204,20 @@ export function SettingsPage() {
       workouts.length > 0;
 
     const messageCopy = hasExistingData
-      ? "WARNING: Replacing the workspace with sample data will COMPLETELY OVERWRITE and DELETE all your current notes, goals, tasks, finance logs, client/freelance board tickets, and gym logs. This action is irreversible. Are you sure you want to proceed?"
-      : "Are you sure you want to replace your empty workspace with the complete demo sample dataset? This will load safe development mock data for public demonstration.";
+      ? t(language, "settings.sample.overwriteConfirmExisting")
+      : t(language, "settings.sample.overwriteConfirmEmpty");
 
     const confirmed = window.confirm(messageCopy);
     if (!confirmed) return;
 
     try {
       loadSampleData(false); // Replace
-      setMessage("Safe development mock data loaded (Overwrite Mode). Syncing workspace...");
+      setMessage(t(language, "settings.sample.overwriteSuccess"));
       window.setTimeout(() => {
         window.location.reload();
       }, 600);
     } catch {
-      setError("Failed to load sample data in overwrite mode.");
+      setError(t(language, "settings.sample.overwriteFailed"));
     }
   }
 
@@ -222,18 +226,18 @@ export function SettingsPage() {
     setMessage("");
 
     const confirmed = window.confirm(
-      "Are you sure you want to merge demo sample data into your active workspace? This will inject development mock records directly alongside your existing data."
+      t(language, "settings.sample.mergeConfirm"),
     );
     if (!confirmed) return;
 
     try {
       loadSampleData(true); // Merge
-      setMessage("Safe development mock data merged successfully. Syncing workspace...");
+      setMessage(t(language, "settings.sample.mergeSuccess"));
       window.setTimeout(() => {
         window.location.reload();
       }, 600);
     } catch {
-      setError("Failed to load sample data in merge mode.");
+      setError(t(language, "settings.sample.mergeFailed"));
     }
   }
 
@@ -244,17 +248,17 @@ export function SettingsPage() {
         <header className="flex flex-col gap-4 border-b border-[#27272a] pb-6 md:flex-row md:items-center md:justify-between">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-500">
-              Atlas System Hub
+              {t(language, "settings.eyebrow")}
             </p>
             <h1 className="mt-2 text-4xl font-bold tracking-tight text-zinc-100 sm:text-5xl">
-              System Settings
+              {t(language, "settings.title")}
             </h1>
           </div>
           <Link
             href="/"
             className="rounded-lg border border-[#27272a] bg-[#18181b] px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-zinc-300 transition hover:bg-zinc-800 hover:text-white"
           >
-            Dashboard
+            {t(language, "settings.dashboard")}
           </Link>
         </header>
 
@@ -279,14 +283,13 @@ export function SettingsPage() {
               <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                 <div>
                   <p className="text-[10px] font-bold uppercase tracking-widest text-sky-400">
-                    Account &amp; Sync
+                    {t(language, "settings.accountSync.eyebrow")}
                   </p>
                   <h2 className="mt-2 text-2xl font-bold tracking-tight text-zinc-100">
-                    Local-first account status
+                    {t(language, "settings.accountSync.title")}
                   </h2>
                   <p className="mt-1.5 text-xs leading-relaxed text-zinc-400">
-                    Account controls live on the optional Account page. Atlas
-                    does not sync, migrate, or upload local data yet.
+                    {t(language, "settings.accountSync.description")}
                   </p>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
@@ -294,7 +297,7 @@ export function SettingsPage() {
                     href="/account"
                     className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-zinc-300 transition hover:bg-zinc-800 hover:text-white"
                   >
-                    Open Account
+                    {t(language, "settings.accountSync.openAccount")}
                   </Link>
                   <span
                     className={`rounded-full border px-3 py-1 text-[10px] font-bold uppercase tracking-wider ${accountSyncState.badgeClass}`}
@@ -310,7 +313,7 @@ export function SettingsPage() {
               <div className="mt-5 grid gap-3 md:grid-cols-3">
                 <div className="rounded-lg border border-[#27272a] bg-[#121214] p-4">
                   <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">
-                    Status
+                    {t(language, "settings.accountSync.status")}
                   </p>
                   <p className="mt-2 text-sm font-semibold text-zinc-100">
                     {accountSyncState.status}
@@ -321,12 +324,12 @@ export function SettingsPage() {
                 </div>
                 <div className="rounded-lg border border-[#27272a] bg-[#121214] p-4">
                   <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">
-                    Session
+                    {t(language, "settings.accountSync.session")}
                   </p>
                   <p className="mt-2 text-sm font-semibold text-zinc-100">
                     {auth.status === "signed_in"
-                      ? (auth.user?.email ?? "Signed in")
-                      : "No active login"}
+                      ? (auth.user?.email ?? t(language, "settings.accountSync.signedIn"))
+                      : t(language, "settings.accountSync.noLogin")}
                   </p>
                   <p className="mt-1 text-xs leading-relaxed text-zinc-500">
                     {accountSessionHint}
@@ -334,17 +337,17 @@ export function SettingsPage() {
                 </div>
                 <div className="rounded-lg border border-[#27272a] bg-[#121214] p-4">
                   <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">
-                    Local Workspace
+                    {t(language, "settings.accountSync.localWorkspace")}
                   </p>
                   <p className="mt-2 text-sm font-semibold text-zinc-100">
                     {localDataSummary.hasLocalData
-                      ? "Detected"
-                      : "No records detected"}
+                      ? t(language, "settings.accountSync.detected")
+                      : t(language, "settings.accountSync.noRecords")}
                   </p>
                   <p className="mt-1 text-xs leading-relaxed text-zinc-500">
                     {localDataSummary.hasLocalData
-                      ? `${localDataSummary.approximateRecordCount} approximate records across ${localDataSummary.populatedKeyCount} Atlas storage keys.`
-                      : "Atlas found no populated local workspace keys yet."}
+                      ? `${localDataSummary.approximateRecordCount} ${t(language, "settings.accountSync.approximateRecordsAcross")} ${localDataSummary.populatedKeyCount} ${t(language, "settings.accountSync.storageKeys")}.`
+                      : t(language, "settings.accountSync.noPopulatedKeys")}
                   </p>
                 </div>
               </div>
@@ -355,33 +358,45 @@ export function SettingsPage() {
             {/* System Configuration */}
             <div className="rounded-xl border border-[#27272a] bg-[#18181b] p-6 shadow-xl">
               <p className="text-[10px] font-bold uppercase tracking-widest text-amber-500">
-                Core Engine
+                {t(language, "settings.core.eyebrow")}
               </p>
               <h2 className="mt-2 text-2xl font-bold tracking-tight text-zinc-100">
-                Preferences &amp; Thresholds
+                {t(language, "settings.core.title")}
               </h2>
               <p className="mt-1.5 text-xs text-zinc-400 leading-relaxed">
-                Customize operational modes, base currencies, and gym habit metrics.
+                {t(language, "settings.core.description")}
               </p>
 
               <div className="mt-6 grid gap-4 sm:grid-cols-2">
                 <label className="grid gap-2 text-xs font-semibold text-zinc-400">
-                  Active Day Mode
+                  {t(language, "settings.core.language")}
+                  <select
+                    value={settings.language}
+                    onChange={(e) => setLanguage(e.target.value as Language)}
+                    className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2.5 text-zinc-100 font-bold focus:outline-none focus:border-amber-500/50"
+                  >
+                    <option value="en">{t(language, "settings.core.languageEnglish")}</option>
+                    <option value="es">{t(language, "settings.core.languageSpanish")}</option>
+                  </select>
+                </label>
+
+                <label className="grid gap-2 text-xs font-semibold text-zinc-400">
+                  {t(language, "settings.core.dayMode")}
                   <select
                     value={settings.dayMode}
                     onChange={(e) => setDayMode(e.target.value as DayMode)}
                     className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2.5 text-zinc-100 font-bold focus:outline-none focus:border-amber-500/50"
                   >
-                    <option value="Normal Day">Normal Day</option>
-                    <option value="University Day">University Day</option>
-                    <option value="Work Sprint Day">Work Sprint Day</option>
-                    <option value="Low Energy Day">Low Energy Day</option>
-                    <option value="Recovery Day">Recovery Day</option>
+                    <option value="Normal Day">{t(language, "enum.dayMode.Normal Day")}</option>
+                    <option value="University Day">{t(language, "enum.dayMode.University Day")}</option>
+                    <option value="Work Sprint Day">{t(language, "enum.dayMode.Work Sprint Day")}</option>
+                    <option value="Low Energy Day">{t(language, "enum.dayMode.Low Energy Day")}</option>
+                    <option value="Recovery Day">{t(language, "enum.dayMode.Recovery Day")}</option>
                   </select>
                 </label>
 
                 <label className="grid gap-2 text-xs font-semibold text-zinc-400">
-                  Base Currency
+                  {t(language, "settings.core.baseCurrency")}
                   <select
                     value={settings.baseCurrency}
                     onChange={(e) => setBaseCurrency(e.target.value as Currency)}
@@ -396,7 +411,7 @@ export function SettingsPage() {
                 <div className="grid gap-3 border border-[#27272a] bg-[#121214] p-4 rounded-lg sm:col-span-2">
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <label className="grid gap-1.5 text-xs font-semibold text-zinc-400 shrink-0">
-                      Exchange Rate (1 USD = X PYG)
+                      {t(language, "settings.core.exchangeRate")}
                       <input
                         type="number"
                         value={settings.usdToPygRate}
@@ -406,26 +421,26 @@ export function SettingsPage() {
                     </label>
                     <div className="text-[10px] text-zinc-500 space-y-1">
                       <p>
-                        <span className="font-bold text-zinc-400">Source:</span>{" "}
+                        <span className="font-bold text-zinc-400">{t(language, "settings.core.source")}</span>{" "}
                         <span className="rounded bg-amber-500/10 border border-amber-500/35 px-1.5 py-0.5 text-[9px] text-amber-500 font-bold uppercase tracking-wider">
-                          {settings.exchangeRateSource ?? "Manual"}
+                          {settings.exchangeRateSource ?? t(language, "settings.core.manual")}
                         </span>
                       </p>
                       <p>
-                        <span className="font-bold text-zinc-400">Last updated:</span>{" "}
+                        <span className="font-bold text-zinc-400">{t(language, "settings.core.lastUpdated")}</span>{" "}
                         <span className="font-mono text-zinc-400 font-medium">
-                          {settings.exchangeRateUpdatedAt ?? "Initial Setup"}
+                          {settings.exchangeRateUpdatedAt ?? t(language, "settings.core.initialSetup")}
                         </span>
                       </p>
                     </div>
                   </div>
                   <p className="text-[10px] leading-relaxed text-zinc-500 italic mt-0.5">
-                    ℹ️ Atlas does not query dynamic online exchange rates yet. Update this manually when required.
+                    {t(language, "settings.core.exchangeRateNote")}
                   </p>
                 </div>
 
                 <label className="grid gap-2 text-xs font-semibold text-zinc-400 sm:col-span-2">
-                  Gym Weekly Target (Workouts / Week)
+                  {t(language, "settings.core.gymWeeklyTarget")}
                   <input
                     type="number"
                     min="1"
@@ -441,13 +456,13 @@ export function SettingsPage() {
             {/* Privacy warnings & Database Backups */}
             <div className="rounded-xl border border-[#27272a] bg-[#18181b] p-6 shadow-xl">
               <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-500">
-                Security Sandbox
+                {t(language, "settings.data.eyebrow")}
               </p>
               <h2 className="mt-2 text-2xl font-bold tracking-tight text-zinc-100">
-                Privacy &amp; Data Vault
+                {t(language, "settings.data.title")}
               </h2>
               <p className="mt-2 text-xs leading-relaxed text-zinc-400">
-                Atlas is offline-first. Your reviews, finances, workouts, and plans are stored directly in your local browser storage. Backups contain sensitive personal data — keep them safe and out of public Git repos.
+                {t(language, "settings.data.description")}
               </p>
 
               <div className="mt-6 grid gap-3 sm:grid-cols-2 text-xs font-bold uppercase tracking-wider">
@@ -456,14 +471,14 @@ export function SettingsPage() {
                   onClick={exportData}
                   className="rounded-lg bg-amber-500 text-zinc-950 px-4 py-3 hover:bg-amber-400 transition"
                 >
-                  Export Local Backup (JSON)
+                  {t(language, "settings.data.exportJson")}
                 </button>
                 <button
                   type="button"
                   onClick={() => inputRef.current?.click()}
                   className="rounded-lg border border-[#27272a] bg-[#121214] px-4 py-3 text-zinc-200 hover:bg-zinc-800 transition"
                 >
-                  Import Local Backup (JSON)
+                  {t(language, "settings.data.importJson")}
                 </button>
                 <input
                   ref={inputRef}
@@ -478,13 +493,13 @@ export function SettingsPage() {
             {/* Polished Testing & Sample Data section */}
             <div className="rounded-xl border border-amber-500/25 bg-[#18181b] p-6 shadow-xl">
               <p className="text-[10px] font-bold uppercase tracking-widest text-amber-500">
-                Mocking Harness
+                {t(language, "settings.testing.eyebrow")}
               </p>
               <h2 className="mt-2 text-2xl font-bold tracking-tight text-zinc-100">
-                Testing &amp; Sample Data
+                {t(language, "settings.testing.title")}
               </h2>
               <p className="mt-2 text-xs leading-relaxed text-zinc-400">
-                Sample data is fake and safe for public demos. It is meant to test Atlas without using real personal data.
+                {t(language, "settings.testing.description")}
               </p>
 
               <div className="mt-6 grid gap-3 sm:grid-cols-3 text-xs font-bold uppercase tracking-wider">
@@ -492,25 +507,25 @@ export function SettingsPage() {
                   type="button"
                   onClick={handleLoadSampleDataOverwrite}
                   className="rounded-lg bg-amber-500 text-zinc-950 px-3 py-3 hover:bg-amber-400 transition text-center"
-                  title="Overwrite current local workspace with complete sample data"
+                  title={t(language, "settings.sample.replaceTitle")}
                 >
-                  Replace Workspace
+                  {t(language, "settings.testing.replace")}
                 </button>
                 <button
                   type="button"
                   onClick={handleLoadSampleDataMerge}
                   className="rounded-lg border border-amber-500/25 bg-amber-500/5 px-3 py-3 text-amber-500 hover:bg-amber-500/10 transition text-center font-bold"
-                  title="Safely merge sample mock records into your active workspace"
+                  title={t(language, "settings.sample.mergeTitle")}
                 >
-                  Merge Demo Data
+                  {t(language, "settings.testing.merge")}
                 </button>
                 <button
                   type="button"
                   onClick={handleResetWorkspace}
                   className="rounded-lg border border-red-500/25 bg-red-500/10 px-3 py-3 text-red-400 hover:bg-red-500/20 transition text-center"
-                  title="Wipe out everything and reset workspace to pristine empty state"
+                  title={t(language, "settings.sample.resetTitle")}
                 >
-                  Reset Workspace
+                  {t(language, "settings.testing.reset")}
                 </button>
               </div>
             </div>
@@ -518,13 +533,13 @@ export function SettingsPage() {
             {/* Markdown & Obsidian Exporter */}
             <div className="rounded-xl border border-[#27272a] bg-[#18181b] p-6 shadow-xl">
               <p className="text-[10px] font-bold uppercase tracking-widest text-indigo-400">
-                Interoperability
+                {t(language, "settings.markdown.eyebrow")}
               </p>
               <h2 className="mt-2 text-2xl font-bold tracking-tight text-zinc-100">
-                Markdown / Obsidian Export
+                {t(language, "settings.markdown.title")}
               </h2>
               <p className="mt-2 text-xs leading-relaxed text-zinc-400">
-                Download structured knowledge-base Markdown files optimized for direct drag-and-drop import into Obsidian or any other markdown viewer.
+                {t(language, "settings.markdown.description")}
               </p>
               
               <div className="mt-5 grid gap-3 sm:grid-cols-2 text-xs font-bold uppercase tracking-wider">
@@ -534,7 +549,7 @@ export function SettingsPage() {
                   onClick={() => latestReview && downloadWeeklyReviewMarkdown(latestReview)}
                   className="rounded-lg border border-[#27272a] bg-[#121214] px-4 py-3 text-zinc-300 transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-40"
                 >
-                  Export Latest Weekly Review
+                  {t(language, "settings.markdown.exportLatestReview")}
                 </button>
                 <button
                   type="button"
@@ -542,7 +557,7 @@ export function SettingsPage() {
                   onClick={() => downloadAllNotesMarkdown(notes)}
                   className="rounded-lg border border-[#27272a] bg-[#121214] px-4 py-3 text-zinc-300 transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-40"
                 >
-                  Export Notes Library
+                  {t(language, "settings.markdown.exportNotes")}
                 </button>
                 <button
                   type="button"
@@ -550,7 +565,7 @@ export function SettingsPage() {
                   onClick={() => downloadGoalsSummaryMarkdown(goals)}
                   className="rounded-lg border border-[#27272a] bg-[#121214] px-4 py-3 text-zinc-300 transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-40"
                 >
-                  Export Goals Roadmap
+                  {t(language, "settings.markdown.exportGoals")}
                 </button>
                 <button
                   type="button"
@@ -570,7 +585,7 @@ export function SettingsPage() {
                   }
                   className="rounded-lg border border-[#27272a] bg-[#121214] px-4 py-3 text-zinc-300 transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-40"
                 >
-                  Export Today&apos;s Plan
+                  {t(language, "settings.markdown.exportToday")}
                 </button>
                 <button
                   type="button"
@@ -580,11 +595,11 @@ export function SettingsPage() {
                   }
                   className="rounded-lg border border-[#27272a] bg-[#121214] px-4 py-3 text-zinc-300 transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-40 sm:col-span-2"
                 >
-                  Export Academic Week Logs
+                  {t(language, "settings.markdown.exportAcademicWeek")}
                 </button>
               </div>
               <p className="mt-3 text-[10px] text-zinc-500 italic">
-                * Buttons are disabled if no local data exists yet in that category.
+                {t(language, "settings.markdown.disabledNote")}
               </p>
             </div>
 
@@ -592,31 +607,32 @@ export function SettingsPage() {
 
           {/* Right Column — QA checklist & Scope */}
           <div className="grid gap-6">
+            <CloudQAChecklist />
             
             {/* Live QA Checklist Box */}
             <div className="rounded-xl border border-[#27272a] bg-[#18181b] p-6 shadow-xl">
               <p className="text-[10px] font-bold uppercase tracking-widest text-amber-500">
-                System Quality Assurance
+                {t(language, "settings.qa.eyebrow")}
               </p>
               <h2 className="mt-2 text-2xl font-bold tracking-tight text-zinc-100">
-                Harness QA Checklist
+                {t(language, "settings.qa.title")}
               </h2>
               <p className="mt-1.5 text-xs text-zinc-400 leading-relaxed">
-                Live diagnostic indicators calculating local database volumes.
+                {t(language, "settings.qa.description")}
               </p>
 
               <div className="mt-6 space-y-2.5">
                 {[
-                  { label: "Dashboard briefed", ok: tasks.length > 0 || workItems.length > 0, desc: `${tasks.length + workItems.length} active agenda items` },
-                  { label: "XP / Levels progress", ok: xp.currentXP > 0, desc: `Current: ${xp.currentXP} XP (Level ${xp.level})` },
-                  { label: "Finance Ledger conversion", ok: transactions.length > 0, desc: `${transactions.length} PYG/USD ledger entries` },
-                  { label: "Savings-linked Goal mapped", ok: goals.some(g => g.linkedFinanceMetric === "savings"), desc: goals.some(g => g.linkedFinanceMetric === "savings") ? "Verified" : "Missing" },
-                  { label: "Gym intensity logs & Streaks", ok: workouts.length > 0, desc: `${workouts.length} gym logs active` },
-                  { label: "Academic course timeline", ok: subjects.length > 0 && tasks.some(t => t.area === "Academic"), desc: `${subjects.length} subjects & acad tasks` },
-                  { label: "Client Freelance Board tickets", ok: clients.length > 0 && workItems.length > 0, desc: `${clients.length} clients, ${workItems.length} items` },
-                  { label: "Notes Knowledge base", ok: notes.length > 0, desc: `${notes.length} markdown notes` },
-                  { label: "Weekly reflection logs", ok: reviews.length > 0, desc: `${reviews.length} completed review journals` },
-                  { label: "Daily wraps & reflections", ok: dailyWraps.length > 0, desc: `${dailyWraps.length} daily reflections logged` },
+                  { label: t(language, "settings.qa.dashboardBriefed"), ok: tasks.length > 0 || workItems.length > 0, desc: `${tasks.length + workItems.length} ${t(language, "settings.qa.activeAgendaItems")}` },
+                  { label: t(language, "settings.qa.xpProgress"), ok: xp.currentXP > 0, desc: `${t(language, "settings.qa.current")}: ${xp.currentXP} XP (${t(language, "xp.level")} ${xp.level})` },
+                  { label: t(language, "settings.qa.financeLedger"), ok: transactions.length > 0, desc: `${transactions.length} ${t(language, "settings.qa.ledgerEntries")}` },
+                  { label: t(language, "settings.qa.savingsLinked"), ok: goals.some(g => g.linkedFinanceMetric === "savings"), desc: goals.some(g => g.linkedFinanceMetric === "savings") ? t(language, "settings.qa.verified") : t(language, "settings.qa.missing") },
+                  { label: t(language, "settings.qa.gymLogs"), ok: workouts.length > 0, desc: `${workouts.length} ${t(language, "settings.qa.gymLogsActive")}` },
+                  { label: t(language, "settings.qa.academicTimeline"), ok: subjects.length > 0 && tasks.some(t => t.area === "Academic"), desc: `${subjects.length} ${t(language, "settings.qa.subjectsAcademicTasks")}` },
+                  { label: t(language, "settings.qa.clientBoard"), ok: clients.length > 0 && workItems.length > 0, desc: `${clients.length} ${t(language, "settings.qa.clients")}, ${workItems.length} ${t(language, "settings.qa.items")}` },
+                  { label: t(language, "settings.qa.notesKnowledge"), ok: notes.length > 0, desc: `${notes.length} ${t(language, "settings.qa.markdownNotes")}` },
+                  { label: t(language, "settings.qa.weeklyReflection"), ok: reviews.length > 0, desc: `${reviews.length} ${t(language, "settings.qa.completedReviews")}` },
+                  { label: t(language, "settings.qa.dailyWraps"), ok: dailyWraps.length > 0, desc: `${dailyWraps.length} ${t(language, "settings.qa.dailyReflections")}` },
                 ].map((check) => (
                   <div key={check.label} className="flex items-center justify-between gap-3 text-xs border-b border-[#27272a]/45 pb-2">
                     <span className="font-semibold text-zinc-300">{check.label}</span>
@@ -627,7 +643,7 @@ export function SettingsPage() {
                           ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/25 animate-pulse-subtle" 
                           : "bg-zinc-800 text-zinc-500 border-[#27272a]"
                       }`}>
-                        {check.ok ? "✓ MAPPED" : "○ EMPTY"}
+                        {check.ok ? `✓ ${t(language, "settings.qa.mapped")}` : `○ ${t(language, "settings.qa.empty")}`}
                       </span>
                     </div>
                   </div>
@@ -638,11 +654,11 @@ export function SettingsPage() {
             {/* Scope Audit */}
             <div className="rounded-xl border border-[#27272a] bg-[#18181b] p-6 shadow-xl">
               <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">
-                Auditing
+                {t(language, "settings.scope.eyebrow")}
               </p>
-              <h2 className="mt-2 text-xl font-bold text-zinc-100">Export Scope</h2>
+              <h2 className="mt-2 text-xl font-bold text-zinc-100">{t(language, "settings.scope.title")}</h2>
               <p className="mt-3 text-xs leading-relaxed text-zinc-400">
-                Export and clear options affect strictly Atlas Personal OS-specific local browser storage tokens. Other site cookies, extensions, or browser settings are completely untouched.
+                {t(language, "settings.scope.description")}
               </p>
               <div className="mt-4 grid gap-2">
                 {ATLAS_STORAGE_KEY_VALUES.map((key) => (
@@ -651,7 +667,7 @@ export function SettingsPage() {
                     className="rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2.5 text-xs text-amber-500/90 font-mono flex items-center justify-between"
                   >
                     <span>{key}</span>
-                    <span className="text-[8px] rounded bg-zinc-800 border border-[#27272a] px-1.5 py-0.5 text-zinc-500 font-bold uppercase tracking-wider">Vault</span>
+                    <span className="text-[8px] rounded bg-zinc-800 border border-[#27272a] px-1.5 py-0.5 text-zinc-500 font-bold uppercase tracking-wider">{t(language, "settings.scope.vault")}</span>
                   </code>
                 ))}
               </div>
@@ -660,11 +676,11 @@ export function SettingsPage() {
             {/* Obsidian Vault Context */}
             <div className="rounded-xl border border-[#27272a]/60 bg-gradient-to-br from-[#18181b] to-[#141416] p-6 shadow-xl">
               <p className="text-[10px] font-bold uppercase tracking-widest text-amber-500">
-                Knowledge Mapping
+                {t(language, "settings.obsidian.eyebrow")}
               </p>
-              <h2 className="mt-2 text-xl font-bold text-zinc-100">Obsidian Integration</h2>
+              <h2 className="mt-2 text-xl font-bold text-zinc-100">{t(language, "settings.obsidian.title")}</h2>
               <p className="mt-3 text-xs leading-relaxed text-zinc-400">
-                These generated templates represent snapshots of your local workspace. Drag downloaded files into your vault directory. They include parsed statistics, metadata, and links mapped perfectly to Obsidian frontmatter structures.
+                {t(language, "settings.obsidian.description")}
               </p>
             </div>
 

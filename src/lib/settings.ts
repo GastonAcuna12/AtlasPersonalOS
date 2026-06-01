@@ -7,9 +7,11 @@ import {
   useStoredValue,
   writeToStorage,
 } from "@/lib/storage";
+import { isLanguage, type Language } from "@/lib/i18n";
 import type { AtlasSettings, FinanceSettings, Currency, DayMode } from "@/types/atlas";
 
 export type { AtlasSettings, DayMode } from "@/types/atlas";
+export type { Language } from "@/lib/i18n";
 
 export const DAY_MODES: DayMode[] = [
   "Normal Day",
@@ -21,6 +23,7 @@ export const DAY_MODES: DayMode[] = [
 
 export const DEFAULT_APP_SETTINGS: AtlasSettings = {
   dayMode: "Normal Day",
+  language: "en",
   gymWeeklyTarget: 4,
 };
 
@@ -48,6 +51,9 @@ export function normalizeAppSettings(value: unknown): AtlasSettings {
     dayMode: isDayMode(candidate.dayMode)
       ? candidate.dayMode
       : DEFAULT_APP_SETTINGS.dayMode,
+    language: isLanguage(candidate.language)
+      ? candidate.language
+      : DEFAULT_APP_SETTINGS.language,
     gymWeeklyTarget:
       typeof candidate.gymWeeklyTarget === "number" && candidate.gymWeeklyTarget > 0
         ? candidate.gymWeeklyTarget
@@ -147,6 +153,7 @@ export function useAtlasSettings() {
     // 1. App settings changes
     const appChanges: Partial<AtlasSettings> = {};
     if (changes.dayMode !== undefined) appChanges.dayMode = changes.dayMode;
+    if (changes.language !== undefined) appChanges.language = changes.language;
     if (changes.gymWeeklyTarget !== undefined) appChanges.gymWeeklyTarget = changes.gymWeeklyTarget;
 
     if (Object.keys(appChanges).length > 0) {
@@ -183,6 +190,10 @@ export function useAtlasSettings() {
     updateSettings({ dayMode });
   }
 
+  function setLanguage(language: Language) {
+    updateSettings({ language });
+  }
+
   function setBaseCurrency(baseCurrency: Currency) {
     updateSettings({ baseCurrency });
   }
@@ -204,6 +215,7 @@ export function useAtlasSettings() {
     settings: combinedSettings,
     updateSettings,
     setDayMode,
+    setLanguage,
     setBaseCurrency,
     setExchangeRate,
     setGymWeeklyTarget,

@@ -30,6 +30,8 @@ import {
 } from "@/lib/work";
 import { useXP } from "@/lib/xp";
 import { formatMoney } from "@/lib/finances";
+import { useAtlasSettings } from "@/lib/settings";
+import { t } from "@/lib/i18n";
 import type { TaskPriority, Currency } from "@/types/atlas";
 
 const initialClientDraft: ClientDraft = {
@@ -64,6 +66,16 @@ const initialWorkItemDraft: WorkItemDraft = {
 
 export function WorkPage() {
   const xp = useXP();
+  const { settings } = useAtlasSettings();
+  const language = settings.language;
+  const workStatusLabel = (status: WorkItemStatus) =>
+    t(language, `work.status.${status}`, getStatusLabel(status));
+  const workTypeLabel = (type: WorkItemType) =>
+    t(language, `work.type.${type}`, type);
+  const difficultyLabel = (difficulty: Difficulty) =>
+    t(language, `work.difficulty.${difficulty}`, difficulty);
+  const clientTypeLabel = (type: ClientType) =>
+    t(language, `work.clientType.${type}`, type);
   const { clients, activeClients, addClient, updateClient } = useClients();
   const { workItems, addWorkItem, updateWorkItem, completeWorkItem, deleteWorkItem } =
     useWorkItems();
@@ -148,7 +160,7 @@ export function WorkPage() {
   function handleAddClient(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!clientDraft.name.trim()) {
-      setErrorClient("Client name is required.");
+      setErrorClient(t(language, "work.errorClientName", "Client name is required."));
       return;
     }
     const client = addClient(clientDraft);
@@ -164,11 +176,11 @@ export function WorkPage() {
   function handleAddWorkItem(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!workItemDraft.title.trim()) {
-      setErrorWorkItem("Work item title is required.");
+      setErrorWorkItem(t(language, "work.errorItemTitle", "Work item title is required."));
       return;
     }
     if (!workItemDraft.clientId) {
-      setErrorWorkItem("Please select a client.");
+      setErrorWorkItem(t(language, "work.errorSelectClient", "Please select a client."));
       return;
     }
     const item = addWorkItem(workItemDraft);
@@ -272,7 +284,7 @@ export function WorkPage() {
 
   function handleSaveClientEdit(id: string) {
     if (!editClientName.trim()) {
-      alert("Client name is required.");
+      alert(t(language, "work.errorClientName", "Client name is required."));
       return;
     }
     updateClient(id, {
@@ -308,7 +320,7 @@ export function WorkPage() {
 
   function handleSaveWorkItemEdit(id: string) {
     if (!editWorkTitle.trim()) {
-      alert("Work item title is required.");
+      alert(t(language, "work.errorItemTitle", "Work item title is required."));
       return;
     }
     updateWorkItem(id, {
@@ -335,28 +347,28 @@ export function WorkPage() {
       <header className="flex flex-col gap-4 border-b border-[#27272a] pb-6 md:flex-row md:items-center md:justify-between">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-500">
-            Operations &amp; Delivery
+            {t(language, "work.eyebrow", "Operations & Delivery")}
           </p>
           <h1 className="mt-2 text-4xl font-bold tracking-tight text-zinc-100 sm:text-5xl">
-            Work Board
+            {t(language, "work.title", "Work Board")}
           </h1>
         </div>
         <Link
           href="/"
           className="w-fit rounded-lg border border-[#27272a] bg-[#18181b] px-4 py-2 text-xs font-bold uppercase tracking-wider text-zinc-300 transition hover:bg-zinc-800 hover:text-white"
         >
-          Dashboard
+          {t(language, "common.dashboard")}
         </Link>
       </header>
 
       {/* Overview Statistics Cards */}
       <section className="grid gap-4 mt-6 grid-cols-2 lg:grid-cols-5">
         {[
-          ["Active Clients", activeClients.length],
-          ["Due Today", dueToday.length],
-          ["Due This Week", dueThisWeek.length],
-          ["Weekly Load", `${workloadHoursThisWeek}h`],
-          ["Pending Feedback", waitingFeedback.length],
+          [t(language, "work.activeClients", "Active Clients"), activeClients.length],
+          [t(language, "work.dueToday", "Due Today"), dueToday.length],
+          [t(language, "work.dueThisWeek", "Due This Week"), dueThisWeek.length],
+          [t(language, "work.weeklyLoad", "Weekly Load"), `${workloadHoursThisWeek}h`],
+          [t(language, "work.pendingFeedback", "Pending Feedback"), waitingFeedback.length],
         ].map(([label, val]) => (
           <div key={label} className="rounded-xl border border-[#27272a] bg-[#18181b] p-4 shadow-lg text-center">
             <p className="text-[10px] text-zinc-500 font-semibold uppercase tracking-wider">{label}</p>
@@ -375,7 +387,7 @@ export function WorkPage() {
               : "border-transparent text-zinc-500 hover:text-zinc-300"
           }`}
         >
-          Work Items Board
+          {t(language, "work.itemsBoard", "Work Items Board")}
         </button>
         <button
           onClick={() => setActiveTab("clients")}
@@ -385,7 +397,7 @@ export function WorkPage() {
               : "border-transparent text-zinc-500 hover:text-zinc-300"
           }`}
         >
-          Client Directory
+          {t(language, "work.clientDirectory", "Client Directory")}
         </button>
       </div>
 
@@ -394,12 +406,12 @@ export function WorkPage() {
         <section className="mt-8 flex flex-col gap-6">
           {/* Collapse Form Button */}
           <div className="flex justify-between items-center">
-            <h2 className="text-base font-bold text-zinc-200 uppercase tracking-wide">Kanban Pipeline</h2>
+            <h2 className="text-base font-bold text-zinc-200 uppercase tracking-wide">{t(language, "work.kanbanPipeline", "Kanban Pipeline")}</h2>
             <button
               onClick={() => setShowNewItemForm(!showNewItemForm)}
               className="rounded-lg bg-amber-500 hover:bg-amber-400 text-zinc-950 px-4 py-2.5 text-xs font-bold uppercase tracking-wider transition-all duration-200 shadow-md"
             >
-              {showNewItemForm ? "Cancel New Item" : "+ New Work Item"}
+              {showNewItemForm ? t(language, "work.cancelNewItem", "Cancel New Item") : t(language, "work.newWorkItem", "+ New Work Item")}
             </button>
           </div>
 
@@ -410,7 +422,7 @@ export function WorkPage() {
               className="rounded-xl border border-[#27272a] bg-[#18181b] p-6 shadow-xl grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 animate-fade-in-up"
             >
               <label className="grid gap-2 text-xs font-semibold text-zinc-400 uppercase tracking-wider">
-                Client *
+                {t(language, "work.clientRequired", "Client *")}
                 <select
                   value={workItemDraft.clientId}
                   onChange={(e) =>
@@ -418,7 +430,7 @@ export function WorkPage() {
                   }
                   className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2 text-zinc-100 text-sm focus:border-amber-500 focus:outline-none"
                 >
-                  <option value="">Select a client</option>
+                  <option value="">{t(language, "work.selectClient", "Select a client")}</option>
                   {activeClients.map((client) => (
                     <option key={client.id} value={client.id}>
                       {client.name}
@@ -428,9 +440,9 @@ export function WorkPage() {
               </label>
 
               <label className="grid gap-2 text-xs font-semibold text-zinc-400 uppercase tracking-wider">
-                Item Title *
+                {t(language, "work.itemTitle", "Item Title *")}
                 <input
-                  placeholder="e.g. 60s Shorts Reel"
+                  placeholder={t(language, "work.itemTitlePlaceholder", "e.g. 60s Shorts Reel")}
                   value={workItemDraft.title}
                   onChange={(e) =>
                     setWorkItemDraft((c) => ({ ...c, title: e.target.value }))
@@ -440,7 +452,7 @@ export function WorkPage() {
               </label>
 
               <label className="grid gap-2 text-xs font-semibold text-zinc-400 uppercase tracking-wider">
-                Deliverable Type
+                {t(language, "work.deliverableType", "Deliverable Type")}
                 <select
                   value={workItemDraft.type}
                   onChange={(e) =>
@@ -453,14 +465,14 @@ export function WorkPage() {
                 >
                   {WORK_ITEM_TYPES.map((t) => (
                     <option key={t} value={t}>
-                      {t}
+                      {workTypeLabel(t)}
                     </option>
                   ))}
                 </select>
               </label>
 
               <label className="grid gap-2 text-xs font-semibold text-zinc-400 uppercase tracking-wider">
-                Initial Status
+                {t(language, "common.status")}
                 <select
                   value={workItemDraft.status}
                   onChange={(e) =>
@@ -473,14 +485,14 @@ export function WorkPage() {
                 >
                   {WORK_ITEM_STATUSES.map((s) => (
                     <option key={s} value={s}>
-                      {getStatusLabel(s)}
+                      {workStatusLabel(s)}
                     </option>
                   ))}
                 </select>
               </label>
 
               <label className="grid gap-2 text-xs font-semibold text-zinc-400 uppercase tracking-wider">
-                Priority Label
+                {t(language, "work.priorityLabel", "Priority Label")}
                 <select
                   value={workItemDraft.priority}
                   onChange={(e) =>
@@ -493,14 +505,14 @@ export function WorkPage() {
                 >
                   {PRIORITIES.map((p) => (
                     <option key={p} value={p}>
-                      {p}
+                      {t(language, `enum.priority.${p}`, p)}
                     </option>
                   ))}
                 </select>
               </label>
 
               <label className="grid gap-2 text-xs font-semibold text-zinc-400 uppercase tracking-wider">
-                Task Difficulty
+                {t(language, "work.taskDifficulty", "Task Difficulty")}
                 <select
                   value={workItemDraft.difficulty}
                   onChange={(e) =>
@@ -513,7 +525,7 @@ export function WorkPage() {
                 >
                   {DIFFICULTIES.map((d) => (
                     <option key={d} value={d}>
-                      {d}
+                      {difficultyLabel(d)}
                     </option>
                   ))}
                 </select>
@@ -523,10 +535,10 @@ export function WorkPage() {
               {(!selectedClientForNewItem || selectedClientForNewItem.billingType === "per_item" || !selectedClientForNewItem.billingType) ? (
                 <>
                   <label className="grid gap-2 text-xs font-semibold text-zinc-400 uppercase tracking-wider">
-                    Billing Value
+                    {t(language, "work.billingValue", "Billing Value")}
                     <input
                       type="number"
-                      placeholder="Amount"
+                      placeholder={t(language, "work.amount", "Amount")}
                       value={workItemDraft.value ?? ""}
                       onChange={(e) =>
                         setWorkItemDraft((c) => ({
@@ -538,7 +550,7 @@ export function WorkPage() {
                     />
                   </label>
                   <label className="grid gap-2 text-xs font-semibold text-zinc-400 uppercase tracking-wider">
-                    Currency
+                    {t(language, "quick.currency", "Currency")}
                     <select
                       value={workItemDraft.currency ?? "USD"}
                       onChange={(e) =>
@@ -556,17 +568,17 @@ export function WorkPage() {
                 </>
               ) : (
                 <div className="rounded-lg bg-[#121214] border border-[#27272a] p-3 text-xs text-zinc-400 flex flex-col justify-center sm:col-span-2">
-                  <span className="font-bold text-amber-500 uppercase text-[9px] tracking-widest leading-none mb-1">Billing Policy</span>
+                  <span className="font-bold text-amber-500 uppercase text-[9px] tracking-widest leading-none mb-1">{t(language, "work.billingPolicy", "Billing Policy")}</span>
                   {selectedClientForNewItem.billingType === "fixed_monthly"
-                    ? `Fixed Retainer: Billed at ${formatMoney(selectedClientForNewItem.monthlyRate ?? 0, selectedClientForNewItem.currency ?? "USD")}/mo.`
+                    ? `${t(language, "work.fixedRetainer", "Fixed Retainer")}: ${t(language, "work.billedAt", "Billed at")} ${formatMoney(selectedClientForNewItem.monthlyRate ?? 0, selectedClientForNewItem.currency ?? "USD")}/mo.`
                     : selectedClientForNewItem.billingType === "hourly"
-                    ? `Hourly Retainer: Billed at ${formatMoney(selectedClientForNewItem.hourlyRate ?? 0, selectedClientForNewItem.currency ?? "USD")}/hr.`
-                    : "Non-billable personal profile."}
+                    ? `${t(language, "work.hourlyRetainer", "Hourly Retainer")}: ${t(language, "work.billedAt", "Billed at")} ${formatMoney(selectedClientForNewItem.hourlyRate ?? 0, selectedClientForNewItem.currency ?? "USD")}/hr.`
+                    : t(language, "work.nonBillableProfile", "Non-billable personal profile.")}
                 </div>
               )}
 
               <label className="grid gap-2 text-xs font-semibold text-zinc-400 uppercase tracking-wider">
-                Work Minutes Est.
+                {t(language, "work.minutesEstimate", "Work Minutes Est.")}
                 <input
                   type="number"
                   placeholder="e.g. 60"
@@ -582,7 +594,7 @@ export function WorkPage() {
               </label>
 
               <label className="grid gap-2 text-xs font-semibold text-zinc-400 uppercase tracking-wider">
-                Planned Date
+                {t(language, "task.plannedDate")}
                 <input
                   type="date"
                   value={workItemDraft.plannedDate}
@@ -594,7 +606,7 @@ export function WorkPage() {
               </label>
 
               <label className="grid gap-2 text-xs font-semibold text-zinc-400 uppercase tracking-wider">
-                Deliverable Deadline
+                {t(language, "work.deliverableDeadline", "Deliverable Deadline")}
                 <input
                   type="date"
                   value={workItemDraft.deadline}
@@ -606,9 +618,9 @@ export function WorkPage() {
               </label>
 
               <label className="grid gap-2 text-xs font-semibold text-zinc-400 uppercase tracking-wider">
-                Reference Link
+                {t(language, "work.referenceLink", "Reference Link")}
                 <input
-                  placeholder="Google Drive, Notion, brief, folder, etc."
+                  placeholder={t(language, "work.referencePlaceholder", "Google Drive, Notion, brief, folder, etc.")}
                   value={workItemDraft.referenceUrl ?? ""}
                   onChange={(e) =>
                     setWorkItemDraft((c) => ({ ...c, referenceUrl: e.target.value }))
@@ -618,9 +630,9 @@ export function WorkPage() {
               </label>
 
               <label className="grid gap-2 text-xs font-semibold text-zinc-400 uppercase tracking-wider sm:col-span-2 md:col-span-3 lg:col-span-4">
-                Description / Scope Guidelines
+                {t(language, "work.scopeGuidelines", "Description / Scope Guidelines")}
                 <textarea
-                  placeholder="Add guidelines or notes..."
+                  placeholder={t(language, "work.scopePlaceholder", "Add guidelines or notes...")}
                   rows={2}
                   value={workItemDraft.description}
                   onChange={(e) =>
@@ -640,7 +652,7 @@ export function WorkPage() {
                 type="submit"
                 className="rounded-lg bg-amber-500 hover:bg-amber-400 text-zinc-950 px-4 py-3 text-xs font-bold uppercase tracking-wider transition sm:col-span-2 md:col-span-1"
               >
-                Create Item
+                {t(language, "work.createItem", "Create Item")}
               </button>
             </form>
           )}
@@ -664,7 +676,7 @@ export function WorkPage() {
                   >
                     <div className="flex justify-between items-center border-b border-[#27272a] pb-2">
                       <span className="font-bold text-xs text-zinc-400 uppercase tracking-widest">
-                        {getStatusLabel(colStatus)}
+                        {workStatusLabel(colStatus)}
                       </span>
                       <span className="rounded-full bg-[#18181b] border border-[#27272a] px-2.5 py-0.5 text-xs font-bold text-amber-500">
                         {colItems.length}
@@ -688,18 +700,18 @@ export function WorkPage() {
                               {editingWorkItemId === item.id ? (
                                 <div className="grid gap-3 text-xs text-left">
                                   <div className="flex justify-between items-center border-b border-[#27272a] pb-1.5">
-                                    <span className="font-bold text-amber-500 uppercase tracking-widest text-[9px]">Edit Work Item</span>
+                                    <span className="font-bold text-amber-500 uppercase tracking-widest text-[9px]">{t(language, "work.editItem", "Edit Work Item")}</span>
                                     <button
                                       type="button"
                                       onClick={() => setEditingWorkItemId(null)}
                                       className="text-zinc-400 hover:text-white text-[10px] font-bold"
                                     >
-                                      Discard
+                                      {t(language, "work.discard", "Discard")}
                                     </button>
                                   </div>
 
                                   <label className="grid gap-1 font-semibold text-zinc-400 uppercase tracking-wider text-[10px]">
-                                    Title
+                                    {t(language, "common.title")}
                                     <input
                                       value={editWorkTitle}
                                       onChange={(e) => setEditWorkTitle(e.target.value)}
@@ -709,7 +721,7 @@ export function WorkPage() {
 
                                   <div className="grid grid-cols-2 gap-2">
                                     <label className="grid gap-1 font-semibold text-zinc-400 uppercase tracking-wider text-[10px]">
-                                      Type
+                                      {t(language, "common.type")}
                                       <select
                                         value={editWorkType}
                                         onChange={(e) => setEditWorkType(e.target.value as WorkItemType)}
@@ -717,14 +729,14 @@ export function WorkPage() {
                                       >
                                         {WORK_ITEM_TYPES.map((t) => (
                                           <option key={t} value={t}>
-                                            {t}
+                                            {workTypeLabel(t)}
                                           </option>
                                         ))}
                                       </select>
                                     </label>
 
                                     <label className="grid gap-1 font-semibold text-zinc-400 uppercase tracking-wider text-[10px]">
-                                      Priority
+                                      {t(language, "common.priority")}
                                       <select
                                         value={editWorkPriority}
                                         onChange={(e) => setEditWorkPriority(e.target.value as TaskPriority)}
@@ -732,7 +744,7 @@ export function WorkPage() {
                                       >
                                         {PRIORITIES.map((p) => (
                                           <option key={p} value={p}>
-                                            {p}
+                                            {t(language, `enum.priority.${p}`, p)}
                                           </option>
                                         ))}
                                       </select>
@@ -741,7 +753,7 @@ export function WorkPage() {
 
                                   <div className="grid grid-cols-2 gap-2">
                                     <label className="grid gap-1 font-semibold text-zinc-400 uppercase tracking-wider text-[10px]">
-                                      Difficulty
+                                      {t(language, "work.taskDifficulty", "Task Difficulty")}
                                       <select
                                         value={editWorkDifficulty}
                                         onChange={(e) => setEditWorkDifficulty(e.target.value as Difficulty)}
@@ -749,14 +761,14 @@ export function WorkPage() {
                                       >
                                         {DIFFICULTIES.map((d) => (
                                           <option key={d} value={d}>
-                                            {d}
+                                            {difficultyLabel(d)}
                                           </option>
                                         ))}
                                       </select>
                                     </label>
 
                                     <label className="grid gap-1 font-semibold text-zinc-400 uppercase tracking-wider text-[10px]">
-                                      Minutes
+                                      {t(language, "common.minutes")}
                                       <input
                                         type="number"
                                         value={editWorkEstimatedMinutes ?? ""}
@@ -769,7 +781,7 @@ export function WorkPage() {
                                   {(!client || !client.billingType || client.billingType === "per_item") && (
                                     <div className="grid grid-cols-2 gap-2">
                                       <label className="grid gap-1 font-semibold text-zinc-400 uppercase tracking-wider text-[10px]">
-                                        Value ($)
+                                        {t(language, "work.billingValue", "Billing Value")}
                                         <input
                                           type="number"
                                           value={editWorkValue ?? ""}
@@ -779,7 +791,7 @@ export function WorkPage() {
                                       </label>
 
                                       <label className="grid gap-1 font-semibold text-zinc-400 uppercase tracking-wider text-[10px]">
-                                        Currency
+                                      {t(language, "quick.currency", "Currency")}
                                         <select
                                           value={editWorkCurrency}
                                           onChange={(e) => setEditWorkCurrency(e.target.value as Currency)}
@@ -794,7 +806,7 @@ export function WorkPage() {
 
                                   <div className="grid grid-cols-2 gap-2">
                                     <label className="grid gap-1 font-semibold text-zinc-400 uppercase tracking-wider text-[10px]">
-                                      Plan Date
+                                      {t(language, "task.plannedDate")}
                                       <input
                                         type="date"
                                         value={editWorkPlannedDate}
@@ -804,7 +816,7 @@ export function WorkPage() {
                                     </label>
 
                                     <label className="grid gap-1 font-semibold text-zinc-400 uppercase tracking-wider text-[10px]">
-                                      Deadline
+                                      {t(language, "work.deadline", "Deadline")}
                                       <input
                                         type="date"
                                         value={editWorkDeadline}
@@ -815,17 +827,17 @@ export function WorkPage() {
                                   </div>
 
                                   <label className="grid gap-1 font-semibold text-zinc-400 uppercase tracking-wider text-[10px]">
-                                    Reference URL
+                                    {t(language, "work.referenceUrl", "Reference URL")}
                                     <input
                                       value={editWorkReferenceUrl}
                                       onChange={(e) => setEditWorkReferenceUrl(e.target.value)}
-                                      placeholder="e.g. Drive link"
+                                      placeholder={t(language, "work.referenceUrlPlaceholder", "e.g. Drive link")}
                                       className="rounded border border-[#27272a] bg-[#121214] px-2 py-1 text-zinc-150 focus:outline-none w-full"
                                     />
                                   </label>
 
                                   <label className="grid gap-1 font-semibold text-zinc-400 uppercase tracking-wider text-[10px]">
-                                    Notes
+                                    {t(language, "common.notes")}
                                     <textarea
                                       rows={2}
                                       value={editWorkNotes}
@@ -840,14 +852,14 @@ export function WorkPage() {
                                       onClick={() => handleSaveWorkItemEdit(item.id)}
                                       className="rounded bg-amber-500 hover:bg-amber-400 text-zinc-950 px-3 py-1.5 font-bold uppercase tracking-wider transition text-[10px]"
                                     >
-                                      Save
+                                      {t(language, "common.save")}
                                     </button>
                                     <button
                                       type="button"
                                       onClick={() => setEditingWorkItemId(null)}
                                       className="rounded border border-[#27272a] bg-zinc-800 hover:bg-zinc-700 px-3 py-1.5 font-bold uppercase tracking-wider text-zinc-300 transition text-[10px]"
                                     >
-                                      Cancel
+                                      {t(language, "common.cancel")}
                                     </button>
                                   </div>
                                 </div>
@@ -857,13 +869,13 @@ export function WorkPage() {
                                     <div className="flex items-center gap-1.5 min-w-0">
                                       <span
                                         className="text-zinc-650 hover:text-zinc-400 cursor-grab active:cursor-grabbing text-xs select-none p-0.5 shrink-0"
-                                        title="Drag work item"
-                                        aria-label="Drag work item"
+                                        title={t(language, "work.dragItem", "Drag work item")}
+                                        aria-label={t(language, "work.dragItem", "Drag work item")}
                                       >
                                         ⠿
                                       </span>
                                       <span className="text-[10px] font-bold uppercase tracking-wider text-amber-500 truncate max-w-[140px]" title={client?.name}>
-                                        {client?.name ?? "No client"}
+                                        {client?.name ?? t(language, "work.noClient", "No client")}
                                       </span>
                                     </div>
                                     <div className="flex items-center gap-2 shrink-0">
@@ -871,14 +883,14 @@ export function WorkPage() {
                                         type="button"
                                         onClick={() => handleStartEditingWorkItem(item)}
                                         className="text-zinc-500 hover:text-amber-500 text-[10px] uppercase font-bold transition duration-150"
-                                        title="Edit item"
+                                        title={t(language, "work.editItemTitle", "Edit item")}
                                       >
-                                        Edit
+                                        {t(language, "work.edit", "Edit")}
                                       </button>
                                       <button
                                         onClick={() => deleteWorkItem(item.id)}
                                         className="text-zinc-600 hover:text-red-400 text-xs transition duration-150 shrink-0"
-                                        title="Delete item"
+                                        title={t(language, "work.deleteItemTitle", "Delete item")}
                                       >
                                         ✕
                                       </button>
@@ -903,28 +915,28 @@ export function WorkPage() {
                                         rel="noopener noreferrer"
                                         className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-500 hover:text-amber-400 transition hover:underline cursor-pointer"
                                       >
-                                        🔗 Open reference
+                                        🔗 {t(language, "work.openReference", "Open reference")}
                                       </a>
                                     </div>
                                   )}
 
                                   <div className="flex flex-wrap gap-1.5 text-[9px] font-bold uppercase tracking-wider">
                                     <span className="rounded bg-zinc-900 px-1.5 py-0.5 border border-[#27272a] text-zinc-400">
-                                      {item.type}
+                                      {workTypeLabel(item.type)}
                                     </span>
                                     <span
                                       className={`rounded bg-zinc-900 px-1.5 py-0.5 border border-[#27272a] ${getDifficultyColor(
                                         item.difficulty
                                       )}`}
                                     >
-                                      {item.difficulty}
+                                      {difficultyLabel(item.difficulty)}
                                     </span>
                                     <span
                                       className={`rounded bg-zinc-900 px-1.5 py-0.5 border border-[#27272a] ${getPriorityColor(
                                         item.priority
                                       )}`}
                                     >
-                                      {item.priority}
+                                      {t(language, `enum.priority.${item.priority}`, item.priority)}
                                     </span>
                                     {item.estimatedMinutes && (
                                       <span className="rounded bg-zinc-900 px-1.5 py-0.5 text-zinc-500 border border-[#27272a]">
@@ -937,10 +949,10 @@ export function WorkPage() {
                                     <div className="flex justify-between items-center text-[10px] gap-2">
                                       <span className="text-zinc-500 font-semibold">
                                         {item.deadline
-                                          ? `Due: ${item.deadline}`
+                                          ? `${t(language, "work.dueLabel", "Due")}: ${item.deadline}`
                                           : item.plannedDate
-                                          ? `Plan: ${item.plannedDate}`
-                                          : "No Date"}
+                                          ? `${t(language, "work.planLabel", "Plan")}: ${item.plannedDate}`
+                                          : t(language, "work.noDate", "No Date")}
                                       </span>
                                       {(!client || !client.billingType || client.billingType === "per_item") ? (
                                         item.value && item.value > 0 ? (
@@ -950,15 +962,15 @@ export function WorkPage() {
                                         ) : null
                                       ) : client.billingType === "fixed_monthly" ? (
                                         <span className="rounded bg-amber-500/10 px-1.5 py-0.5 text-[9px] font-bold text-amber-500 border border-amber-500/25 whitespace-nowrap">
-                                          Fixed
+                                          {t(language, "work.billing.fixedShort", "Fixed")}
                                         </span>
                                       ) : client.billingType === "hourly" ? (
                                         <span className="rounded bg-blue-500/10 px-1.5 py-0.5 text-[9px] font-bold text-blue-500 border border-blue-500/25 whitespace-nowrap">
-                                          Hourly
+                                          {t(language, "work.billing.hourlyShort", "Hourly")}
                                         </span>
                                       ) : (
                                         <span className="rounded bg-zinc-800 px-1.5 py-0.5 text-[9px] font-bold text-zinc-500 border border-[#27272a] whitespace-nowrap">
-                                          Free
+                                          {t(language, "work.billing.freeShort", "Free")}
                                         </span>
                                       )}
                                     </div>
@@ -974,7 +986,7 @@ export function WorkPage() {
                                       >
                                         {WORK_ITEM_STATUSES.map((s) => (
                                           <option key={s} value={s}>
-                                            {getStatusLabel(s)}
+                                            {workStatusLabel(s)}
                                           </option>
                                         ))}
                                       </select>
@@ -983,7 +995,7 @@ export function WorkPage() {
                                         onClick={() => handleCompleteWorkItem(item)}
                                         className="rounded-lg bg-zinc-800 hover:bg-zinc-700 px-2 py-1 text-[10px] font-bold text-zinc-200 transition text-center uppercase tracking-wide border border-[#27272a]"
                                       >
-                                        ✓ Done
+                                        ✓ {t(language, "work.done", "Done")}
                                       </button>
                                     </div>
                                   </div>
@@ -994,7 +1006,7 @@ export function WorkPage() {
                         })
                       ) : (
                         <p className="text-xs text-zinc-600 italic text-center py-6 bg-[#121214]/20 rounded-lg border border-dashed border-[#27272a]">
-                          Column Empty
+                          {t(language, "work.columnEmpty", "Column Empty")}
                         </p>
                       )}
                     </div>
@@ -1016,7 +1028,7 @@ export function WorkPage() {
             >
               <div className="flex justify-between items-center border-b border-[#27272a] pb-2">
                 <span className="font-bold text-xs text-zinc-400 uppercase tracking-widest">
-                  Completed
+                  {t(language, "common.completed")}
                 </span>
                 <span className="rounded-full bg-[#18181b] border border-[#27272a] px-2.5 py-0.5 text-xs font-bold text-emerald-500">
                   {groupedWorkItems.completed.length}
@@ -1039,12 +1051,12 @@ export function WorkPage() {
                     >
                       <div className="flex justify-between items-center gap-2">
                         <span className="text-[9px] font-bold uppercase tracking-wider text-zinc-500">
-                          {clientsMap.get(item.clientId)?.name ?? "No client"}
+                          {clientsMap.get(item.clientId)?.name ?? t(language, "work.noClient", "No client")}
                         </span>
                         <span
                           className="text-zinc-650 hover:text-zinc-450 select-none text-[10px]"
-                          title="Drag work item"
-                          aria-label="Drag work item"
+                          title={t(language, "work.dragItem", "Drag work item")}
+                          aria-label={t(language, "work.dragItem", "Drag work item")}
                         >
                           ⠿
                         </span>
@@ -1060,27 +1072,27 @@ export function WorkPage() {
                             rel="noopener noreferrer"
                             className="inline-flex items-center gap-1 text-[9px] font-bold text-amber-500/80 hover:text-amber-400 transition hover:underline cursor-pointer"
                           >
-                            🔗 Open reference
+                            🔗 {t(language, "work.openReference", "Open reference")}
                           </a>
                         </div>
                       )}
                       <div className="flex justify-between items-center mt-2.5 pt-2 border-t border-[#27272a]/30">
                         <p className="text-[9px] text-zinc-500 font-bold uppercase tracking-wider">
-                          Done: {item.completedAt ? item.completedAt.slice(0, 10) : ""}
+                          {t(language, "work.doneLabel", "Done")}: {item.completedAt ? item.completedAt.slice(0, 10) : ""}
                         </p>
                         <button
                           type="button"
                           onClick={() => handleMoveWorkItemStatus(item, "in_progress")}
                           className="text-[9px] font-bold text-amber-500 hover:underline uppercase tracking-wide cursor-pointer"
                         >
-                          Reopen
+                          {t(language, "work.reopen", "Reopen")}
                         </button>
                       </div>
                     </article>
                   ))
                 ) : (
                   <p className="text-xs text-zinc-600 italic text-center py-6 bg-[#121214]/20 rounded-lg border border-dashed border-[#27272a]">
-                    No items finished
+                    {t(language, "work.noItemsFinished", "No items finished")}
                   </p>
                 )}
 
@@ -1090,7 +1102,7 @@ export function WorkPage() {
                     onClick={() => setShowAllCompleted(!showAllCompleted)}
                     className="mt-1 text-[10px] font-bold text-amber-500 hover:text-amber-400 hover:underline uppercase tracking-wider cursor-pointer w-full text-center py-1.5 bg-[#18181b]/30 rounded border border-[#27272a] transition"
                   >
-                    {showAllCompleted ? "Show Less" : `Show All Completed (${groupedWorkItems.completed.length})`}
+                    {showAllCompleted ? t(language, "work.showLess", "Show Less") : `${t(language, "work.showAllCompleted", "Show All Completed")} (${groupedWorkItems.completed.length})`}
                   </button>
                 )}
               </div>
@@ -1106,7 +1118,7 @@ export function WorkPage() {
               onClick={() => setShowNewClientForm(!showNewClientForm)}
               className="rounded-lg bg-amber-500 hover:bg-amber-400 text-zinc-950 px-4 py-3 text-xs font-bold uppercase tracking-wider transition w-full shadow-md text-center"
             >
-              {showNewClientForm ? "Close Form" : "+ Add New Client"}
+              {showNewClientForm ? t(language, "work.closeForm", "Close Form") : t(language, "work.addNewClient", "+ Add New Client")}
             </button>
 
             {/* Add Client Form */}
@@ -1116,13 +1128,13 @@ export function WorkPage() {
                 className="rounded-xl border border-[#27272a] bg-[#18181b] p-5 shadow-xl flex flex-col gap-4 animate-fade-in-up"
               >
                 <p className="text-xs font-bold text-zinc-400 uppercase tracking-widest border-b border-[#27272a] pb-2 mb-1">
-                  New Client Profile
+                  {t(language, "work.newClientProfile", "New Client Profile")}
                 </p>
 
                 <label className="grid gap-2 text-xs font-semibold text-zinc-400 uppercase tracking-wider">
-                  Client Name *
+                  {t(language, "work.clientName", "Client Name *")}
                   <input
-                    placeholder="e.g. Media Agency X"
+                    placeholder={t(language, "work.clientNamePlaceholder", "e.g. Media Agency X")}
                     value={clientDraft.name}
                     onChange={(e) => setClientDraft((c) => ({ ...c, name: e.target.value }))}
                     className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2 text-zinc-100 text-sm font-semibold focus:border-amber-500 focus:outline-none"
@@ -1130,7 +1142,7 @@ export function WorkPage() {
                 </label>
 
                 <label className="grid gap-2 text-xs font-semibold text-zinc-400 uppercase tracking-wider">
-                  Business Type
+                  {t(language, "work.businessType", "Business Type")}
                   <select
                     value={clientDraft.type}
                     onChange={(e) =>
@@ -1140,14 +1152,14 @@ export function WorkPage() {
                   >
                     {CLIENT_TYPES.map((t) => (
                       <option key={t} value={t}>
-                        {t}
+                        {clientTypeLabel(t)}
                       </option>
                     ))}
                   </select>
                 </label>
 
                 <label className="grid gap-2 text-xs font-semibold text-zinc-400 uppercase tracking-wider">
-                  Difficulty Level
+                  {t(language, "work.difficultyLevel", "Difficulty Level")}
                   <select
                     value={clientDraft.difficulty}
                     onChange={(e) =>
@@ -1160,14 +1172,14 @@ export function WorkPage() {
                   >
                     {DIFFICULTIES.map((d) => (
                       <option key={d} value={d}>
-                        {d}
+                        {difficultyLabel(d)}
                       </option>
                     ))}
                   </select>
                 </label>
 
                 <label className="grid gap-2 text-xs font-semibold text-zinc-400 uppercase tracking-wider">
-                  Billing Arrangement
+                  {t(language, "work.billingArrangement", "Billing Arrangement")}
                   <select
                     value={clientDraft.billingType}
                     onChange={(e) =>
@@ -1178,16 +1190,16 @@ export function WorkPage() {
                     }
                     className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2 text-zinc-100 text-sm focus:border-amber-500 focus:outline-none"
                   >
-                    <option value="per_item">Per deliverable value</option>
-                    <option value="fixed_monthly">Fixed monthly retainer</option>
-                    <option value="hourly">Hourly rate billed</option>
-                    <option value="non_billable">Non-billable (internal project)</option>
+                    <option value="per_item">{t(language, "work.billing.perItem", "Per deliverable value")}</option>
+                    <option value="fixed_monthly">{t(language, "work.billing.fixedMonthly", "Fixed monthly retainer")}</option>
+                    <option value="hourly">{t(language, "work.billing.hourly", "Hourly rate billed")}</option>
+                    <option value="non_billable">{t(language, "work.billing.nonBillable", "Non-billable (internal project)")}</option>
                   </select>
                 </label>
 
                 {clientDraft.billingType === "per_item" && (
                   <label className="grid gap-2 text-xs font-semibold text-zinc-400 uppercase tracking-wider">
-                    Default Rate per item (Optional)
+                    {t(language, "work.defaultRate", "Default Rate per item (Optional)")}
                     <input
                       type="number"
                       placeholder="e.g. 150"
@@ -1205,7 +1217,7 @@ export function WorkPage() {
 
                 {clientDraft.billingType === "fixed_monthly" && (
                   <label className="grid gap-2 text-xs font-semibold text-zinc-400 uppercase tracking-wider">
-                    Monthly Retainer Rate ($)
+                    {t(language, "work.monthlyRate", "Monthly Retainer Rate ($)")}
                     <input
                       type="number"
                       placeholder="e.g. 1200"
@@ -1223,7 +1235,7 @@ export function WorkPage() {
 
                 {clientDraft.billingType === "hourly" && (
                   <label className="grid gap-2 text-xs font-semibold text-zinc-400 uppercase tracking-wider">
-                    Hourly Rate Arrangement ($/hr)
+                    {t(language, "work.hourlyRate", "Hourly Rate Arrangement ($/hr)")}
                     <input
                       type="number"
                       placeholder="e.g. 45"
@@ -1241,7 +1253,7 @@ export function WorkPage() {
 
                 {clientDraft.billingType !== "non_billable" && (
                   <label className="grid gap-2 text-xs font-semibold text-zinc-400 uppercase tracking-wider">
-                    Billing Currency
+                    {t(language, "work.billingCurrency", "Billing Currency")}
                     <select
                       value={clientDraft.currency}
                       onChange={(e) =>
@@ -1259,9 +1271,9 @@ export function WorkPage() {
                 )}
 
                 <label className="grid gap-2 text-xs font-semibold text-zinc-400 uppercase tracking-wider">
-                  Internal Notes
+                  {t(language, "work.internalNotes", "Internal Notes")}
                   <textarea
-                    placeholder="Contacts, requirements, links..."
+                    placeholder={t(language, "work.internalNotesPlaceholder", "Contacts, requirements, links...")}
                     rows={3}
                     value={clientDraft.notes}
                     onChange={(e) => setClientDraft((c) => ({ ...c, notes: e.target.value }))}
@@ -1279,7 +1291,7 @@ export function WorkPage() {
                   type="submit"
                   className="rounded-lg bg-amber-500 hover:bg-amber-400 text-zinc-950 px-4 py-2.5 text-xs font-bold uppercase tracking-wider transition w-full"
                 >
-                  Save Profile
+                  {t(language, "work.saveProfile", "Save Profile")}
                 </button>
               </form>
             )}
@@ -1294,10 +1306,10 @@ export function WorkPage() {
                   client.billingType === "fixed_monthly"
                     ? `${formatMoney(client.monthlyRate ?? 0, client.currency ?? "USD")}/mo`
                     : client.billingType === "hourly"
-                    ? `${formatMoney(client.hourlyRate ?? 0, client.currency ?? "USD")}/hr`
+                      ? `${formatMoney(client.hourlyRate ?? 0, client.currency ?? "USD")}/hr`
                     : client.defaultRate
-                    ? `${formatMoney(client.defaultRate, client.currency ?? "USD")} per item`
-                    : "Custom item value";
+                      ? `${formatMoney(client.defaultRate, client.currency ?? "USD")} ${t(language, "work.perItemSuffix", "per item")}`
+                      : t(language, "work.customItemValue", "Custom item value");
 
                 return (
                   <article
@@ -1307,17 +1319,17 @@ export function WorkPage() {
                     {isEditing ? (
                       <div className="grid gap-4.5 text-xs">
                         <div className="flex justify-between items-center border-b border-[#27272a] pb-2">
-                          <span className="font-bold text-amber-500 uppercase tracking-widest text-[10px]">Editing Profile</span>
+                          <span className="font-bold text-amber-500 uppercase tracking-widest text-[10px]">{t(language, "work.editingProfile", "Editing Profile")}</span>
                           <button
                             onClick={() => setEditingClientId(null)}
                             className="text-zinc-400 hover:text-white"
                           >
-                            Discard
+                            {t(language, "work.discard", "Discard")}
                           </button>
                         </div>
 
                         <label className="grid gap-2 font-semibold text-zinc-400 uppercase tracking-wider">
-                          Name
+                          {t(language, "work.name", "Name")}
                           <input
                             value={editClientName}
                             onChange={(e) => setEditClientName(e.target.value)}
@@ -1327,7 +1339,7 @@ export function WorkPage() {
 
                         <div className="grid grid-cols-2 gap-3.5">
                           <label className="grid gap-2 font-semibold text-zinc-400 uppercase tracking-wider">
-                            Type
+                            {t(language, "common.type")}
                             <select
                               value={editClientType}
                               onChange={(e) => setEditClientType(e.target.value as ClientType)}
@@ -1335,14 +1347,14 @@ export function WorkPage() {
                             >
                               {CLIENT_TYPES.map((t) => (
                                 <option key={t} value={t}>
-                                  {t}
+                                  {clientTypeLabel(t)}
                                 </option>
                               ))}
                             </select>
                           </label>
 
                           <label className="grid gap-2 font-semibold text-zinc-400 uppercase tracking-wider">
-                            Difficulty
+                            {t(language, "work.difficultyLevel", "Difficulty Level")}
                             <select
                               value={editClientDifficulty}
                               onChange={(e) =>
@@ -1352,7 +1364,7 @@ export function WorkPage() {
                             >
                               {DIFFICULTIES.map((d) => (
                                 <option key={d} value={d}>
-                                  {d}
+                                  {difficultyLabel(d)}
                                 </option>
                               ))}
                             </select>
@@ -1360,7 +1372,7 @@ export function WorkPage() {
                         </div>
 
                         <label className="grid gap-2 font-semibold text-zinc-400 uppercase tracking-wider">
-                          Billing Mode
+                          {t(language, "work.billingMode", "Billing Mode")}
                           <select
                             value={editClientBillingType}
                             onChange={(e) =>
@@ -1368,16 +1380,16 @@ export function WorkPage() {
                             }
                             className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-1.5 text-zinc-100 focus:outline-none"
                           >
-                            <option value="per_item">Per deliverable value</option>
-                            <option value="fixed_monthly">Fixed monthly retainer</option>
-                            <option value="hourly">Hourly rate billed</option>
-                            <option value="non_billable">Non-billable (internal project)</option>
+                            <option value="per_item">{t(language, "work.billing.perItem", "Per deliverable value")}</option>
+                            <option value="fixed_monthly">{t(language, "work.billing.fixedMonthly", "Fixed monthly retainer")}</option>
+                            <option value="hourly">{t(language, "work.billing.hourly", "Hourly rate billed")}</option>
+                            <option value="non_billable">{t(language, "work.billing.nonBillable", "Non-billable (internal project)")}</option>
                           </select>
                         </label>
 
                         {editClientBillingType === "per_item" && (
                           <label className="grid gap-2 font-semibold text-zinc-400 uppercase tracking-wider">
-                            Default Rate per item ($)
+                            {t(language, "work.defaultRatePerItem", "Default Rate per item ($)")}
                             <input
                               type="number"
                               value={editClientRate ?? ""}
@@ -1389,7 +1401,7 @@ export function WorkPage() {
 
                         {editClientBillingType === "fixed_monthly" && (
                           <label className="grid gap-2 font-semibold text-zinc-400 uppercase tracking-wider">
-                            Monthly Rate Retainer ($)
+                            {t(language, "work.monthlyRateRetainer", "Monthly Rate Retainer ($)")}
                             <input
                               type="number"
                               value={editClientMonthlyRate ?? ""}
@@ -1401,7 +1413,7 @@ export function WorkPage() {
 
                         {editClientBillingType === "hourly" && (
                           <label className="grid gap-2 font-semibold text-zinc-400 uppercase tracking-wider">
-                            Hourly Rate Retainer ($/hr)
+                            {t(language, "work.hourlyRateRetainer", "Hourly Rate Retainer ($/hr)")}
                             <input
                               type="number"
                               value={editClientHourlyRate ?? ""}
@@ -1413,7 +1425,7 @@ export function WorkPage() {
 
                         {editClientBillingType !== "non_billable" && (
                           <label className="grid gap-2 font-semibold text-zinc-400 uppercase tracking-wider">
-                            Billing Currency
+                            {t(language, "work.billingCurrency", "Billing Currency")}
                             <select
                               value={editClientCurrency}
                               onChange={(e) => setEditClientCurrency(e.target.value as Currency)}
@@ -1426,7 +1438,7 @@ export function WorkPage() {
                         )}
 
                         <label className="grid gap-2 font-semibold text-zinc-400 uppercase tracking-wider">
-                          Internal Notes
+                          {t(language, "work.internalNotes", "Internal Notes")}
                           <textarea
                             rows={2}
                             value={editClientNotes}
@@ -1441,14 +1453,14 @@ export function WorkPage() {
                             onClick={() => handleSaveClientEdit(client.id)}
                             className="rounded-lg bg-amber-500 hover:bg-amber-400 text-zinc-950 px-4 py-2 font-bold uppercase tracking-wider transition"
                           >
-                            Save changes
+                            {t(language, "work.saveChanges", "Save changes")}
                           </button>
                           <button
                             type="button"
                             onClick={() => setEditingClientId(null)}
                             className="rounded-lg border border-[#27272a] bg-zinc-800 hover:bg-zinc-700 px-4 py-2 font-bold uppercase tracking-wider text-zinc-300 transition"
                           >
-                            Cancel
+                            {t(language, "common.cancel")}
                           </button>
                         </div>
                       </div>
@@ -1461,16 +1473,16 @@ export function WorkPage() {
                                 {client.name}
                               </h3>
                               <span className="rounded bg-zinc-900 border border-[#27272a] px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-zinc-400">
-                                {client.type}
+                                {clientTypeLabel(client.type)}
                               </span>
                               <span className="rounded bg-amber-500/10 border border-amber-500/25 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-amber-500 capitalize">
-                                {client.status}
+                                {t(language, `work.clientStatus.${client.status}`, client.status)}
                               </span>
                             </div>
                             <p className="text-[10px] text-zinc-500 mt-1 uppercase font-bold tracking-wider">
-                              Difficulty:{" "}
+                              {t(language, "work.difficultyPrefix", "Difficulty")}:{" "}
                               <span className={getDifficultyColor(client.difficulty)}>
-                                {client.difficulty}
+                                {difficultyLabel(client.difficulty)}
                               </span>
                             </p>
                           </div>
@@ -1479,22 +1491,22 @@ export function WorkPage() {
                             onClick={() => handleStartEditingClient(client)}
                             className="rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider text-zinc-300 transition hover:bg-zinc-800 hover:text-white"
                           >
-                            Edit
+                            {t(language, "work.edit", "Edit")}
                           </button>
                         </div>
 
                         <div className="rounded-lg bg-[#121214] border border-[#27272a]/80 p-3 text-xs leading-5">
                           <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider leading-none mb-1">
-                            Arrangement details
+                            {t(language, "work.arrangementDetails", "Arrangement details")}
                           </p>
                           <p className="font-semibold text-zinc-200">
-                            {client.billingType === "non_billable" ? "Non-billable personal profile" : `Retainer Rate: ${clientRateFormatted}`}
+                            {client.billingType === "non_billable" ? t(language, "work.nonBillableProfile", "Non-billable personal profile") : `${t(language, "work.retainerRate", "Retainer Rate")}: ${clientRateFormatted}`}
                           </p>
                         </div>
 
                         {client.notes && (
                           <div className="text-xs text-zinc-400 bg-[#121214]/40 border border-[#27272a]/60 p-3 rounded-lg leading-relaxed">
-                            <span className="text-[9px] font-bold uppercase tracking-widest text-zinc-500 block mb-1">Internal Notes</span>
+                            <span className="text-[9px] font-bold uppercase tracking-widest text-zinc-500 block mb-1">{t(language, "work.internalNotes", "Internal Notes")}</span>
                             {client.notes}
                           </div>
                         )}
@@ -1505,7 +1517,7 @@ export function WorkPage() {
               })
             ) : (
               <p className="rounded-lg border border-[#27272a] bg-[#121214] px-4 py-8 text-xs text-zinc-500 italic text-center col-span-2">
-                No clients added yet. Complete form to build client base.
+                {t(language, "work.emptyClients", "No clients added yet. Complete form to build client base.")}
               </p>
             )}
           </div>

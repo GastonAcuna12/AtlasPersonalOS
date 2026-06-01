@@ -15,6 +15,7 @@ import {
 } from "@/lib/finances";
 import { useXP } from "@/lib/xp";
 import { useAtlasSettings } from "@/lib/settings";
+import { t } from "@/lib/i18n";
 
 import type { Currency, PaymentMethod, TransactionDraft, TransactionType } from "@/types/atlas";
 
@@ -66,6 +67,7 @@ export function FinancesPage() {
   const xp = useXP();
   const { transactions, categories, addTransaction, deleteTransaction } = useTransactions();
   const { settings, setExchangeRate } = useAtlasSettings();
+  const language = settings.language;
   const { savings } = useSavings();
 
 
@@ -120,16 +122,16 @@ export function FinancesPage() {
   let warningType: "none" | "low" | "warning" | "danger" = "none";
 
   if (overview.savingsInBaseCurrency > overview.totalBalance) {
-    warningMessage = "Savings exceed current balance";
+    warningMessage = t(language, "dashboard.warning.savingsExceed");
     warningType = "danger";
   } else if (overview.availableMoney < 0) {
-    warningMessage = "Available money is negative";
+    warningMessage = t(language, "dashboard.warning.availableNegative");
     warningType = "danger";
   } else if (savingsRatio > 0.8) {
-    warningMessage = "Most funds are reserved";
+    warningMessage = t(language, "dashboard.warning.mostReserved");
     warningType = "warning";
   } else if (overview.availableMoney > 0 && overview.availableMoney < (settings.baseCurrency === "PYG" ? 500000 : 100)) {
-    warningMessage = "Low available balance";
+    warningMessage = t(language, "dashboard.warning.lowBalance");
     warningType = "low";
   }
 
@@ -145,16 +147,16 @@ export function FinancesPage() {
 
   function validateTransaction(transaction: TransactionDraft) {
     if (!transaction.amount || transaction.amount <= 0) {
-      return "Enter an amount greater than 0.";
+      return t(language, "finances.errorAmount", "Enter an amount greater than 0.");
     }
     if (!transaction.category.trim()) {
-      return "Choose or enter a category.";
+      return t(language, "finances.errorCategory", "Choose or enter a category.");
     }
     if (!transaction.description.trim()) {
-      return "Add a short description.";
+      return t(language, "finances.errorDescription", "Add a short description.");
     }
     if (!transaction.date) {
-      return "Choose a transaction date.";
+      return t(language, "finances.errorDate", "Choose a transaction date.");
     }
     return "";
   }
@@ -196,18 +198,18 @@ export function FinancesPage() {
       <header className="flex flex-col gap-4 border-b border-[#27272a] pb-6 md:flex-row md:items-center md:justify-between">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-500">
-            Capital Ledger
+            {t(language, "finances.eyebrow", "Capital Ledger")}
           </p>
           <h1 className="mt-2 text-4xl font-bold tracking-tight text-zinc-100 sm:text-5xl">
-            Finances Hub
+            {t(language, "finances.title", "Finances Hub")}
           </h1>
         </div>
         <div className="flex flex-wrap items-center gap-3">
           <span className="rounded-lg border border-[#27272a] bg-[#18181b] px-3.5 py-2 text-xs font-bold uppercase tracking-wider text-zinc-400">
-            Base: {settings.baseCurrency}
+            {t(language, "finances.base", "Base")}: {settings.baseCurrency}
           </span>
           <div className="flex items-center gap-2 rounded-lg border border-[#27272a] bg-[#18181b] px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-zinc-400">
-            <span>Rate: 1 USD =</span>
+            <span>{t(language, "finances.rate", "Rate")}: 1 USD =</span>
             <input
               type="number"
               value={settings.usdToPygRate}
@@ -220,7 +222,7 @@ export function FinancesPage() {
             href="/"
             className="rounded-lg border border-[#27272a] bg-[#18181b] px-4 py-2 text-xs font-bold uppercase tracking-wider text-zinc-300 transition hover:bg-zinc-800 hover:text-white"
           >
-            Dashboard
+            {t(language, "common.dashboard")}
           </Link>
         </div>
       </header>
@@ -233,7 +235,7 @@ export function FinancesPage() {
             onClick={() => setShowAddForm(!showAddForm)}
             className="rounded-lg bg-amber-500 hover:bg-amber-400 text-zinc-950 px-4 py-3 text-xs font-bold uppercase tracking-wider transition w-full shadow-md text-center"
           >
-            {showAddForm ? "Close Form" : "+ Add Transaction"}
+            {showAddForm ? t(language, "goals.closeForm", "Close Form") : t(language, "finances.addTransaction", "+ Add Transaction")}
           </button>
 
           {showAddForm && (
@@ -242,12 +244,12 @@ export function FinancesPage() {
               className="rounded-xl border border-[#27272a] bg-[#18181b] p-6 shadow-xl flex flex-col gap-4.5 animate-fade-in-up"
             >
               <p className="text-xs font-bold text-zinc-400 uppercase tracking-widest border-b border-[#27272a] pb-2 mb-1">
-                New Transaction
+                {t(language, "finances.newTransaction", "New Transaction")}
               </p>
               
               <div className="grid grid-cols-2 gap-3.5">
                 <label className="grid gap-2 text-xs font-semibold text-zinc-400 uppercase tracking-wider">
-                  Type
+                  {t(language, "common.type")}
                   <select
                     value={draft.type}
                     onChange={(event) =>
@@ -255,13 +257,13 @@ export function FinancesPage() {
                     }
                     className="rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2.5 text-zinc-100 text-sm focus:border-amber-500 focus:outline-none cursor-pointer w-full block transition-colors duration-200 hover:border-zinc-750"
                   >
-                    <option value="expense">Expense</option>
-                    <option value="income">Income</option>
+                    <option value="expense">{t(language, "common.expense")}</option>
+                    <option value="income">{t(language, "common.income")}</option>
                   </select>
                 </label>
  
                 <label className="grid gap-2 text-xs font-semibold text-zinc-400 uppercase tracking-wider">
-                  Currency
+                  {t(language, "goals.currency", "Currency")}
                   <select
                     value={draft.currency}
                     onChange={(event) =>
@@ -276,7 +278,7 @@ export function FinancesPage() {
               </div>
 
               <label className="grid gap-2 text-xs font-semibold text-zinc-400 uppercase tracking-wider">
-                Amount
+                {t(language, "work.amount", "Amount")}
                 <input
                   type="number"
                   min="0"
@@ -288,14 +290,14 @@ export function FinancesPage() {
               </label>
 
               <label className="grid gap-2 text-xs font-semibold text-zinc-400 uppercase tracking-wider">
-                Category *
+                {t(language, "finances.categoryRequired", "Category *")}
                 <select
                   value={draft.category}
                   onChange={(event) => updateDraft("category", event.target.value)}
                   className="rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2.5 text-zinc-150 text-sm focus:border-amber-500 focus:outline-none cursor-pointer w-full block transition-colors duration-200 hover:border-zinc-750"
                   required
                 >
-                  <option value="" disabled>Select category</option>
+                  <option value="" disabled>{t(language, "finances.selectCategory", "Select category")}</option>
                   {FINANCE_CATEGORIES.map((category) => (
                     <option key={category} value={category}>
                       {category}
@@ -305,7 +307,7 @@ export function FinancesPage() {
               </label>
 
               <label className="grid gap-2 text-xs font-semibold text-zinc-400 uppercase tracking-wider">
-                Description / Memo
+                {t(language, "finances.descriptionMemo", "Description / Memo")}
                 <input
                   value={draft.description}
                   onChange={(event) => updateDraft("description", event.target.value)}
@@ -315,7 +317,7 @@ export function FinancesPage() {
 
               <div className="grid grid-cols-2 gap-3.5">
                 <label className="grid gap-2 text-xs font-semibold text-zinc-400 uppercase tracking-wider">
-                  Date
+                  {t(language, "common.date")}
                   <input
                     type="date"
                     value={draft.date}
@@ -325,7 +327,7 @@ export function FinancesPage() {
                 </label>
 
                 <label className="grid gap-2 text-xs font-semibold text-zinc-400 uppercase tracking-wider">
-                  Method
+                  {t(language, "finances.method", "Method")}
                   <select
                     value={draft.paymentMethod}
                     onChange={(event) =>
@@ -343,7 +345,7 @@ export function FinancesPage() {
               </div>
 
               <label className="grid gap-2 text-xs font-semibold text-zinc-400 uppercase tracking-wider">
-                Optional Tag
+                {t(language, "finances.optionalTag", "Optional Tag")}
                 <input
                   value={draft.tag}
                   onChange={(event) => updateDraft("tag", event.target.value)}
@@ -359,11 +361,11 @@ export function FinancesPage() {
                 type="submit"
                 className="rounded-lg bg-amber-500 hover:bg-amber-400 text-zinc-950 px-4 py-3 text-xs font-bold uppercase tracking-wider transition w-full"
               >
-                Save Transaction
+                {t(language, "finances.saveTransaction", "Save Transaction")}
               </button>
 
               <div className="mt-4 border-t border-[#27272a]/60 pt-4">
-                <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider mb-2">Quick Examples</p>
+                <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider mb-2">{t(language, "finances.quickExamples", "Quick Examples")}</p>
                 <div className="grid gap-1.5">
                   {quickExamples.map((example) => (
                     <button
@@ -397,18 +399,18 @@ export function FinancesPage() {
             }`}>
               <div>
                 <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-400">
-                  Available Money
+                  {t(language, "dashboard.availableMoney")}
                 </p>
                 <p className="mt-2.5 text-3xl font-black tracking-tight text-zinc-100 break-words leading-none">
                   {formatMoney(overview.availableMoney, settings.baseCurrency)}
                 </p>
                 <p className="text-[10px] text-zinc-450 font-semibold uppercase mt-1.5 tracking-wide">
-                  Spendable balance
+                  {t(language, "dashboard.spendableBalance")}
                 </p>
               </div>
               <div className="mt-3.5 border-t border-[#27272a]/40 pt-2.5 flex flex-col gap-1 text-[10px] text-zinc-500">
                 <p className="text-[9px] font-bold uppercase tracking-wider">
-                  Reserved goal funds are excluded
+                  {t(language, "finances.reservedExcluded", "Reserved goal funds are excluded")}
                 </p>
 
                 {warningMessage && (
@@ -428,45 +430,45 @@ export function FinancesPage() {
             {/* Income This Month */}
             <div className="rounded-xl border border-[#27272a] bg-[#18181b] p-5 shadow-lg flex flex-col justify-between min-h-[140px]">
               <div>
-                <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">Income This Month</p>
+                <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">{t(language, "dashboard.incomeThisMonth")}</p>
                 <p className="mt-2 text-2xl font-bold text-emerald-450 tracking-tight break-words leading-none">
                   {formatMoney(overview.monthlyIncome, settings.baseCurrency)}
                 </p>
               </div>
-              <p className="text-[9px] text-zinc-500 font-semibold uppercase leading-none">Month inflow</p>
+              <p className="text-[9px] text-zinc-500 font-semibold uppercase leading-none">{t(language, "dashboard.monthInflow")}</p>
             </div>
 
             {/* Expenses This Month */}
             <div className="rounded-xl border border-[#27272a] bg-[#18181b] p-5 shadow-lg flex flex-col justify-between min-h-[140px]">
               <div>
-                <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">Expenses This Month</p>
+                <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">{t(language, "dashboard.expensesThisMonth")}</p>
                 <p className="mt-2 text-2xl font-bold text-red-400 tracking-tight break-words leading-none">
                   {formatMoney(overview.monthlyExpenses, settings.baseCurrency)}
                 </p>
               </div>
-              <p className="text-[9px] text-zinc-500 font-semibold uppercase leading-none">Month outflow</p>
+              <p className="text-[9px] text-zinc-500 font-semibold uppercase leading-none">{t(language, "dashboard.monthOutflow")}</p>
             </div>
 
             {/* Net gain/loss */}
             <div className="rounded-xl border border-[#27272a] bg-[#18181b] p-5 shadow-lg flex flex-col justify-between min-h-[140px]">
               <div>
-                <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">Net Gain / Loss</p>
+                <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">{t(language, "finances.netGainLoss", "Net Gain / Loss")}</p>
                 <p className={`mt-2 text-2xl font-bold tracking-tight break-words leading-none ${overview.monthlyNet >= 0 ? "text-emerald-450" : "text-red-400"}`}>
                   {formatMoney(overview.monthlyNet, settings.baseCurrency)}
                 </p>
               </div>
-              <p className="text-[9px] text-zinc-500 font-semibold uppercase leading-none">Cash Flow Balance</p>
+              <p className="text-[9px] text-zinc-500 font-semibold uppercase leading-none">{t(language, "finances.cashFlowBalance", "Cash Flow Balance")}</p>
             </div>
           </section>
 
           {/* Filtering Ledgers */}
           <section className="rounded-xl border border-[#27272a] bg-[#18181b] p-6 shadow-xl">
             <h3 className="text-xs font-bold uppercase tracking-widest text-zinc-450 border-b border-[#27272a] pb-2 mb-4">
-              Filter Transaction Records
+              {t(language, "finances.filterRecords", "Filter Transaction Records")}
             </h3>
             <div className="grid gap-4.5 md:grid-cols-4">
               <label className="grid gap-2 text-xs font-semibold text-zinc-400 uppercase tracking-wider">
-                Month
+                {t(language, "common.month", "Month")}
                 <input
                   type="month"
                   value={filters.month}
@@ -480,7 +482,7 @@ export function FinancesPage() {
                 />
               </label>
               <label className="grid gap-2 text-xs font-semibold text-zinc-400 uppercase tracking-wider">
-                Type
+                {t(language, "common.type")}
                 <select
                   value={filters.type}
                   onChange={(event) =>
@@ -491,13 +493,13 @@ export function FinancesPage() {
                   }
                   className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2 text-zinc-100 text-sm focus:outline-none"
                 >
-                  <option value="all">All</option>
-                  <option value="income">Income</option>
-                  <option value="expense">Expense</option>
+                  <option value="all">{t(language, "common.all")}</option>
+                  <option value="income">{t(language, "common.income")}</option>
+                  <option value="expense">{t(language, "common.expense")}</option>
                 </select>
               </label>
               <label className="grid gap-2 text-xs font-semibold text-zinc-400 uppercase tracking-wider">
-                Category
+                {t(language, "finances.category", "Category")}
                 <select
                   value={filters.category}
                   onChange={(event) =>
@@ -508,7 +510,7 @@ export function FinancesPage() {
                   }
                   className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2 text-zinc-100 text-sm focus:outline-none"
                 >
-                  <option value="all">All</option>
+                  <option value="all">{t(language, "common.all")}</option>
                   {categories.map((category) => (
                     <option key={category} value={category}>
                       {category}
@@ -517,7 +519,7 @@ export function FinancesPage() {
                 </select>
               </label>
               <label className="grid gap-2 text-xs font-semibold text-zinc-400 uppercase tracking-wider">
-                Currency
+                {t(language, "goals.currency", "Currency")}
                 <select
                   value={filters.currency}
                   onChange={(event) =>
@@ -528,7 +530,7 @@ export function FinancesPage() {
                   }
                   className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2 text-zinc-100 text-sm focus:outline-none"
                 >
-                  <option value="all">All</option>
+                  <option value="all">{t(language, "common.all")}</option>
                   <option value="PYG">PYG</option>
                   <option value="USD">USD</option>
                 </select>
@@ -541,7 +543,7 @@ export function FinancesPage() {
             {/* Category breakdown */}
             <div className="rounded-xl border border-[#27272a] bg-[#18181b] p-6 shadow-xl">
               <h3 className="text-xs font-bold uppercase tracking-widest text-zinc-450 border-b border-[#27272a] pb-2 mb-4">
-                Category Distribution
+                {t(language, "finances.categoryDistribution", "Category Distribution")}
               </h3>
               <div className="grid gap-4">
                 {Object.entries(overview.categoryTotals).length > 0 ? (
@@ -566,7 +568,7 @@ export function FinancesPage() {
                   ))
                 ) : (
                   <p className="text-xs text-zinc-500 italic py-2">
-                    No expenses logged for this month.
+                    {t(language, "finances.noExpenses", "No expenses logged for this month.")}
                   </p>
                 )}
               </div>
@@ -575,7 +577,7 @@ export function FinancesPage() {
             {/* Spending Insights */}
             <div className="rounded-xl border border-[#27272a] bg-[#18181b] p-6 shadow-xl">
               <h3 className="text-xs font-bold uppercase tracking-widest text-zinc-450 border-b border-[#27272a] pb-2 mb-4">
-                Financial Insights
+                {t(language, "finances.insights", "Financial Insights")}
               </h3>
               <div className="grid gap-3 text-xs leading-relaxed">
                 {insights.length > 0 ? (
@@ -589,7 +591,7 @@ export function FinancesPage() {
                   ))
                 ) : (
                   <p className="text-xs text-zinc-500 italic py-2">
-                    Add transaction logs to compute spend dynamics and signals.
+                    {t(language, "finances.noInsights", "Add transaction logs to compute spend dynamics and signals.")}
                   </p>
                 )}
               </div>
@@ -599,7 +601,7 @@ export function FinancesPage() {
           {/* Transactions list history */}
           <section className="rounded-xl border border-[#27272a] bg-[#18181b] p-6 shadow-xl">
             <h3 className="text-xs font-bold uppercase tracking-widest text-zinc-450 border-b border-[#27272a] pb-2 mb-4">
-              Ledger Transactions
+              {t(language, "finances.ledgerTransactions", "Ledger Transactions")}
             </h3>
             <div className="grid gap-3.5 max-h-[400px] overflow-y-auto pr-1">
               {filteredTransactions.length > 0 ? (
@@ -621,7 +623,7 @@ export function FinancesPage() {
                         )}
                       </div>
                       <p className="mt-1 text-xs text-zinc-500">
-                        {transaction.date} &middot; Paid via {transaction.paymentMethod}
+                        {transaction.date} &middot; {t(language, "finances.paidVia", "Paid via")} {transaction.paymentMethod}
                       </p>
                     </div>
                     <div className="flex items-center gap-4 md:justify-end">
@@ -638,14 +640,14 @@ export function FinancesPage() {
                         onClick={() => deleteTransaction(transaction.id)}
                         className="rounded-lg border border-[#27272a] bg-[#18181b] px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider text-red-400 transition hover:bg-red-500/10 hover:border-red-500/20"
                       >
-                        Delete
+                        {t(language, "common.delete")}
                       </button>
                     </div>
                   </article>
                 ))
               ) : (
                 <p className="rounded-lg border border-[#27272a] bg-[#121214] px-4 py-6 text-xs text-zinc-500 italic text-center">
-                  No transaction records found matching active filter.
+                  {t(language, "finances.empty", "No transaction records found matching active filter.")}
                 </p>
               )}
             </div>

@@ -7,6 +7,7 @@ import {
   useStoredValue,
   writeToStorage,
 } from "@/lib/storage";
+import { getLanguageLocale, t, type Language } from "@/lib/i18n";
 import type {
   ReviewArea,
   ReviewDraft,
@@ -21,14 +22,18 @@ export type {
   WeeklyReview,
 } from "@/types/atlas";
 
-export const REVIEW_AREAS: { key: ReviewArea; label: string }[] = [
-  { key: "finances", label: "Finances" },
-  { key: "fitness", label: "Fitness" },
-  { key: "academics", label: "Academics" },
-  { key: "work", label: "Work" },
-  { key: "personal", label: "Personal" },
-  { key: "energy", label: "Energy" },
-  { key: "discipline", label: "Discipline" },
+export const REVIEW_AREAS: {
+  key: ReviewArea;
+  label: string;
+  labelKey: string;
+}[] = [
+  { key: "finances", label: "Finances", labelKey: "review.area.finances" },
+  { key: "fitness", label: "Fitness", labelKey: "review.area.fitness" },
+  { key: "academics", label: "Academics", labelKey: "review.area.academics" },
+  { key: "work", label: "Work", labelKey: "review.area.work" },
+  { key: "personal", label: "Personal", labelKey: "review.area.personal" },
+  { key: "energy", label: "Energy", labelKey: "review.area.energy" },
+  { key: "discipline", label: "Discipline", labelKey: "review.area.discipline" },
 ];
 
 export const DEFAULT_RATINGS: ReviewRatings = {
@@ -47,7 +52,38 @@ function toISODate(date: Date) {
   return date.toISOString().slice(0, 10);
 }
 
-export function getCurrentWeekRange(date = new Date()) {
+function parseDateOnlyAtUtcNoon(dateString: string) {
+  return new Date(`${dateString}T12:00:00Z`);
+}
+
+export function formatReviewDate(
+  dateInput: Date | string,
+  language: Language = "en",
+  options: Intl.DateTimeFormatOptions = {
+    month: "short",
+    day: "numeric",
+  },
+) {
+  const date =
+    typeof dateInput === "string" && /^\d{4}-\d{2}-\d{2}$/.test(dateInput)
+      ? parseDateOnlyAtUtcNoon(dateInput)
+      : new Date(dateInput);
+
+  return new Intl.DateTimeFormat(getLanguageLocale(language), {
+    timeZone: "UTC",
+    ...options,
+  }).format(date);
+}
+
+export function getReviewAreaLabel(
+  area: ReviewArea,
+  language: Language = "en",
+) {
+  const definition = REVIEW_AREAS.find((item) => item.key === area);
+  return t(language, definition?.labelKey ?? `review.area.${area}`, definition?.label ?? area);
+}
+
+export function getCurrentWeekRange(date = new Date(), language: Language = "en") {
   const day = date.getDay();
   const mondayOffset = day === 0 ? -6 : 1 - day;
   const monday = new Date(date);
@@ -58,13 +94,13 @@ export function getCurrentWeekRange(date = new Date()) {
   return {
     weekStart: toISODate(monday),
     weekEnd: toISODate(sunday),
-    label: `${new Intl.DateTimeFormat("en", {
+    label: `${formatReviewDate(toISODate(monday), language, {
       month: "short",
       day: "numeric",
-    }).format(monday)} - ${new Intl.DateTimeFormat("en", {
+    })} - ${formatReviewDate(toISODate(sunday), language, {
       month: "short",
       day: "numeric",
-    }).format(sunday)}`,
+    })}`,
   };
 }
 
@@ -172,34 +208,35 @@ export function getWeeklyReviewAverage(review: WeeklyReview) {
   return Math.round((total / values.length) * 10) / 10;
 }
 
-export function getRatingStatusLabel(rating: number) {
-  if (rating <= 3) return "Needs attention";
-  if (rating <= 6) return "Stable";
-  if (rating <= 8) return "Good";
-  return "Strong";
+export function getRatingStatusLabel(rating: number, language: Language = "en") {
+  if (rating <= 3) return t(language, "review.rating.needsAttention");
+  if (rating <= 6) return t(language, "review.rating.stable");
+  if (rating <= 8) return t(language, "review.rating.good");
+  return t(language, "review.rating.strong");
 }
 
 function getAreaByRating(
   review: WeeklyReview,
   sorter: (a: [ReviewArea, number], b: [ReviewArea, number]) => number,
+  language: Language = "en",
 ) {
   const [key, rating] = (Object.entries(review.ratings) as [ReviewArea, number][])
     .sort(sorter)[0];
   return {
     key,
-    label: REVIEW_AREAS.find((area) => area.key === key)?.label ?? key,
+    label: getReviewAreaLabel(key, language),
     rating,
   };
 }
 
-export function getStrongestArea(review?: WeeklyReview) {
+export function getStrongestArea(review?: WeeklyReview, language: Language = "en") {
   if (!review) return null;
-  return getAreaByRating(review, (a, b) => b[1] - a[1]);
+  return getAreaByRating(review, (a, b) => b[1] - a[1], language);
 }
 
-export function getWeakestArea(review?: WeeklyReview) {
+export function getWeakestArea(review?: WeeklyReview, language: Language = "en") {
   if (!review) return null;
-  return getAreaByRating(review, (a, b) => a[1] - b[1]);
+  return getAreaByRating(review, (a, b) => a[1] - b[1], language);
 }
 
 export function hasReviewForCurrentWeek(reviews: WeeklyReview[]) {
@@ -214,8 +251,8 @@ export function getLatestReview(reviews: WeeklyReview[]) {
   return [...reviews].sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0];
 }
 
-export function getReviewStatusLabel(review?: WeeklyReview) {
-  if (!review) return "Not started";
+export function getReviewStatusLabel(review?: WeeklyReview, language: Language = "en") {
+  if (!review) return t(language, "review.status.notStarted");
   const requiredFields = [
     review.wins,
     review.problems,
@@ -226,9 +263,9 @@ export function getReviewStatusLabel(review?: WeeklyReview) {
   ];
   const completed = requiredFields.filter((value) => value.trim()).length;
 
-  if (completed === requiredFields.length) return "Complete";
-  if (completed > 0) return "In progress";
-  return "Started";
+  if (completed === requiredFields.length) return t(language, "review.status.complete");
+  if (completed > 0) return t(language, "review.status.inProgress");
+  return t(language, "review.status.started");
 }
 
 export function shouldShowReviewReminder(reviews: WeeklyReview[], date = new Date()) {
@@ -236,18 +273,23 @@ export function shouldShowReviewReminder(reviews: WeeklyReview[], date = new Dat
   return (day === 0 || day === 1) && !hasReviewForCurrentWeek(reviews);
 }
 
-export function formatWeekRange(review: Pick<WeeklyReview, "weekStart" | "weekEnd">) {
-  const formatter = new Intl.DateTimeFormat("en", {
+export function formatWeekRange(
+  review: Pick<WeeklyReview, "weekStart" | "weekEnd">,
+  language: Language = "en",
+) {
+  const options: Intl.DateTimeFormatOptions = {
     month: "short",
     day: "numeric",
-  });
+  };
 
-  return `${formatter.format(new Date(review.weekStart))} - ${formatter.format(
-    new Date(review.weekEnd),
+  return `${formatReviewDate(review.weekStart, language, options)} - ${formatReviewDate(
+    review.weekEnd,
+    language,
+    options,
   )}`;
 }
 
-export function useWeeklyReviews() {
+export function useWeeklyReviews(language: Language = "en") {
   const reviews = useStoredValue(
     ATLAS_STORAGE_KEYS.weeklyReviews,
     INITIAL_REVIEWS,
@@ -256,15 +298,15 @@ export function useWeeklyReviews() {
 
   const summary = useMemo(() => {
     const latestReview = getLatestReview(reviews);
-    const strongestArea = getStrongestArea(latestReview);
-    const weakestArea = getWeakestArea(latestReview);
+    const strongestArea = getStrongestArea(latestReview, language);
+    const weakestArea = getWeakestArea(latestReview, language);
     const lastReviewDate = latestReview
-      ? new Intl.DateTimeFormat("en", {
+      ? formatReviewDate(latestReview.createdAt, language, {
           month: "short",
           day: "numeric",
           year: "numeric",
-        }).format(new Date(latestReview.createdAt))
-      : "No review yet";
+        })
+      : t(language, "review.noReviewYet");
     const averageWeeklyScore = latestReview
       ? getWeeklyReviewAverage(latestReview)
       : null;
@@ -277,11 +319,11 @@ export function useWeeklyReviews() {
       weakestArea,
       nextWeekFocus: latestReview?.nextWeekFocus ?? "",
       nextReviewSuggestion: hasReviewForCurrentWeek(reviews)
-        ? "Capture notes for the next review"
-        : "Complete a review this week",
+        ? t(language, "review.suggestion.captureNext")
+        : t(language, "review.suggestion.completeThisWeek"),
       reviewCount: reviews.length,
     };
-  }, [reviews]);
+  }, [language, reviews]);
 
   function saveReview(draft: ReviewDraft) {
     const currentReviews = readReviews();

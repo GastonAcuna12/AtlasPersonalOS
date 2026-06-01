@@ -9,6 +9,8 @@ import {
 import { useNotes, type NoteDraft } from "@/lib/notes";
 import { useXP } from "@/lib/xp";
 import { NotesCloudPanel } from "@/components/NotesCloudPanel";
+import { useAtlasSettings } from "@/lib/settings";
+import { t } from "@/lib/i18n";
 
 const initialDraft: NoteDraft = {
   title: "",
@@ -19,6 +21,8 @@ const initialDraft: NoteDraft = {
 
 export function NotesPage() {
   const { notes, addNote, deleteNote } = useNotes();
+  const { settings } = useAtlasSettings();
+  const language = settings.language;
   const xp = useXP();
   const [draft, setDraft] = useState(initialDraft);
   const [tagText, setTagText] = useState("");
@@ -31,12 +35,12 @@ export function NotesPage() {
     event.preventDefault();
 
     if (!draft.title.trim()) {
-      setError("Please add a note title.");
+      setError(t(language, "notes.errorTitle"));
       return;
     }
 
     if (!draft.content.trim()) {
-      setError("Please add note content before saving.");
+      setError(t(language, "notes.errorContent"));
       return;
     }
 
@@ -58,7 +62,7 @@ export function NotesPage() {
     setDraft(initialDraft);
     setTagText("");
     setError("");
-    setMessage("Note saved successfully! +10 XP awarded.");
+    setMessage(t(language, "notes.saved"));
     setShowCreateForm(false);
 
     setTimeout(() => setMessage(""), 4000);
@@ -84,14 +88,14 @@ export function NotesPage() {
           <div>
             <div className="flex items-center gap-2">
               <span className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-500">
-                Knowledge Vault
+                {t(language, "notes.eyebrow")}
               </span>
               <span className="rounded-full bg-[#18181b] border border-[#27272a] px-2 py-0.5 text-[10px] font-bold text-zinc-400">
-                {notes.length} {notes.length === 1 ? "note" : "notes"}
+                {notes.length} {notes.length === 1 ? t(language, "notes.note") : t(language, "notes.notes")}
               </span>
             </div>
             <h1 className="mt-2 text-4xl font-bold tracking-tight text-zinc-100 sm:text-5xl">
-              Notes
+              {t(language, "notes.title")}
             </h1>
           </div>
           <div className="flex flex-wrap gap-2 text-xs font-bold uppercase tracking-wider">
@@ -104,7 +108,7 @@ export function NotesPage() {
                   : "bg-amber-500 text-zinc-950 hover:bg-amber-400"
               }`}
             >
-              {showCreateForm ? "✕ Cancel" : "+ Note"}
+              {showCreateForm ? `✕ ${t(language, "common.cancel")}` : t(language, "notes.add")}
             </button>
             <button
               type="button"
@@ -112,13 +116,13 @@ export function NotesPage() {
               disabled={notes.length === 0}
               className="rounded-lg border border-[#27272a] bg-[#18181b] px-4 py-2.5 text-zinc-300 transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              Export All (Markdown)
+              {t(language, "notes.exportAll")}
             </button>
             <Link
               href="/"
               className="rounded-lg border border-[#27272a] bg-[#18181b] px-4 py-2.5 text-zinc-300 transition hover:bg-zinc-800"
             >
-              Dashboard
+              {t(language, "common.dashboard")}
             </Link>
           </div>
         </header>
@@ -135,15 +139,15 @@ export function NotesPage() {
         {/* Collapsible Form — Progressive Disclosure */}
         {showCreateForm && (
           <section className="mt-6 rounded-xl border border-[#27272a] bg-[#18181b] p-6 shadow-xl animate-fade-in-up">
-            <h2 className="text-lg font-bold text-zinc-100">Create New Note</h2>
-            <p className="text-xs text-zinc-500 mt-1">Capture ideas, summaries, study templates, or tasks.</p>
+            <h2 className="text-lg font-bold text-zinc-100">{t(language, "notes.createTitle")}</h2>
+            <p className="text-xs text-zinc-500 mt-1">{t(language, "notes.createDescription")}</p>
             
             <form onSubmit={handleSubmit} className="mt-4 flex flex-col gap-4">
               <div className="grid gap-4 md:grid-cols-2">
                 <label className="grid gap-1.5 text-xs font-semibold text-zinc-400">
-                  Note Title *
+                  {t(language, "notes.noteTitle")}
                   <input
-                    placeholder="e.g. NextJS 16 Migration Notes"
+                    placeholder={t(language, "notes.titlePlaceholder")}
                     value={draft.title}
                     onChange={(event) =>
                       setDraft((current) => ({ ...current, title: event.target.value }))
@@ -153,9 +157,9 @@ export function NotesPage() {
                   />
                 </label>
                 <label className="grid gap-1.5 text-xs font-semibold text-zinc-400">
-                  Area / Domain
+                  {t(language, "notes.areaDomain")}
                   <input
-                    placeholder="e.g. Work, Personal, Academics"
+                    placeholder={t(language, "notes.areaPlaceholder")}
                     value={draft.area}
                     onChange={(event) =>
                       setDraft((current) => ({ ...current, area: event.target.value }))
@@ -166,9 +170,9 @@ export function NotesPage() {
               </div>
 
               <label className="grid gap-1.5 text-xs font-semibold text-zinc-400">
-                Tags (Comma separated)
+                {t(language, "notes.tags")}
                 <input
-                  placeholder="e.g. dev, web, learning"
+                  placeholder={t(language, "notes.tagsPlaceholder")}
                   value={tagText}
                   onChange={(event) => setTagText(event.target.value)}
                   className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2 text-zinc-100 focus:outline-none focus:border-amber-500/50"
@@ -176,9 +180,9 @@ export function NotesPage() {
               </label>
 
               <label className="grid gap-1.5 text-xs font-semibold text-zinc-400">
-                Note Content *
+                {t(language, "notes.content")}
                 <textarea
-                  placeholder="Type or paste markdown content..."
+                  placeholder={t(language, "notes.contentPlaceholder")}
                   rows={8}
                   value={draft.content}
                   onChange={(event) =>
@@ -201,7 +205,7 @@ export function NotesPage() {
                   type="submit"
                   className="rounded-lg bg-amber-500 text-zinc-950 px-5 py-3 hover:bg-amber-400 transition"
                 >
-                  Save Note
+                  {t(language, "notes.save")}
                 </button>
                 <button
                   type="button"
@@ -213,7 +217,7 @@ export function NotesPage() {
                   }}
                   className="rounded-lg border border-[#27272a] bg-zinc-800 text-zinc-200 px-5 py-3 hover:bg-zinc-700 transition"
                 >
-                  Cancel
+                  {t(language, "common.cancel")}
                 </button>
               </div>
             </form>
@@ -226,7 +230,7 @@ export function NotesPage() {
             <div className="relative flex-1">
               <input
                 type="text"
-                placeholder="Search note titles, content, tags, or areas..."
+                placeholder={t(language, "notes.searchPlaceholder")}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full rounded-lg border border-[#27272a] bg-[#121214] pl-10 pr-4 py-2.5 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-amber-500/50"
@@ -237,7 +241,7 @@ export function NotesPage() {
             </div>
             {searchQuery && (
               <span className="text-xs font-semibold text-zinc-400">
-                Found {filteredNotes.length} matching {filteredNotes.length === 1 ? "note" : "notes"}
+                {t(language, "notes.found")} {filteredNotes.length} {t(language, "notes.matching")} {filteredNotes.length === 1 ? t(language, "notes.note") : t(language, "notes.notes")}
               </span>
             )}
           </div>
@@ -256,7 +260,7 @@ export function NotesPage() {
                     {/* Top Row info */}
                     <div className="flex items-center justify-between gap-2">
                       <span className="rounded bg-zinc-800 border border-[#27272a] px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-amber-500">
-                        {note.area || "Personal"}
+                        {note.area || t(language, "common.personal")}
                       </span>
                       <span className="text-[10px] text-zinc-500 font-medium">
                         {note.updatedAt.slice(0, 10)}
@@ -292,17 +296,17 @@ export function NotesPage() {
                       onClick={() => downloadNoteMarkdown(note)}
                       className="rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2 text-zinc-300 transition hover:bg-zinc-800"
                     >
-                      Export MD
+                      {t(language, "common.exportMarkdown")}
                     </button>
                     <button
                       type="button"
                       onClick={() => {
-                        const confirmed = window.confirm(`Delete note "${note.title}"?`);
+                        const confirmed = window.confirm(`${t(language, "notes.deleteConfirm")} "${note.title}"?`);
                         if (confirmed) deleteNote(note.id);
                       }}
                       className="rounded-lg border border-red-500/25 bg-red-500/10 px-3.5 py-2 text-red-400 transition hover:bg-red-500/20 ml-auto"
                     >
-                      Delete
+                      {t(language, "common.delete")}
                     </button>
                   </div>
                 </article>
@@ -312,8 +316,8 @@ export function NotesPage() {
             <div className="rounded-xl border border-[#27272a] bg-[#18181b] p-12 text-center">
               <p className="text-zinc-500 italic text-sm">
                 {searchQuery
-                  ? "No notes found matching your search term."
-                  : "No notes saved yet. Click '+ Note' in the header to create one!"}
+                  ? t(language, "notes.noSearch")
+                  : t(language, "notes.noNotes")}
               </p>
             </div>
           )}

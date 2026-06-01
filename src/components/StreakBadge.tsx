@@ -2,6 +2,8 @@
 
 import React from "react";
 import { getStreakTier } from "@/lib/streaks";
+import { t } from "@/lib/i18n";
+import { useAtlasSettings } from "@/lib/settings";
 
 interface StreakBadgeProps {
   streak: number;
@@ -10,6 +12,8 @@ interface StreakBadgeProps {
 }
 
 export function StreakBadge({ streak, label, size = "md" }: StreakBadgeProps) {
+  const { settings } = useAtlasSettings();
+  const language = settings.language;
   const tier = getStreakTier(streak);
 
   if (streak <= 0) return null;
@@ -63,7 +67,7 @@ export function StreakBadge({ streak, label, size = "md" }: StreakBadgeProps) {
   return (
     <div
       className={`inline-flex items-center font-bold tracking-wide uppercase border rounded-full transition-all duration-300 ${tierStyles.bg} ${tierStyles.color} ${tierStyles.glow} ${sizeClasses}`}
-      title={`${streak} day ${label} streak — Tier: ${tier.toUpperCase()}`}
+      title={`${streak} ${t(language, "streak.day")} ${label} ${t(language, "streak.streak")} — ${t(language, "streak.tier")}: ${tier.toUpperCase()}`}
     >
       <svg
         className={`${iconSizes} ${tierStyles.iconClass} fill-current`}
@@ -74,7 +78,7 @@ export function StreakBadge({ streak, label, size = "md" }: StreakBadgeProps) {
         <path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
       </svg>
       <span>
-        {streak}d {label}
+        {streak}{t(language, "streak.daysShort")} {label}
       </span>
     </div>
   );

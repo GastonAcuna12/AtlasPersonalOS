@@ -7,8 +7,10 @@ import { downloadDailyWrapMarkdown } from "@/lib/markdownExport";
 import {
   DEFAULT_RATINGS,
   REVIEW_AREAS,
+  formatReviewDate,
   formatWeekRange,
   getCurrentWeekRange,
+  getReviewAreaLabel,
   getRatingStatusLabel,
   getReviewStatusLabel,
   getStrongestArea,
@@ -19,7 +21,9 @@ import {
   useWeeklyReviews,
 } from "@/lib/reviews";
 import { useXP } from "@/lib/xp";
-import { useDailyWraps } from "@/lib/dailyWraps";
+import { generateDailyWrapSummary, useDailyWraps } from "@/lib/dailyWraps";
+import { useAtlasSettings } from "@/lib/settings";
+import { t } from "@/lib/i18n";
 
 const reflectionFields = [
   ["wins", "What went well this week?"],
@@ -43,7 +47,9 @@ type DraftTextKey = Exclude<keyof ReviewDraft, "ratings">;
 
 export function WeeklyReviewPage() {
   const xp = useXP();
-  const { reviews, saveReview, deleteReview } = useWeeklyReviews();
+  const { settings } = useAtlasSettings();
+  const language = settings.language;
+  const { reviews, saveReview, deleteReview } = useWeeklyReviews(language);
 
   const sortedReviews = useMemo(() => {
     return [...reviews].sort((a, b) => b.weekStart.localeCompare(a.weekStart));
@@ -62,7 +68,7 @@ export function WeeklyReviewPage() {
   };
 
   const [draft, setDraft] = useState<ReviewDraft>(() => {
-    const currentWeek = getCurrentWeekRange();
+    const currentWeek = getCurrentWeekRange(new Date(), language);
     const existing = reviews.find(
       (review) =>
         review.weekStart === currentWeek.weekStart &&
@@ -142,13 +148,13 @@ export function WeeklyReviewPage() {
     updatedAt: new Date().toISOString(),
   };
   const average = getWeeklyReviewAverage(previewReview);
-  const strongestArea = getStrongestArea(previewReview);
-  const weakestArea = getWeakestArea(previewReview);
+  const strongestArea = getStrongestArea(previewReview, language);
+  const weakestArea = getWeakestArea(previewReview, language);
   const currentSavedReview = reviews.find(
     (review) =>
       review.weekStart === draft.weekStart && review.weekEnd === draft.weekEnd
   );
-  const statusLabel = getReviewStatusLabel(currentSavedReview ?? previewReview);
+  const statusLabel = getReviewStatusLabel(currentSavedReview ?? previewReview, language);
 
   function updateText(key: DraftTextKey, value: string) {
     setDraft((current) => ({
@@ -176,9 +182,9 @@ export function WeeklyReviewPage() {
         amount: 50,
         label: "Completed weekly review",
       });
-      setMessage("Review saved locally! +50 XP awarded.");
+      setMessage(t(language, "review.saved", "Review saved locally! +50 XP awarded."));
     } else {
-      setMessage("Review updated locally. XP was already awarded for this week.");
+      setMessage(t(language, "review.updated", "Review updated locally. XP was already awarded for this week."));
     }
 
     setTimeout(() => setMessage(""), 4000);
@@ -191,20 +197,20 @@ export function WeeklyReviewPage() {
         <header className="flex flex-col gap-4 border-b border-[#27272a] pb-6 md:flex-row md:items-center md:justify-between">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-500">
-              Workspace Reflection
+              {t(language, "review.eyebrow", "Workspace Reflection")}
             </p>
             <h1 className="mt-2 text-4xl font-bold tracking-tight text-zinc-100 sm:text-5xl">
-              Weekly Review
+              {t(language, "review.title", "Weekly Review")}
             </h1>
             <p className="mt-3 max-w-2xl text-xs leading-relaxed text-zinc-400">
-              Close the week, identify recurring signals, and plan next week&apos;s focus through a calm, journaling reflection page.
+              {t(language, "review.description", "Close the week, identify recurring signals, and plan next week's focus through a calm, journaling reflection page.")}
             </p>
           </div>
           <Link
             href="/"
             className="rounded-lg border border-[#27272a] bg-[#18181b] px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-zinc-300 transition hover:bg-zinc-800 hover:text-white"
           >
-            Dashboard
+            {t(language, "common.dashboard")}
           </Link>
         </header>
 
@@ -222,50 +228,50 @@ export function WeeklyReviewPage() {
             {/* Week Status */}
             <section className="rounded-xl border border-[#27272a] bg-[#18181b] p-6 shadow-xl">
               <p className="text-[10px] font-bold uppercase tracking-widest text-amber-500">
-                Auditing
+                {t(language, "review.auditing", "Auditing")}
               </p>
               <h2 className="mt-2 text-xl font-bold text-zinc-100">
-                {formatWeekRange(draft)}
+                {formatWeekRange(draft, language)}
               </h2>
               <p className="mt-2.5 text-xs text-zinc-400 leading-relaxed">
-                Save once to finalize the review. Updates persist locally without double-awarding XP.
+                {t(language, "review.saveHint", "Save once to finalize the review. Updates persist locally without double-awarding XP.")}
               </p>
               <button
                 type="submit"
                 form="weekly-review-form"
                 className="mt-5 w-full rounded-lg bg-amber-500 hover:bg-amber-400 py-3 text-xs font-bold text-zinc-950 transition uppercase tracking-wider text-center"
               >
-                Save Weekly Review
+                {t(language, "review.saveWeekly", "Save Weekly Review")}
               </button>
             </section>
 
             {/* Scores Overview */}
             <section className="rounded-xl border border-[#27272a] bg-[#18181b] p-6 shadow-xl">
               <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">
-                Performance Dashboard
+                {t(language, "review.performanceDashboard", "Performance Dashboard")}
               </p>
-              <h3 className="mt-1 text-lg font-bold text-zinc-100 mb-4">Weekly Scores</h3>
+              <h3 className="mt-1 text-lg font-bold text-zinc-100 mb-4">{t(language, "review.weeklyScores", "Weekly Scores")}</h3>
               <div className="grid gap-3 text-xs font-semibold">
                 <div className="rounded-lg border border-[#27272a] bg-[#121214] p-3.5">
-                  <p className="text-zinc-500">Average score</p>
+                  <p className="text-zinc-500">{t(language, "review.averageScore", "Average score")}</p>
                   <p className="mt-2 text-2xl font-bold text-zinc-100">
                     {average}/10
                   </p>
                 </div>
                 <div className="rounded-lg border border-[#27272a] bg-[#121214] p-3.5">
-                  <p className="text-zinc-500">Strongest area</p>
+                  <p className="text-zinc-500">{t(language, "review.strongestArea", "Strongest area")}</p>
                   <p className="mt-2 text-sm font-bold text-zinc-200">
                     {strongestArea?.label} &middot; <span className="text-emerald-400">{strongestArea?.rating}/10</span>
                   </p>
                 </div>
                 <div className="rounded-lg border border-[#27272a] bg-[#121214] p-3.5">
-                  <p className="text-zinc-500">Weakest area</p>
+                  <p className="text-zinc-500">{t(language, "review.weakestArea", "Weakest area")}</p>
                   <p className="mt-2 text-sm font-bold text-zinc-200">
                     {weakestArea?.label} &middot; <span className="text-red-400">{weakestArea?.rating}/10</span>
                   </p>
                 </div>
                 <div className="rounded-lg border border-amber-500/25 bg-amber-500/5 p-3.5">
-                  <p className="text-amber-500/80">Status</p>
+                  <p className="text-amber-500/80">{t(language, "common.status")}</p>
                   <p className="mt-2 text-sm font-bold text-zinc-100 uppercase tracking-wide">
                     {statusLabel}
                   </p>
@@ -284,9 +290,9 @@ export function WeeklyReviewPage() {
               {/* Range sliders */}
               <section className="rounded-xl border border-[#27272a] bg-[#18181b] p-6 shadow-xl">
                 <p className="text-[10px] font-bold uppercase tracking-widest text-amber-500 mb-2">
-                  Evaluation
+                  {t(language, "review.evaluation", "Evaluation")}
                 </p>
-                <h3 className="text-lg font-bold text-zinc-100">Area Ratings</h3>
+                <h3 className="text-lg font-bold text-zinc-100">{t(language, "review.areaRatings", "Area Ratings")}</h3>
                 <div className="mt-5 grid gap-4 grid-cols-1 sm:grid-cols-2 xl:grid-cols-4">
                   {REVIEW_AREAS.map((area) => (
                     <label
@@ -294,7 +300,7 @@ export function WeeklyReviewPage() {
                       className="grid gap-3.5 rounded-lg border border-[#27272a] bg-[#121214] p-4 text-xs font-semibold text-zinc-300"
                     >
                       <span className="flex items-center justify-between gap-3">
-                        {area.label}
+                        {getReviewAreaLabel(area.key, language)}
                         <span className="font-bold text-amber-500 text-sm">
                           {draft.ratings[area.key]}/10
                         </span>
@@ -310,7 +316,7 @@ export function WeeklyReviewPage() {
                         className="accent-amber-500 cursor-pointer w-full"
                       />
                       <span className="w-fit rounded bg-[#18181b] border border-[#27272a] px-2 py-0.5 text-[10px] text-zinc-400">
-                        {getRatingStatusLabel(draft.ratings[area.key])}
+                        {getRatingStatusLabel(draft.ratings[area.key], language)}
                       </span>
                     </label>
                   ))}
@@ -322,14 +328,14 @@ export function WeeklyReviewPage() {
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-baseline sm:justify-between border-b border-[#27272a]/60 pb-3 mb-4">
                   <div>
                     <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-500">
-                      Chronology Snapshot
+                      {t(language, "review.chronologySnapshot", "Chronology Snapshot")}
                     </p>
                     <h3 className="mt-1 text-lg font-bold text-zinc-100">
-                      Daily Wraps this Week
+                      {t(language, "review.dailyWrapsThisWeek", "Daily Wraps this Week")}
                     </h3>
                   </div>
                   <span className="rounded-full bg-zinc-800 border border-[#27272a] px-2.5 py-0.5 text-[10px] font-bold text-zinc-400">
-                    {weekWraps.length} of 7 days closed
+                    {weekWraps.length} {t(language, "review.ofSevenClosed", "of 7 days closed")}
                   </span>
                 </div>
                 
@@ -339,39 +345,39 @@ export function WeeklyReviewPage() {
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                       {weekWrapAverages.avgMood !== null && (
                         <div className="rounded-lg border border-[#27272a] bg-[#121214] p-3 text-center">
-                          <p className="text-[9px] font-bold text-zinc-500 uppercase tracking-wide">Avg Mood</p>
+                          <p className="text-[9px] font-bold text-zinc-500 uppercase tracking-wide">{t(language, "review.metric.avgMood")}</p>
                           <p className="text-lg font-bold text-zinc-100 mt-1">{weekWrapAverages.avgMood}/10</p>
                         </div>
                       )}
                       {weekWrapAverages.avgEnergy !== null && (
                         <div className="rounded-lg border border-[#27272a] bg-[#121214] p-3 text-center">
-                          <p className="text-[9px] font-bold text-zinc-500 uppercase tracking-wide">Avg Energy</p>
+                          <p className="text-[9px] font-bold text-zinc-500 uppercase tracking-wide">{t(language, "review.metric.avgEnergy")}</p>
                           <p className="text-lg font-bold text-zinc-100 mt-1">{weekWrapAverages.avgEnergy}/10</p>
                         </div>
                       )}
                       {weekWrapAverages.avgProductivity !== null && (
                         <div className="rounded-lg border border-[#27272a] bg-[#121214] p-3 text-center">
-                          <p className="text-[9px] font-bold text-zinc-500 uppercase tracking-wide">Avg Productivity</p>
+                          <p className="text-[9px] font-bold text-zinc-500 uppercase tracking-wide">{t(language, "review.metric.avgProductivity")}</p>
                           <p className="text-lg font-bold text-zinc-100 mt-1">{weekWrapAverages.avgProductivity}/10</p>
                         </div>
                       )}
                       <div className="rounded-lg border border-[#27272a] bg-[#121214] p-3 text-center">
-                        <p className="text-[9px] font-bold text-zinc-500 uppercase tracking-wide">Tasks Done</p>
+                        <p className="text-[9px] font-bold text-zinc-500 uppercase tracking-wide">{t(language, "review.metric.tasksDone")}</p>
                         <p className="text-lg font-bold text-zinc-100 mt-1">{weekWrapAverages.totalTasks}</p>
                       </div>
                     </div>
 
                     <div className="grid grid-cols-3 gap-3">
                       <div className="rounded-lg border border-[#27272a] bg-[#121214] p-2.5 text-center">
-                        <p className="text-[9px] font-bold text-zinc-500 uppercase">Work Items</p>
+                        <p className="text-[9px] font-bold text-zinc-500 uppercase">{t(language, "review.metric.workItems")}</p>
                         <p className="text-sm font-bold text-zinc-100 mt-0.5">{weekWrapAverages.totalWorkItems}</p>
                       </div>
                       <div className="rounded-lg border border-[#27272a] bg-[#121214] p-2.5 text-center">
-                        <p className="text-[9px] font-bold text-zinc-500 uppercase">Gym Days</p>
+                        <p className="text-[9px] font-bold text-zinc-500 uppercase">{t(language, "review.metric.gymDays")}</p>
                         <p className="text-sm font-bold text-zinc-100 mt-0.5">{weekWrapAverages.gymDays}/7</p>
                       </div>
                       <div className="rounded-lg border border-[#27272a] bg-[#121214] p-2.5 text-center">
-                        <p className="text-[9px] font-bold text-zinc-500 uppercase">XP Earned</p>
+                        <p className="text-[9px] font-bold text-zinc-500 uppercase">{t(language, "review.metric.xpEarned")}</p>
                         <p className="text-sm font-bold text-amber-500 mt-0.5">+{weekWrapAverages.totalXP}</p>
                       </div>
                     </div>
@@ -386,10 +392,16 @@ export function WeeklyReviewPage() {
                           <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                             <div className="min-w-0">
                               <p className="font-bold text-zinc-200">
-                                {new Date(wrap.date + "T12:00:00").toLocaleDateString("en", { weekday: "short", month: "short", day: "numeric" })}
+                                {formatReviewDate(wrap.date, language, {
+                                  weekday: "short",
+                                  month: "short",
+                                  day: "numeric",
+                                })}
                               </p>
                               <p className="text-zinc-400 mt-1.5 leading-relaxed">
-                                {wrap.generatedSummary || "No summary captured."}
+                                {wrap.generatedSummary
+                                  ? generateDailyWrapSummary(wrap.statsSnapshot, language)
+                                  : t(language, "review.noSummaryCaptured")}
                               </p>
                               <div className="mt-2.5 flex flex-wrap gap-1.5">
                                 {wrap.mood !== undefined && (
@@ -408,7 +420,7 @@ export function WeeklyReviewPage() {
                               onClick={() => downloadDailyWrapMarkdown(wrap)}
                               className="shrink-0 rounded-lg border border-[#27272a] bg-[#18181b] px-3 py-1.5 text-[10px] font-bold text-zinc-300 hover:bg-zinc-800 transition uppercase tracking-wider"
                             >
-                              Export
+                              {t(language, "common.exportMarkdown", "Export")}
                             </button>
                           </div>
                         </div>
@@ -417,7 +429,7 @@ export function WeeklyReviewPage() {
                   </div>
                 ) : (
                   <p className="rounded-lg border border-[#27272a] bg-[#121214] px-4 py-4 text-xs text-zinc-500 italic">
-                    No daily wraps completed this week. Complete daily wraps from the Today page to visualize snapshots here.
+                    {t(language, "review.noDailyWraps", "No daily wraps completed this week. Complete daily wraps from the Today page to visualize snapshots here.")}
                   </p>
                 )}
               </section>
@@ -425,16 +437,16 @@ export function WeeklyReviewPage() {
               {/* Reflection Questions */}
               <section className="rounded-xl border border-[#27272a] bg-[#18181b] p-6 shadow-xl">
                 <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-2">
-                  Self-Reflection
+                  {t(language, "review.selfReflection", "Self-Reflection")}
                 </p>
-                <h3 className="text-lg font-bold text-zinc-100">Journal Reflection</h3>
+                <h3 className="text-lg font-bold text-zinc-100">{t(language, "review.journalReflection", "Journal Reflection")}</h3>
                 <div className="mt-5 grid gap-5 md:grid-cols-2">
                   {reflectionFields.map(([key, label]) => (
                     <label
                       key={key}
                       className="grid gap-2 text-xs font-semibold text-zinc-400"
                     >
-                      {label}
+                      {t(language, `review.field.${key}`, label)}
                       <textarea
                         rows={4}
                         value={draft[key]}
@@ -449,16 +461,16 @@ export function WeeklyReviewPage() {
               {/* Optional reflection */}
               <section className="rounded-xl border border-[#27272a] bg-[#18181b] p-6 shadow-xl">
                 <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-2">
-                  Patterns
+                  {t(language, "review.patterns", "Patterns")}
                 </p>
-                <h3 className="text-lg font-bold text-zinc-100">Pattern Notes (Optional)</h3>
+                <h3 className="text-lg font-bold text-zinc-100">{t(language, "review.patternNotes", "Pattern Notes (Optional)")}</h3>
                 <div className="mt-5 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
                   {optionalFields.map(([key, label]) => (
                     <label
                       key={key}
                       className="grid gap-2 text-xs font-semibold text-zinc-400"
                     >
-                      {label}
+                      {t(language, `review.field.${key}`, label)}
                       <textarea
                         rows={3}
                         value={draft[key] ?? ""}
@@ -474,22 +486,22 @@ export function WeeklyReviewPage() {
             {/* Saved Reviews History */}
             <section className="rounded-xl border border-[#27272a] bg-[#18181b] p-6 shadow-xl">
               <p className="text-[10px] font-bold uppercase tracking-widest text-indigo-400 mb-2">
-                Archives
+                {t(language, "review.archives", "Archives")}
               </p>
-              <h3 className="text-lg font-bold text-zinc-100">Previous Reviews</h3>
+              <h3 className="text-lg font-bold text-zinc-100">{t(language, "review.previousReviews", "Previous Reviews")}</h3>
               <div className="mt-5 grid gap-4">
                 {sortedReviews.length > 0 ? (
                   sortedReviews.map((review, index) => {
                     const isOpen = openReviewIds[review.id] !== undefined ? openReviewIds[review.id] : index === 0;
-                    const strongest = getStrongestArea(review);
-                    const weakest = getWeakestArea(review);
+                    const strongest = getStrongestArea(review, language);
+                    const weakest = getWeakestArea(review, language);
                     const avg = getWeeklyReviewAverage(review);
                     const completionDate = review.createdAt
-                      ? new Intl.DateTimeFormat("en", {
+                      ? formatReviewDate(review.createdAt, language, {
                           month: "short",
                           day: "numeric",
                           year: "numeric",
-                        }).format(new Date(review.createdAt))
+                        })
                       : "";
 
                     return (
@@ -504,14 +516,14 @@ export function WeeklyReviewPage() {
                         >
                           <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
                             <span className="font-bold text-zinc-150 text-sm">
-                              {formatWeekRange(review)}
+                              {formatWeekRange(review, language)}
                             </span>
                             <div className="flex items-center gap-2">
                               <span className="text-[11px] font-semibold text-zinc-400">
-                                Average: <span className="text-amber-500 font-bold">{avg}/10</span>
+                                {t(language, "review.average", "Average")}: <span className="text-amber-500 font-bold">{avg}/10</span>
                               </span>
                               <span className="uppercase text-[9px] px-1.5 py-0.5 rounded bg-[#18181b] text-zinc-300 border border-[#27272a]">
-                                {getReviewStatusLabel(review)}
+                                {getReviewStatusLabel(review, language)}
                               </span>
                             </div>
                           </div>
@@ -533,7 +545,7 @@ export function WeeklyReviewPage() {
                             )}
                             {completionDate && (
                               <span className="text-zinc-550 font-medium">
-                                Done: {completionDate}
+                                {t(language, "review.done", "Done")}: {completionDate}
                               </span>
                             )}
                             <span className="text-zinc-500 ml-1">
@@ -556,10 +568,10 @@ export function WeeklyReviewPage() {
                             <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between border-b border-[#27272a]/40 pb-4">
                               <div>
                                 <h4 className="font-bold text-zinc-150 text-xs uppercase tracking-wider text-zinc-400">
-                                  Details Overview
+                                  {t(language, "review.detailsOverview", "Details Overview")}
                                 </h4>
                                 <p className="mt-1 text-[11px] font-semibold text-zinc-500">
-                                  Rating Breakdown & Reflective Fields
+                                  {t(language, "review.ratingBreakdown", "Rating Breakdown & Reflective Fields")}
                                 </p>
                               </div>
                               <div className="flex gap-2 text-[10px] font-bold uppercase tracking-wider">
@@ -568,28 +580,28 @@ export function WeeklyReviewPage() {
                                   onClick={() => downloadWeeklyReviewMarkdown(review)}
                                   className="rounded-lg border border-[#27272a] bg-[#18181b] px-3 py-2 text-zinc-300 hover:bg-zinc-800 transition"
                                 >
-                                  Export
+                                  {t(language, "common.exportMarkdown", "Export")}
                                 </button>
                                 <button
                                   type="button"
                                   onClick={() => {
-                                    const confirmed = window.confirm(`Delete weekly review for week ${review.weekStart}?`);
+                                    const confirmed = window.confirm(`${t(language, "review.deleteConfirm", "Delete weekly review for week")} ${review.weekStart}?`);
                                     if (confirmed) deleteReview(review.id);
                                   }}
                                   className="rounded-lg border border-red-500/25 bg-red-500/10 px-3 py-2 text-red-400 hover:bg-red-500/20 transition"
                                 >
-                                  Delete
+                                  {t(language, "common.delete")}
                                 </button>
                               </div>
                             </div>
                             <div className="mt-4 grid gap-4 md:grid-cols-2 text-xs">
                               <p className="leading-relaxed text-zinc-300">
-                                <span className="font-bold text-zinc-400 block uppercase text-[9px] tracking-wider mb-0.5">Biggest Win</span>{" "}
-                                {review.biggestWin || review.wins || "No captured record."}
+                                <span className="font-bold text-zinc-400 block uppercase text-[9px] tracking-wider mb-0.5">{t(language, "review.biggestWin", "Biggest Win")}</span>{" "}
+                                {review.biggestWin || review.wins || t(language, "review.noCapturedRecord", "No captured record.")}
                               </p>
                               <p className="leading-relaxed text-zinc-300">
-                                <span className="font-bold text-zinc-400 block uppercase text-[9px] tracking-wider mb-0.5">Next Focus</span>{" "}
-                                {review.nextWeekFocus || "No captured record."}
+                                <span className="font-bold text-zinc-400 block uppercase text-[9px] tracking-wider mb-0.5">{t(language, "review.nextFocus", "Next Focus")}</span>{" "}
+                                {review.nextWeekFocus || t(language, "review.noCapturedRecord", "No captured record.")}
                               </p>
                             </div>
                           </div>
@@ -599,7 +611,7 @@ export function WeeklyReviewPage() {
                   })
                 ) : (
                   <p className="rounded-lg border border-[#27272a] bg-[#121214] px-4 py-4 text-xs text-zinc-500 italic">
-                    No reviews saved yet. Completed historical logs will appear here.
+                    {t(language, "review.empty", "No reviews saved yet. Completed historical logs will appear here.")}
                   </p>
                 )}
               </div>
@@ -608,11 +620,11 @@ export function WeeklyReviewPage() {
             {/* Roadmap / AI Card */}
             <section className="rounded-xl border border-[#27272a]/65 bg-gradient-to-br from-[#18181b] to-[#141416] p-6 shadow-xl">
               <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">
-                Roadmap
+                {t(language, "review.roadmap", "Roadmap")}
               </p>
-              <h2 className="mt-2 text-lg font-bold text-zinc-300">Pattern Detection &amp; Insights</h2>
+              <h2 className="mt-2 text-lg font-bold text-zinc-300">{t(language, "review.patternDetection", "Pattern Detection & Insights")}</h2>
               <p className="mt-2 text-xs leading-relaxed text-zinc-500">
-                Future updates will implement offline secure pattern recognition algorithms to analyze historical reviews, finding energy fluctuations, discipline constraints, and core trends across your personal operational dashboard.
+                {t(language, "review.futureInsights", "Future updates will implement offline secure pattern recognition algorithms to analyze historical reviews, finding energy fluctuations, discipline constraints, and core trends across your personal operational dashboard.")}
               </p>
             </section>
           </div>

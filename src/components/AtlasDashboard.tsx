@@ -24,20 +24,15 @@ import { calculateStreak, calculateAtlasStreak } from "@/lib/streaks";
 import { StreakBadge } from "@/components/StreakBadge";
 import { useNotes } from "@/lib/notes";
 import { useStudySessions } from "@/lib/academics";
+import { t } from "@/lib/i18n";
 
-const xpRules = [
-  { label: "Adding a finance transaction", xp: XP_RULES["finance-transaction"].amount },
-  {
-    label: "Logging a workout, with effort bonuses",
-    xp: XP_RULES["workout-log"].amount,
-  },
-  { label: "Creating a note", xp: XP_RULES["note-created"].amount },
-  { label: "Completing structured tasks", xp: XP_RULES["task-completed"].amount },
-  { label: "Updating a goal", xp: XP_RULES["goal-updated"].amount },
-  {
-    label: "Completing a weekly review",
-    xp: XP_RULES["weekly-review-completed"].amount,
-  },
+const xpRuleKeys = [
+  { key: "xp.rule.finance", xp: XP_RULES["finance-transaction"].amount },
+  { key: "xp.rule.workout", xp: XP_RULES["workout-log"].amount },
+  { key: "xp.rule.note", xp: XP_RULES["note-created"].amount },
+  { key: "xp.rule.task", xp: XP_RULES["task-completed"].amount },
+  { key: "xp.rule.goal", xp: XP_RULES["goal-updated"].amount },
+  { key: "xp.rule.review", xp: XP_RULES["weekly-review-completed"].amount },
 ];
 
 export function AtlasDashboard() {
@@ -51,6 +46,7 @@ export function AtlasDashboard() {
   const { workouts } = useWorkoutLogs();
   const { goals } = useGoals();
   const { settings } = useAtlasSettings();
+  const language = settings.language;
   const { clients } = useClients();
   const { workItems } = useWorkItems();
   const { dailyWraps, getDailyWrapForDate } = useDailyWraps();
@@ -86,16 +82,16 @@ export function AtlasDashboard() {
   let financeWarningType: "none" | "low" | "warning" | "danger" = "none";
 
   if (financeOverview.savingsInBaseCurrency > financeOverview.totalBalance) {
-    financeWarningMessage = "Savings exceed current balance";
+    financeWarningMessage = t(language, "dashboard.warning.savingsExceed");
     financeWarningType = "danger";
   } else if (financeOverview.availableMoney < 0) {
-    financeWarningMessage = "Available money is negative";
+    financeWarningMessage = t(language, "dashboard.warning.availableNegative");
     financeWarningType = "danger";
   } else if (savingsRatio > 0.8) {
-    financeWarningMessage = "Most funds are reserved";
+    financeWarningMessage = t(language, "dashboard.warning.mostReserved");
     financeWarningType = "warning";
   } else if (financeOverview.availableMoney > 0 && financeOverview.availableMoney < (settings.baseCurrency === "PYG" ? 500000 : 100)) {
-    financeWarningMessage = "Low available balance";
+    financeWarningMessage = t(language, "dashboard.warning.lowBalance");
     financeWarningType = "low";
   }
 
@@ -155,31 +151,36 @@ export function AtlasDashboard() {
     );
   }, [plans, dailyWraps, tasks, workItems, workouts, notes, transactions, studySessions]);
 
+  const xpRules = xpRuleKeys.map((rule) => ({
+    label: t(language, rule.key),
+    xp: rule.xp,
+  }));
+
   // Derived Daily Plan Banner Classes & Copy
   const planningBanner = useMemo(() => {
     if (isCompletedToday) {
       return {
-        label: "Completed",
-        text: "Daily Planning Completed (+25 XP awarded). You have locked in your priorities for today.",
+        label: t(language, "dashboard.planning.completed.label"),
+        text: t(language, "dashboard.planning.completed.text"),
         colorClass: "bg-emerald-500/10 border-emerald-500/30 text-emerald-400",
         btnClass: "border-emerald-500/30 bg-emerald-500/15 text-emerald-300 hover:bg-emerald-500/25",
       };
     }
     if (currentPlanStatus === "in_progress" || currentPlanStatus === "planned") {
       return {
-        label: "In Progress",
-        text: "Daily Planning In Progress. Take action and lock in your commitments.",
+        label: t(language, "dashboard.planning.progress.label"),
+        text: t(language, "dashboard.planning.progress.text"),
         colorClass: "bg-amber-500/10 border-amber-500/30 text-amber-400",
         btnClass: "border-amber-500/30 bg-amber-500/15 text-amber-300 hover:bg-amber-500/25",
       };
     }
     return {
-      label: "Pending",
-      text: "Daily Planning Pending. Define your intentions and tasks to make today highly productive.",
+      label: t(language, "dashboard.planning.pending.label"),
+      text: t(language, "dashboard.planning.pending.text"),
       colorClass: "bg-zinc-800/40 border-[#27272a] text-zinc-400",
       btnClass: "border-[#27272a] bg-zinc-800 hover:bg-zinc-700 text-zinc-200",
     };
-  }, [isCompletedToday, currentPlanStatus]);
+  }, [isCompletedToday, currentPlanStatus, language]);
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8 text-zinc-100 animate-fade-in-up">
@@ -187,7 +188,7 @@ export function AtlasDashboard() {
       <header className="flex flex-col gap-4 border-b border-[#27272a] pb-6 md:flex-row md:items-center md:justify-between">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-500">
-            Private Command Center
+            {t(language, "dashboard.eyebrow")}
           </p>
           <h1 className="mt-2 text-4xl font-bold tracking-tight text-zinc-100 sm:text-5xl">
             Atlas OS
@@ -195,10 +196,10 @@ export function AtlasDashboard() {
         </div>
         <div className="flex flex-wrap gap-2 text-xs font-semibold tracking-wider uppercase">
           <span className="rounded-lg border border-[#27272a] bg-[#18181b] px-3.5 py-2 text-zinc-400">
-            Local Foundation
+            {t(language, "dashboard.localFoundation")}
           </span>
           <span className="rounded-lg border border-[#27272a] bg-[#18181b] px-3.5 py-2 text-zinc-400">
-            Vault Sync Offline
+            {t(language, "dashboard.vaultSyncOffline")}
           </span>
         </div>
       </header>
@@ -206,9 +207,9 @@ export function AtlasDashboard() {
       {/* Streaks Header Grid */}
       {(gymStreak > 0 || planningStreak > 0 || wrapStreak > 0) && (
         <section className="mt-6 flex flex-wrap gap-3">
-          <StreakBadge streak={planningStreak} label="Planning" size="md" />
-          <StreakBadge streak={gymStreak} label="Gym" size="md" />
-          <StreakBadge streak={wrapStreak} label="Wrap" size="md" />
+          <StreakBadge streak={planningStreak} label={t(language, "dashboard.streak.planning")} size="md" />
+          <StreakBadge streak={gymStreak} label={t(language, "dashboard.streak.gym")} size="md" />
+          <StreakBadge streak={wrapStreak} label={t(language, "dashboard.streak.wrap")} size="md" />
         </section>
       )}
 
@@ -241,7 +242,7 @@ export function AtlasDashboard() {
             </span>
             <div>
               <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">
-                Daily Intentions &middot; {planningBanner.label}
+                {t(language, "dashboard.dailyIntentions")} &middot; {planningBanner.label}
               </p>
               <p className="text-sm font-semibold mt-0.5">{planningBanner.text}</p>
             </div>
@@ -250,7 +251,7 @@ export function AtlasDashboard() {
             href="/today"
             className={`rounded-lg border px-4 py-2.5 text-xs font-bold uppercase tracking-wider transition shrink-0 text-center ${planningBanner.btnClass}`}
           >
-            {isCompletedToday ? "Review agenda" : "Start planning"}
+            {isCompletedToday ? t(language, "dashboard.planning.reviewAgenda") : t(language, "dashboard.planning.startPlanning")}
           </Link>
         </section>
 
@@ -272,27 +273,27 @@ export function AtlasDashboard() {
               </span>
               <div className="min-w-0">
                 <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">
-                  Daily Wrap &middot; {todayWrap ? "Closed" : "Pending"}
+                  {t(language, "dashboard.dailyWrap")} &middot; {todayWrap ? t(language, "common.closed") : t(language, "common.pending")}
                 </p>
                 {todayWrap ? (
                   <div className="mt-1">
                     <p className="text-sm font-semibold text-zinc-200 line-clamp-2">
-                      {todayWrap.generatedSummary || "Day closed with no summary."}
+                      {todayWrap.generatedSummary || t(language, "dashboard.dayClosedNoSummary")}
                     </p>
                     <div className="mt-2.5 flex flex-wrap gap-1.5">
                       {todayWrap.mood !== undefined && (
                         <span className="rounded-full bg-zinc-800 border border-[#27272a] px-2.5 py-0.5 text-[9px] font-bold text-zinc-300">
-                          Mood {todayWrap.mood}/10
+                          {t(language, "dashboard.mood")} {todayWrap.mood}/10
                         </span>
                       )}
                       {todayWrap.energy !== undefined && (
                         <span className="rounded-full bg-zinc-800 border border-[#27272a] px-2.5 py-0.5 text-[9px] font-bold text-zinc-300">
-                          Energy {todayWrap.energy}/10
+                          {t(language, "common.energy")} {todayWrap.energy}/10
                         </span>
                       )}
                       {todayWrap.productivity !== undefined && (
                         <span className="rounded-full bg-zinc-800 border border-[#27272a] px-2.5 py-0.5 text-[9px] font-bold text-zinc-300">
-                          Productivity {todayWrap.productivity}/10
+                          {t(language, "dashboard.productivity")} {todayWrap.productivity}/10
                         </span>
                       )}
                       <span className="rounded-full bg-emerald-500/10 border border-emerald-500/35 px-2.5 py-0.5 text-[9px] font-bold text-emerald-400">
@@ -302,7 +303,7 @@ export function AtlasDashboard() {
                   </div>
                 ) : (
                   <p className="text-sm font-semibold mt-0.5 text-zinc-300">
-                    End-of-day reflection not yet completed. Close your day to capture stats and earn +20 XP.
+                    {t(language, "dashboard.wrap.notCompleted")}
                   </p>
                 )}
               </div>
@@ -315,7 +316,7 @@ export function AtlasDashboard() {
                   : "border-amber-500/30 bg-amber-500/15 text-amber-300 hover:bg-amber-500/25"
               }`}
             >
-              {todayWrap ? "Review wrap" : "Close your day"}
+              {todayWrap ? t(language, "dashboard.wrap.review") : t(language, "dashboard.wrap.close")}
             </Link>
           </section>
         )}
@@ -328,30 +329,30 @@ export function AtlasDashboard() {
             {/* 3. Priority Briefing Card */}
             <section className="rounded-xl border border-[#27272a] bg-[#18181b] p-6 shadow-xl">
               <p className="text-[10px] font-bold uppercase tracking-widest text-amber-500">
-                Strategic Focus
+                {t(language, "dashboard.strategicFocus")}
               </p>
-              <h3 className="mt-2 text-2xl font-bold tracking-tight text-zinc-100">Priority Briefing</h3>
+              <h3 className="mt-2 text-2xl font-bold tracking-tight text-zinc-100">{t(language, "dashboard.priorityBriefing")}</h3>
               
               <div className="mt-5 grid gap-4 sm:grid-cols-2">
                 <div className="rounded-lg bg-[#121214] border border-[#27272a] p-4 flex flex-col justify-between">
                   <div>
-                    <p className="text-[10px] text-zinc-500 uppercase tracking-wider font-semibold">Top Priority Today</p>
+                    <p className="text-[10px] text-zinc-500 uppercase tracking-wider font-semibold">{t(language, "dashboard.topPriorityToday")}</p>
                     <p className="mt-2 text-sm font-bold truncate text-zinc-200">
-                      {briefing.topTask ? briefing.topTask.title : "No tasks planned"}
+                      {briefing.topTask ? briefing.topTask.title : t(language, "dashboard.noTasksPlanned")}
                     </p>
                   </div>
                   {briefing.topTask && (
                     <span className="inline-block mt-3 w-fit rounded bg-zinc-800 px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-zinc-300 border border-[#27272a]">
-                      {briefing.topTask.priority} priority
+                      {t(language, `enum.priority.${briefing.topTask.priority}`, briefing.topTask.priority)} {t(language, "common.priority").toLowerCase()}
                     </span>
                   )}
                 </div>
 
                 <div className="rounded-lg bg-[#121214] border border-[#27272a] p-4 flex flex-col justify-between">
                   <div>
-                    <p className="text-[10px] text-zinc-500 uppercase tracking-wider font-semibold">Next Critical Deadline</p>
+                    <p className="text-[10px] text-zinc-500 uppercase tracking-wider font-semibold">{t(language, "dashboard.nextCriticalDeadline")}</p>
                     <p className="mt-2 text-sm font-bold truncate text-zinc-200">
-                      {briefing.nextDeadline ? briefing.nextDeadline.title : "No critical deadlines"}
+                      {briefing.nextDeadline ? briefing.nextDeadline.title : t(language, "dashboard.noCriticalDeadlines")}
                     </p>
                   </div>
                   {briefing.nextDeadline && (
@@ -367,9 +368,9 @@ export function AtlasDashboard() {
 
                 <div className="rounded-lg bg-[#121214] border border-[#27272a] p-4 flex flex-col justify-between">
                   <div>
-                    <p className="text-[10px] text-zinc-500 uppercase tracking-wider font-semibold">Key Objective Progress</p>
+                    <p className="text-[10px] text-zinc-500 uppercase tracking-wider font-semibold">{t(language, "dashboard.keyObjectiveProgress")}</p>
                     <p className="mt-2 text-sm font-bold truncate text-zinc-200">
-                      {briefing.topGoal ? briefing.topGoal.title : "No urgent objective"}
+                      {briefing.topGoal ? briefing.topGoal.title : t(language, "dashboard.noUrgentObjective")}
                     </p>
                   </div>
                   {briefing.topGoal ? (
@@ -381,33 +382,33 @@ export function AtlasDashboard() {
                     </div>
                   ) : (
                     <span className="inline-block mt-3 w-fit rounded bg-zinc-800 px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-zinc-500 border border-[#27272a]/60">
-                      Focus on daily tasks
+                      {t(language, "dashboard.focusDailyTasks")}
                     </span>
                   )}
                 </div>
 
                 <div className="rounded-lg bg-[#121214] border border-[#27272a] p-4 flex flex-col justify-between">
                   <div>
-                    <p className="text-[10px] text-zinc-500 uppercase tracking-wider font-semibold">Review & Urgency</p>
+                    <p className="text-[10px] text-zinc-500 uppercase tracking-wider font-semibold">{t(language, "dashboard.reviewUrgency")}</p>
                     <div className="mt-2.5 flex flex-wrap gap-1.5">
                       <span className={`rounded px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider border ${
                         briefing.overdueCount > 0 
                           ? "bg-red-500/10 text-red-400 border-red-500/20 animate-pulse" 
                           : "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
                       }`}>
-                        {briefing.overdueCount} Overdue
+                        {briefing.overdueCount} {t(language, "common.overdue")}
                       </span>
                       <span className={`rounded px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider border ${
                         briefing.weeklyReviewStatus === "Pending" 
                           ? "bg-amber-500/10 text-amber-400 border-amber-500/20" 
                           : "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
                       }`}>
-                        Review: {briefing.weeklyReviewStatus}
+                        {t(language, "dashboard.review")}: {briefing.weeklyReviewStatus}
                       </span>
                     </div>
                   </div>
                   <Link href="/review" className="mt-3 text-xs font-bold text-amber-500 hover:text-amber-400 transition hover:underline">
-                    Launch Reflection &rarr;
+                    {t(language, "dashboard.launchReflection")} &rarr;
                   </Link>
                 </div>
               </div>
@@ -418,12 +419,12 @@ export function AtlasDashboard() {
               <div className="flex items-baseline justify-between border-b border-[#27272a]/60 pb-3 mb-4">
                 <div>
                   <p className="text-[10px] font-bold uppercase tracking-widest text-cyan-500">
-                    Objectives
+                    {t(language, "dashboard.objectives")}
                   </p>
-                  <h3 className="mt-1 text-xl font-bold text-zinc-100">Active Goals</h3>
+                  <h3 className="mt-1 text-xl font-bold text-zinc-100">{t(language, "dashboard.activeGoals")}</h3>
                 </div>
                 <Link href="/goals" className="text-xs font-bold text-zinc-400 hover:text-zinc-100 transition hover:underline">
-                  Manage goals ({goals.length}) &rarr;
+                  {t(language, "dashboard.manageGoals")} ({goals.length}) &rarr;
                 </Link>
               </div>
               <div className="grid gap-4">
@@ -436,7 +437,7 @@ export function AtlasDashboard() {
                           <div>
                             <p className="font-bold text-zinc-200 text-sm">{goal.title}</p>
                             <p className="text-[10px] text-zinc-500 mt-1 uppercase tracking-wide">
-                              {goal.area} &middot; Target: {goal.targetValue} {goal.unit || ""}
+                              {goal.area} &middot; {t(language, "dashboard.target")}: {goal.targetValue} {goal.unit || ""}
                             </p>
                           </div>
                           <span className="text-sm font-bold text-cyan-400 shrink-0">{progress}%</span>
@@ -452,7 +453,7 @@ export function AtlasDashboard() {
                   })
                 ) : (
                   <p className="rounded-lg border border-[#27272a] bg-[#121214] px-4 py-4 text-xs text-zinc-500 italic">
-                    No active goals currently being tracked.
+                    {t(language, "dashboard.noActiveGoals")}
                   </p>
                 )}
               </div>
@@ -463,12 +464,12 @@ export function AtlasDashboard() {
               <div className="flex items-baseline justify-between border-b border-[#27272a]/60 pb-3 mb-4">
                 <div>
                   <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-500">
-                    Financial Ledger
+                    {t(language, "dashboard.financialLedger")}
                   </p>
-                  <h3 className="mt-1 text-xl font-bold text-zinc-100">Financial Overview</h3>
+                  <h3 className="mt-1 text-xl font-bold text-zinc-100">{t(language, "dashboard.financialOverview")}</h3>
                 </div>
                 <Link href="/finances" className="text-xs font-bold text-zinc-400 hover:text-zinc-100 transition hover:underline">
-                  Finances Hub &rarr;
+                  {t(language, "dashboard.financesHub")} &rarr;
                 </Link>
               </div>
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -484,18 +485,18 @@ export function AtlasDashboard() {
                 }`}>
                   <div>
                     <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-400">
-                      Available Money
+                      {t(language, "dashboard.availableMoney")}
                     </p>
                     <p className="mt-2.5 text-3xl font-black tracking-tight text-zinc-100 break-words leading-none">
                       {formatMoney(financeOverview.availableMoney, settings.baseCurrency)}
                     </p>
                     <p className="text-[10px] text-zinc-450 font-semibold uppercase mt-1.5 tracking-wide">
-                      Spendable balance
+                      {t(language, "dashboard.spendableBalance")}
                     </p>
                   </div>
                   <div className="mt-3 border-t border-[#27272a]/40 pt-2.5 flex flex-col gap-1 text-[9px] text-zinc-500">
                     <p className="font-bold uppercase tracking-wider">
-                      Excludes reserved goal funds
+                      {t(language, "dashboard.excludesReservedFunds")}
                     </p>
                     {financeWarningMessage && (
                       <p className={`mt-1 text-[8px] font-bold uppercase tracking-wider leading-tight flex items-center gap-0.5 ${
@@ -514,34 +515,34 @@ export function AtlasDashboard() {
                 {/* Income Card */}
                 <div className="rounded-lg border border-[#27272a] bg-[#121214] p-4 flex flex-col justify-between min-h-[140px]">
                   <div>
-                    <p className="text-[10px] text-zinc-550 font-bold uppercase tracking-wider">Income This Month</p>
+                    <p className="text-[10px] text-zinc-550 font-bold uppercase tracking-wider">{t(language, "dashboard.incomeThisMonth")}</p>
                     <p className="mt-2 text-2xl font-bold text-emerald-400 tracking-tight break-words leading-none">
                       {formatMoney(financeOverview.monthlyIncome, settings.baseCurrency)}
                     </p>
                   </div>
-                  <p className="text-[9px] text-zinc-500 font-semibold uppercase leading-none">Month inflow</p>
+                  <p className="text-[9px] text-zinc-500 font-semibold uppercase leading-none">{t(language, "dashboard.monthInflow")}</p>
                 </div>
 
                 {/* Expenses Card */}
                 <div className="rounded-lg border border-[#27272a] bg-[#121214] p-4 flex flex-col justify-between min-h-[140px]">
                   <div>
-                    <p className="text-[10px] text-zinc-550 font-bold uppercase tracking-wider">Expenses This Month</p>
+                    <p className="text-[10px] text-zinc-550 font-bold uppercase tracking-wider">{t(language, "dashboard.expensesThisMonth")}</p>
                     <p className="mt-2 text-2xl font-bold text-red-400 tracking-tight break-words leading-none">
                       {formatMoney(financeOverview.monthlyExpenses, settings.baseCurrency)}
                     </p>
                   </div>
-                  <p className="text-[9px] text-zinc-500 font-semibold uppercase leading-none">Month outflow</p>
+                  <p className="text-[9px] text-zinc-500 font-semibold uppercase leading-none">{t(language, "dashboard.monthOutflow")}</p>
                 </div>
 
                 {/* Monthly Net Card */}
                 <div className="rounded-lg border border-[#27272a] bg-[#121214] p-4 flex flex-col justify-between min-h-[140px]">
                   <div>
-                    <p className="text-[10px] text-zinc-550 font-bold uppercase tracking-wider">Monthly Net</p>
+                    <p className="text-[10px] text-zinc-550 font-bold uppercase tracking-wider">{t(language, "dashboard.monthlyNet")}</p>
                     <p className={`mt-2 text-2xl font-bold tracking-tight break-words leading-none ${financeOverview.monthlyNet >= 0 ? "text-emerald-450" : "text-red-400"}`}>
                       {formatMoney(financeOverview.monthlyNet, settings.baseCurrency)}
                     </p>
                   </div>
-                  <p className="text-[9px] text-zinc-500 font-semibold uppercase leading-none">Current month cash flow</p>
+                  <p className="text-[9px] text-zinc-500 font-semibold uppercase leading-none">{t(language, "dashboard.currentMonthCashFlow")}</p>
                 </div>
               </div>
             </section>
@@ -553,9 +554,9 @@ export function AtlasDashboard() {
             {/* 6. Upcoming Deadlines unified widget */}
             <section className="rounded-xl border border-[#27272a] bg-[#18181b] p-6 shadow-xl">
               <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">
-                Chronology
+                {t(language, "dashboard.chronology")}
               </p>
-              <h3 className="mt-1 text-xl font-bold text-zinc-100">Upcoming Deadlines</h3>
+              <h3 className="mt-1 text-xl font-bold text-zinc-100">{t(language, "dashboard.upcomingDeadlines")}</h3>
               
               <div className="mt-5 grid gap-3">
                 {upcomingDeadlines.length > 0 ? (
@@ -593,7 +594,7 @@ export function AtlasDashboard() {
                   })
                 ) : (
                   <p className="rounded-lg border border-[#27272a] bg-[#121214] px-4 py-4 text-xs text-zinc-500 italic">
-                    No upcoming deadlines in the next 30 days.
+                    {t(language, "dashboard.noUpcomingDeadlines")}
                   </p>
                 )}
               </div>
@@ -604,23 +605,23 @@ export function AtlasDashboard() {
               <div className="flex items-center justify-between border-b border-[#27272a]/60 pb-3 mb-4">
                 <div>
                   <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">
-                    Freelance Pipeline
+                    {t(language, "dashboard.freelancePipeline")}
                   </p>
-                  <h3 className="mt-1 text-xl font-bold text-zinc-100">Work Overview</h3>
+                  <h3 className="mt-1 text-xl font-bold text-zinc-100">{t(language, "dashboard.workOverview")}</h3>
                 </div>
                 <Link href="/work" className="text-xs font-bold text-zinc-400 hover:text-zinc-100 transition hover:underline">
-                  Work Board &rarr;
+                  {t(language, "dashboard.workBoard")} &rarr;
                 </Link>
               </div>
               <div className="grid grid-cols-2 gap-3.5">
                 <div className="rounded-lg border border-[#27272a] bg-[#121214] p-3 text-center">
-                  <p className="text-[9px] text-zinc-500 font-semibold uppercase tracking-wider">Active Clients</p>
+                  <p className="text-[9px] text-zinc-500 font-semibold uppercase tracking-wider">{t(language, "dashboard.activeClients")}</p>
                   <p className="mt-1 text-2xl font-bold text-zinc-100">
                     {clients.filter(c => c.status === "active").length}
                   </p>
                 </div>
                 <div className="rounded-lg border border-[#27272a] bg-[#121214] p-3 text-center">
-                  <p className="text-[9px] text-zinc-500 font-semibold uppercase tracking-wider">Due Items Today</p>
+                  <p className="text-[9px] text-zinc-500 font-semibold uppercase tracking-wider">{t(language, "dashboard.dueItemsToday")}</p>
                   <p className="mt-1 text-2xl font-bold text-zinc-100">
                     {todayWorkItems.length}
                   </p>
@@ -632,9 +633,9 @@ export function AtlasDashboard() {
             <section className="rounded-xl border border-[#27272a] bg-[#18181b] p-6 shadow-xl flex flex-col gap-4">
               <div>
                 <p className="text-[10px] font-bold uppercase tracking-widest text-amber-500">
-                  System Health
+                  {t(language, "dashboard.systemHealth")}
                 </p>
-                <h3 className="mt-1 text-xl font-bold text-zinc-100">Atlas Streak</h3>
+                <h3 className="mt-1 text-xl font-bold text-zinc-100">{t(language, "dashboard.atlasStreak")}</h3>
               </div>
 
               {atlasStreak.current > 0 ? (
@@ -645,19 +646,19 @@ export function AtlasDashboard() {
                   <div>
                     <div className="flex items-baseline gap-2">
                       <span className="text-2xl font-black text-zinc-100 font-mono leading-none">{atlasStreak.current}</span>
-                      <span className="text-xs font-bold text-zinc-400 uppercase tracking-wide leading-none">Days Active</span>
+                      <span className="text-xs font-bold text-zinc-400 uppercase tracking-wide leading-none">{t(language, "dashboard.daysActive")}</span>
                     </div>
                     <p className="text-[10px] text-zinc-400 mt-2 leading-snug">
-                      Keep the OS alive: plan, execute, close.
+                      {t(language, "dashboard.keepAlive")}
                     </p>
                   </div>
                 </div>
               ) : (
                 <div className="rounded-lg border border-dashed border-[#27272a] bg-[#121214]/50 p-4.5 text-center">
                   <span className="text-xl block mb-2 opacity-50">💤</span>
-                  <p className="text-xs font-semibold text-zinc-400">OS Status: Idle</p>
+                  <p className="text-xs font-semibold text-zinc-400">{t(language, "dashboard.osIdle")}</p>
                   <p className="text-[10px] text-zinc-550 mt-1.5 max-w-[200px] mx-auto leading-normal">
-                    Complete Daily Intentions or log activities to ignite your system usage streak.
+                    {t(language, "dashboard.igniteStreak")}
                   </p>
                 </div>
               )}
@@ -669,14 +670,14 @@ export function AtlasDashboard() {
                     ? "bg-emerald-500/5 border-emerald-500/25 text-emerald-400" 
                     : "bg-[#121214] border-[#27272a]/60 text-zinc-500"
                 }`}>
-                  <span>Intentions: {isCompletedToday ? "Set" : "Pending"}</span>
+                  <span>{t(language, "dashboard.intentions")}: {isCompletedToday ? t(language, "dashboard.set") : t(language, "common.pending")}</span>
                 </div>
                 <div className={`rounded-lg border p-2 text-center transition-all ${
                   todayWrap 
                     ? "bg-emerald-500/5 border-emerald-500/25 text-emerald-400" 
                     : "bg-[#121214] border-[#27272a]/60 text-zinc-500"
                 }`}>
-                  <span>Wrap-up: {todayWrap ? "Closed" : "Pending"}</span>
+                  <span>{t(language, "dashboard.wrapUp")}: {todayWrap ? t(language, "common.closed") : t(language, "common.pending")}</span>
                 </div>
               </div>
             </section>

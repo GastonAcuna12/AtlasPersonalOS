@@ -2,9 +2,11 @@
 
 import Link from "next/link";
 import { FormEvent, useState } from "react";
+import { AcademicsCloudPanel } from "@/components/AcademicsCloudPanel";
 import { TaskCard } from "@/components/tasks/TaskCard";
 import {
   ACADEMIC_TYPES,
+  getAcademicTasks,
   getAcademicOverview,
   getAcademicTasksForToday,
   getAcademicWorkload,
@@ -32,6 +34,8 @@ import {
   useTasks,
 } from "@/lib/tasks";
 import { useXP } from "@/lib/xp";
+import { useAtlasSettings } from "@/lib/settings";
+import { t } from "@/lib/i18n";
 
 const initialSubject: SubjectDraft = {
   name: "",
@@ -72,6 +76,8 @@ export function AcademicsPage() {
     useAcademicSubjects();
   const { sessions, addStudySession, deleteStudySession } = useStudySessions();
   const xp = useXP();
+  const { settings } = useAtlasSettings();
+  const language = settings.language;
   
   const [subjectDraft, setSubjectDraft] = useState(initialSubject);
   const [taskDraft, setTaskDraft] = useState(() =>
@@ -95,6 +101,7 @@ export function AcademicsPage() {
   const workloadStatus = getAcademicWorkloadStatus(tasks);
   const deadlines = getUpcomingAcademicDeadlines(tasks).slice(0, 8);
   const todayAcademicTasks = getAcademicTasksForToday(tasks);
+  const academicTasks = getAcademicTasks(tasks);
 
   function completeTask(task: AtlasTask) {
     updateTask(task.id, {
@@ -111,7 +118,7 @@ export function AcademicsPage() {
     event.preventDefault();
 
     if (!subjectDraft.name.trim()) {
-      setSubjectError("Add a subject name.");
+      setSubjectError(t(language, "academics.errorSubjectName", "Add a subject name."));
       return;
     }
 
@@ -134,17 +141,17 @@ export function AcademicsPage() {
     event.preventDefault();
 
     if (!taskDraft.title.trim()) {
-      setTaskError("Add a task title.");
+      setTaskError(t(language, "academics.errorTaskTitle", "Add a task title."));
       return;
     }
 
     if (!taskDraft.subjectId) {
-      setTaskError("Choose a subject first.");
+      setTaskError(t(language, "academics.errorChooseSubject", "Choose a subject first."));
       return;
     }
 
     if (!taskDraft.dueDate) {
-      setTaskError("Choose a due date.");
+      setTaskError(t(language, "academics.errorDueDate", "Choose a due date."));
       return;
     }
 
@@ -163,7 +170,7 @@ export function AcademicsPage() {
     }
 
     if (sessionDraft.durationMinutes <= 0) {
-      setSessionError("Study minutes must be greater than 0.");
+      setSessionError(t(language, "academics.errorStudyMinutes", "Study minutes must be greater than 0."));
       return;
     }
 
@@ -180,7 +187,7 @@ export function AcademicsPage() {
   }
 
   function subjectName(subjectId?: string) {
-    return subjects.find((subject) => subject.id === subjectId)?.name ?? "No subject";
+    return subjects.find((subject) => subject.id === subjectId)?.name ?? t(language, "academics.noSubject", "No subject");
   }
 
   return (
@@ -189,11 +196,11 @@ export function AcademicsPage() {
       <header className="flex flex-col gap-4 border-b border-[#27272a] pb-6 md:flex-row md:items-center md:justify-between">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-500">
-            University Planning
+            {t(language, "academics.eyebrow", "University Planning")}
           </p>
           <div className="mt-2 flex flex-wrap items-center gap-3">
             <h1 className="text-4xl font-bold tracking-tight text-zinc-100 sm:text-5xl">
-              Academics
+              {t(language, "academics.title", "Academics")}
             </h1>
             <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-bold border uppercase tracking-wider ${
               workloadStatus.status === "Clear"
@@ -204,7 +211,7 @@ export function AcademicsPage() {
                 ? "bg-blue-500/10 border-blue-500/25 text-blue-400"
                 : "bg-red-500/10 border-red-500/25 text-red-400"
             }`}>
-              {workloadStatus.status} Workload
+              {workloadStatus.status} {t(language, "academics.workload", "Workload")}
             </span>
           </div>
         </div>
@@ -219,7 +226,7 @@ export function AcademicsPage() {
             href="/"
             className="rounded-lg border border-[#27272a] bg-[#18181b] px-4 py-2 text-xs font-bold uppercase tracking-wider text-zinc-300 transition hover:bg-zinc-800"
           >
-            Dashboard
+            {t(language, "common.dashboard")}
           </Link>
           <button
             type="button"
@@ -228,20 +235,26 @@ export function AcademicsPage() {
             }
             className="rounded-lg border border-[#27272a] bg-[#18181b] px-4 py-2 text-xs font-bold uppercase tracking-wider text-zinc-300 transition hover:bg-zinc-800"
           >
-            Export academic week
+            {t(language, "academics.exportWeek", "Export academic week")}
           </button>
         </div>
       </header>
 
+      <AcademicsCloudPanel
+        localSubjects={subjects}
+        localAcademicTasks={academicTasks}
+        localStudySessions={sessions}
+      />
+
       {/* Overview stats */}
       <section className="grid gap-4 mt-6 grid-cols-2 lg:grid-cols-6">
         {[
-          ["Active subjects", overview.activeSubjects],
-          ["Pending tasks", overview.pendingTasks],
-          ["Due this week", overview.dueThisWeek],
-          ["Upcoming exams", overview.upcomingExams],
-          ["Study minutes", overview.studyMinutesThisWeek],
-          ["Done this week", overview.completedThisWeek],
+          [t(language, "academics.activeSubjects", "Active subjects"), overview.activeSubjects],
+          [t(language, "academics.pendingTasks", "Pending tasks"), overview.pendingTasks],
+          [t(language, "academics.dueThisWeek", "Due this week"), overview.dueThisWeek],
+          [t(language, "academics.upcomingExams", "Upcoming exams"), overview.upcomingExams],
+          [t(language, "academics.studyMinutes", "Study minutes"), overview.studyMinutesThisWeek],
+          [t(language, "academics.doneThisWeek", "Done this week"), overview.completedThisWeek],
         ].map(([label, value]) => (
           <div key={label} className="rounded-xl border border-[#27272a] bg-[#18181b] p-4 shadow-lg text-center">
             <p className="text-[10px] text-zinc-500 font-semibold uppercase tracking-wider">{label}</p>
@@ -261,7 +274,7 @@ export function AcademicsPage() {
               onClick={() => setShowSubjectForm(!showSubjectForm)}
               className="rounded-lg bg-amber-500 hover:bg-amber-400 text-zinc-950 px-4 py-2.5 text-xs font-bold uppercase tracking-wider transition w-full shadow-md text-center"
             >
-              {showSubjectForm ? "Close Subject Form" : "+ Add Subject course"}
+              {showSubjectForm ? t(language, "academics.closeSubjectForm", "Close Subject Form") : t(language, "academics.addSubject", "+ Add Subject course")}
             </button>
             {showSubjectForm && (
               <form
@@ -269,11 +282,11 @@ export function AcademicsPage() {
                 className="mt-3 rounded-xl border border-[#27272a] bg-[#18181b] p-5 shadow-xl flex flex-col gap-4 animate-fade-in-up"
               >
                 <p className="text-xs font-bold text-zinc-400 uppercase tracking-widest border-b border-[#27272a] pb-2">
-                  New Subject details
+                  {t(language, "academics.newSubject", "New Subject details")}
                 </p>
                 <div className="grid gap-3">
                   <input
-                    placeholder="Subject course name"
+                    placeholder={t(language, "academics.subjectNamePlaceholder", "Subject course name")}
                     value={subjectDraft.name}
                     onChange={(event) =>
                       setSubjectDraft((current) => ({
@@ -284,7 +297,7 @@ export function AcademicsPage() {
                     className="rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2.5 text-zinc-100 text-sm focus:border-amber-500 focus:outline-none"
                   />
                   <input
-                    placeholder="Professor / Instructor"
+                    placeholder={t(language, "academics.professorPlaceholder", "Professor / Instructor")}
                     value={subjectDraft.professor}
                     onChange={(event) =>
                       setSubjectDraft((current) => ({
@@ -295,7 +308,7 @@ export function AcademicsPage() {
                     className="rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2.5 text-zinc-100 text-sm focus:border-amber-500 focus:outline-none"
                   />
                   <input
-                    placeholder="Schedule details"
+                    placeholder={t(language, "academics.schedulePlaceholder", "Schedule details")}
                     value={subjectDraft.schedule}
                     onChange={(event) =>
                       setSubjectDraft((current) => ({
@@ -306,7 +319,7 @@ export function AcademicsPage() {
                     className="rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2.5 text-zinc-100 text-sm focus:border-amber-500 focus:outline-none"
                   />
                   <textarea
-                    placeholder="Notes (professor contacts, links...)"
+                    placeholder={t(language, "academics.notesPlaceholder", "Notes (professor contacts, links...)")}
                     rows={3}
                     value={subjectDraft.notes}
                     onChange={(event) =>
@@ -318,7 +331,7 @@ export function AcademicsPage() {
                     className="resize-none rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2 text-zinc-100 text-sm focus:border-amber-500 focus:outline-none placeholder:text-zinc-650"
                   />
                   <div className="grid gap-1 mt-1">
-                    <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wide">Color Accent</span>
+                    <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wide">{t(language, "academics.colorAccent", "Color Accent")}</span>
                     <div className="flex flex-wrap gap-1.5 mt-1">
                       {SUBJECT_COLORS.map((color) => {
                         const isSelected = subjectDraft.accent === color.accentClass;
@@ -351,7 +364,7 @@ export function AcademicsPage() {
                   type="submit"
                   className="rounded-lg bg-amber-500 hover:bg-amber-400 text-zinc-950 px-4 py-2.5 text-xs font-bold uppercase tracking-wider transition w-full"
                 >
-                  Save Subject
+                  {t(language, "academics.saveSubject", "Save Subject")}
                 </button>
               </form>
             )}
@@ -363,7 +376,7 @@ export function AcademicsPage() {
               onClick={() => setShowTaskForm(!showTaskForm)}
               className="rounded-lg bg-amber-500 hover:bg-amber-400 text-zinc-950 px-4 py-2.5 text-xs font-bold uppercase tracking-wider transition w-full shadow-md text-center"
             >
-              {showTaskForm ? "Close Task Form" : "+ Add Academic Task"}
+              {showTaskForm ? t(language, "academics.closeTaskForm", "Close Task Form") : t(language, "academics.addTask", "+ Add Academic Task")}
             </button>
             {showTaskForm && (
               <form
@@ -371,11 +384,11 @@ export function AcademicsPage() {
                 className="mt-3 rounded-xl border border-[#27272a] bg-[#18181b] p-5 shadow-xl flex flex-col gap-4 animate-fade-in-up"
               >
                 <p className="text-xs font-bold text-zinc-400 uppercase tracking-widest border-b border-[#27272a] pb-2">
-                  New Academic Task
+                  {t(language, "academics.newTask", "New Academic Task")}
                 </p>
                 <div className="grid gap-3">
                   <input
-                    placeholder="Task title"
+                    placeholder={t(language, "academics.taskTitlePlaceholder", "Task title")}
                     value={taskDraft.title}
                     onChange={(event) =>
                       setTaskDraft((current) => ({
@@ -395,7 +408,7 @@ export function AcademicsPage() {
                     }
                     className="rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2.5 text-zinc-100 text-sm focus:border-amber-500 focus:outline-none cursor-pointer w-full block transition-colors duration-200 hover:border-zinc-750"
                   >
-                    <option value="">Choose subject</option>
+                    <option value="">{t(language, "academics.chooseSubject", "Choose subject")}</option>
                     {activeSubjects.map((subject) => (
                       <option key={subject.id} value={subject.id}>
                         {subject.name}
@@ -414,7 +427,7 @@ export function AcademicsPage() {
                   >
                     {ACADEMIC_TYPES.map((type) => (
                       <option key={type} value={type}>
-                        {type}
+                          {t(language, `academics.type.${type}`, type)}
                       </option>
                     ))}
                   </select>
@@ -431,7 +444,7 @@ export function AcademicsPage() {
                     >
                       {TASK_PRIORITIES.map((priority) => (
                         <option key={priority} value={priority}>
-                          {priority}
+                          {t(language, `enum.priority.${priority}`, priority)}
                         </option>
                       ))}
                     </select>
@@ -447,14 +460,14 @@ export function AcademicsPage() {
                     >
                       {TASK_ENERGY_LEVELS.map((energy) => (
                         <option key={energy} value={energy}>
-                          {energy}
+                          {t(language, `enum.energy.${energy}`, energy)}
                         </option>
                       ))}
                     </select>
                   </div>
                   <div className="grid grid-cols-2 gap-3.5">
                     <label className="grid gap-1 text-[10px] font-bold text-zinc-500 uppercase tracking-wide">
-                      Due Date
+                      {t(language, "goals.deadline", "Deadline")}
                       <input
                         type="date"
                         value={taskDraft.dueDate}
@@ -468,7 +481,7 @@ export function AcademicsPage() {
                       />
                     </label>
                     <label className="grid gap-1 text-[10px] font-bold text-zinc-500 uppercase tracking-wide">
-                      Planned Date
+                      {t(language, "task.plannedDate")}
                       <input
                         type="date"
                         value={taskDraft.plannedDate}
@@ -483,7 +496,7 @@ export function AcademicsPage() {
                     </label>
                   </div>
                   <label className="grid gap-1.5 text-[10px] font-bold text-zinc-500 uppercase tracking-wide">
-                    Est. Study Minutes
+                    {t(language, "academics.estimatedStudyMinutes", "Est. Study Minutes")}
                     <input
                       type="number"
                       min="1"
@@ -498,7 +511,7 @@ export function AcademicsPage() {
                     />
                   </label>
                   <textarea
-                    placeholder="Task details or rubric notes..."
+                    placeholder={t(language, "academics.taskNotesPlaceholder", "Task details or rubric notes...")}
                     rows={3}
                     value={taskDraft.notes}
                     onChange={(event) =>
@@ -517,7 +530,7 @@ export function AcademicsPage() {
                   type="submit"
                   className="rounded-lg bg-amber-500 hover:bg-amber-400 text-zinc-950 px-4 py-2.5 text-xs font-bold uppercase tracking-wider transition w-full"
                 >
-                  Save Task
+                  {t(language, "academics.saveTask", "Save Task")}
                 </button>
               </form>
             )}
@@ -529,7 +542,7 @@ export function AcademicsPage() {
               onClick={() => setShowSessionForm(!showSessionForm)}
               className="rounded-lg bg-amber-500 hover:bg-amber-400 text-zinc-950 px-4 py-2.5 text-xs font-bold uppercase tracking-wider transition w-full shadow-md text-center"
             >
-              {showSessionForm ? "Close Session Form" : "+ Log Study Session"}
+              {showSessionForm ? t(language, "academics.closeSessionForm", "Close Session Form") : t(language, "academics.logStudySession", "+ Log Study Session")}
             </button>
             {showSessionForm && (
               <form
@@ -537,7 +550,7 @@ export function AcademicsPage() {
                 className="mt-3 rounded-xl border border-[#27272a] bg-[#18181b] p-5 shadow-xl flex flex-col gap-4 animate-fade-in-up"
               >
                 <p className="text-xs font-bold text-zinc-400 uppercase tracking-widest border-b border-[#27272a] pb-2">
-                  New Study Session
+                  {t(language, "academics.newStudySession", "New Study Session")}
                 </p>
                 <div className="grid gap-3">
                   <select
@@ -550,7 +563,7 @@ export function AcademicsPage() {
                     }
                     className="rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2.5 text-zinc-100 text-sm focus:border-amber-500 focus:outline-none cursor-pointer w-full block transition-colors duration-200 hover:border-zinc-750"
                   >
-                    <option value="">Choose subject</option>
+                    <option value="">{t(language, "academics.chooseSubject", "Choose subject")}</option>
                     {activeSubjects.map((subject) => (
                       <option key={subject.id} value={subject.id}>
                         {subject.name}
@@ -569,7 +582,7 @@ export function AcademicsPage() {
                     className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2 text-zinc-100 text-sm focus:border-amber-500 focus:outline-none"
                   />
                   <label className="grid gap-1 text-[10px] font-bold text-zinc-500 uppercase tracking-wide">
-                    Duration Minutes
+                    {t(language, "academics.durationMinutes", "Duration Minutes")}
                     <input
                       type="number"
                       min="1"
@@ -585,7 +598,7 @@ export function AcademicsPage() {
                   </label>
                   <label className="grid gap-2 text-xs font-semibold text-zinc-400 uppercase tracking-wider bg-[#121214] p-3 rounded-lg border border-[#27272a]">
                     <div className="flex justify-between">
-                      <span>Focus Level</span>
+                      <span>{t(language, "academics.focusLevel", "Focus Level")}</span>
                       <span className="text-amber-500 font-bold">{sessionDraft.focusLevel}/10</span>
                     </div>
                     <input
@@ -603,7 +616,7 @@ export function AcademicsPage() {
                     />
                   </label>
                   <textarea
-                    placeholder="Reflective session notes..."
+                    placeholder={t(language, "academics.sessionNotesPlaceholder", "Reflective session notes...")}
                     rows={3}
                     value={sessionDraft.notes}
                     onChange={(event) =>
@@ -622,7 +635,7 @@ export function AcademicsPage() {
                   type="submit"
                   className="rounded-lg bg-amber-500 hover:bg-amber-400 text-zinc-950 px-4 py-2.5 text-xs font-bold uppercase tracking-wider transition w-full"
                 >
-                  Save Session
+                  {t(language, "academics.saveSession", "Save Session")}
                 </button>
               </form>
             )}
@@ -636,14 +649,14 @@ export function AcademicsPage() {
             <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between border-b border-[#27272a] pb-3 mb-4">
               <div>
                 <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">
-                  Academic Courses
+                  {t(language, "academics.courses", "Academic Courses")}
                 </p>
                 <h2 className="text-xl font-bold text-zinc-100">
-                  Active Subjects
+                  {t(language, "academics.activeSubjectsTitle", "Active Subjects")}
                 </h2>
               </div>
               <p className="text-xs text-zinc-400 font-semibold uppercase tracking-wider">
-                {activeSubjects.length} active subject ledger
+                {activeSubjects.length} {t(language, "academics.activeSubjectLedger", "active subject ledger")}
               </p>
             </div>
             <div className="grid gap-4.5 md:grid-cols-2 xl:grid-cols-3">
@@ -662,7 +675,7 @@ export function AcademicsPage() {
                             {subject.name}
                           </h3>
                           <p className="mt-0.5 text-[10px] text-zinc-500">
-                            {subject.professor || "No professor set"}
+                            {subject.professor || t(language, "academics.noProfessorSet", "No professor set")}
                           </p>
                         </div>
                         <span className={`rounded-full bg-zinc-900 border border-[#27272a] px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider ${colorInfo.textClass}`}>
@@ -670,26 +683,26 @@ export function AcademicsPage() {
                         </span>
                       </div>
                       <div className="mt-4 grid gap-2 text-xs text-zinc-400">
-                        <p className="font-medium text-zinc-300">{stats.pendingCount} pending tasks</p>
+                        <p className="font-medium text-zinc-300">{stats.pendingCount} {t(language, "academics.pendingTasksLower", "pending tasks")}</p>
                         <p className="text-zinc-500">
-                          Next deadline:{" "}
-                          <span className="text-zinc-400 font-semibold">{stats.nextDeadline?.dueDate ?? "None"}</span>
+                          {t(language, "academics.nextDeadline", "Next deadline")}:{" "}
+                          <span className="text-zinc-400 font-semibold">{stats.nextDeadline?.dueDate ?? t(language, "common.none")}</span>
                         </p>
-                        <p className="text-zinc-550">{stats.studyMinutesThisWeek} min studied this week</p>
+                        <p className="text-zinc-550">{stats.studyMinutesThisWeek} {t(language, "academics.minStudiedWeek", "min studied this week")}</p>
                       </div>
                       <button
                         type="button"
                         onClick={() => archiveSubject(subject.id)}
                         className="mt-4 rounded-lg border border-[#27272a] bg-[#18181b] px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider text-zinc-400 transition hover:bg-zinc-800"
                       >
-                        Archive Course
+                        {t(language, "academics.archiveCourse", "Archive Course")}
                       </button>
                     </article>
                   );
                 })
               ) : (
                 <p className="rounded-lg border border-[#27272a] bg-[#121214] px-4 py-4 text-xs text-zinc-500 italic col-span-3">
-                  No courses active. Use form on the left to set up subjects.
+                  {t(language, "academics.emptySubjects", "No courses active. Use form on the left to set up subjects.")}
                 </p>
               )}
             </div>
@@ -700,7 +713,7 @@ export function AcademicsPage() {
             {/* Upcoming academic deadlines */}
             <div className="rounded-xl border border-[#27272a] bg-[#18181b] p-6 shadow-xl">
               <h3 className="text-xs font-bold uppercase tracking-widest text-zinc-450 border-b border-[#27272a] pb-2 mb-4">
-                Upcoming Academic Deadlines
+                {t(language, "academics.upcomingDeadlines", "Upcoming Academic Deadlines")}
               </h3>
               <div className="grid gap-3 max-h-[350px] overflow-y-auto pr-1">
                 {deadlines.length > 0 ? (
@@ -725,12 +738,12 @@ export function AcademicsPage() {
                             </p>
                             <p className="mt-1 text-[10px] text-zinc-500 uppercase font-bold tracking-wider">
                               {subjectName(task.subjectId)} &middot;{" "}
-                              {task.academicType ?? "Other"} &middot; {task.priority}
+                              {t(language, `academics.type.${task.academicType ?? "Other"}`, task.academicType ?? "Other")} &middot; {t(language, `enum.priority.${task.priority}`, task.priority)}
                             </p>
                           </div>
                           <div className="text-right sm:shrink-0">
                             <span className="text-xs font-bold text-zinc-300">{task.dueDate}</span>
-                            <span className="text-[10px] text-zinc-550 block font-mono">{task.estimatedMinutes} mins</span>
+                            <span className="text-[10px] text-zinc-550 block font-mono">{task.estimatedMinutes} {t(language, "common.minutes").toLowerCase()}</span>
                           </div>
                         </div>
                       </article>
@@ -738,7 +751,7 @@ export function AcademicsPage() {
                   })
                 ) : (
                   <p className="rounded-lg border border-[#27272a] bg-[#121214] px-4 py-4 text-xs text-zinc-500 italic">
-                    No academic tasks active in queue.
+                    {t(language, "academics.emptyDeadlines", "No academic tasks active in queue.")}
                   </p>
                 )}
               </div>
@@ -747,19 +760,19 @@ export function AcademicsPage() {
             {/* Academic Workload Status */}
             <div className="rounded-xl border border-[#27272a] bg-[#18181b] p-6 shadow-xl">
               <h3 className="text-xs font-bold uppercase tracking-widest text-zinc-450 border-b border-[#27272a] pb-2 mb-4">
-                Workload Audit
+                {t(language, "academics.workloadAudit", "Workload Audit")}
               </h3>
               <div className="grid gap-4">
                 <div className="rounded-lg border border-[#27272a] bg-[#121214] px-4 py-3.5 text-center">
-                  <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">Today Planned</p>
+                  <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">{t(language, "academics.todayPlanned", "Today Planned")}</p>
                   <p className="mt-1 text-xl font-extrabold text-zinc-100">
-                    {workload.todayMinutes} mins
+                    {workload.todayMinutes} {t(language, "common.minutes").toLowerCase()}
                   </p>
                 </div>
                 <div className="rounded-lg border border-[#27272a] bg-[#121214] px-4 py-3.5 text-center">
-                  <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">This Week Target</p>
+                  <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">{t(language, "academics.thisWeekTarget", "This Week Target")}</p>
                   <p className="mt-1 text-xl font-extrabold text-zinc-100">
-                    {workload.weekMinutes} mins
+                    {workload.weekMinutes} {t(language, "common.minutes").toLowerCase()}
                   </p>
                 </div>
                 <div className={`rounded-lg border px-4 py-3.5 text-center transition ${
@@ -771,7 +784,7 @@ export function AcademicsPage() {
                     ? "bg-blue-500/10 border-blue-500/25 text-blue-400"
                     : "bg-red-500/10 border-red-500/25 text-red-400"
                 }`}>
-                  <p className="text-[10px] font-bold uppercase tracking-wider">Weekly Workload Level</p>
+                  <p className="text-[10px] font-bold uppercase tracking-wider">{t(language, "academics.weeklyWorkloadLevel", "Weekly Workload Level")}</p>
                   <p className="mt-1 text-xl font-extrabold">
                     {workloadStatus.status}
                   </p>
@@ -783,7 +796,7 @@ export function AcademicsPage() {
           {/* Today scheduled academic tasks */}
           <section className="rounded-xl border border-[#27272a] bg-[#18181b] p-6 shadow-xl">
             <h3 className="text-xs font-bold uppercase tracking-widest text-zinc-450 border-b border-[#27272a] pb-2 mb-4">
-              Academic tasks inside Today Agenda
+              {t(language, "academics.todayAgendaTasks", "Academic tasks inside Today Agenda")}
             </h3>
             <div className="grid gap-3.5">
               {todayAcademicTasks.length > 0 ? (
@@ -809,7 +822,7 @@ export function AcademicsPage() {
                 ))
               ) : (
                 <p className="rounded-lg border border-[#27272a] bg-[#121214] px-4 py-4 text-xs text-zinc-500 italic">
-                  No academic tasks are scheduled in Today Agenda yet.
+                  {t(language, "academics.emptyTodayAgenda", "No academic tasks are scheduled in Today Agenda yet.")}
                 </p>
               )}
             </div>
@@ -820,14 +833,14 @@ export function AcademicsPage() {
             <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between border-b border-[#27272a] pb-3 mb-4">
               <div>
                 <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">
-                  Log Ledger
+                  {t(language, "academics.logLedger", "Log Ledger")}
                 </p>
                 <h2 className="text-xl font-bold text-zinc-100">
-                  Recent study sessions
+                  {t(language, "academics.recentStudySessions", "Recent study sessions")}
                 </h2>
               </div>
               <p className="text-xs text-zinc-400 font-bold uppercase">
-                {overview.studyMinutesThisWeek} min logged this week
+                {overview.studyMinutesThisWeek} {t(language, "academics.minLoggedWeek", "min logged this week")}
               </p>
             </div>
             <div className="grid gap-3.5 max-h-[300px] overflow-y-auto pr-1">
@@ -842,7 +855,7 @@ export function AcademicsPage() {
                         {subjectName(session.subjectId)}
                       </p>
                       <p className="text-[10px] text-zinc-500 mt-1">
-                        {session.date} &middot; Duration: {session.durationMinutes} mins &middot; Focus Level: {session.focusLevel}/10
+                        {session.date} &middot; {t(language, "academics.duration", "Duration")}: {session.durationMinutes} {t(language, "common.minutes").toLowerCase()} &middot; {t(language, "academics.focusLevel", "Focus Level")}: {session.focusLevel}/10
                       </p>
                       {session.notes && (
                         <p className="mt-2 text-xs leading-relaxed text-zinc-400 italic">
@@ -855,13 +868,13 @@ export function AcademicsPage() {
                       onClick={() => deleteStudySession(session.id)}
                       className="rounded-lg border border-[#27272a] bg-[#18181b] px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider text-red-400 transition hover:bg-red-500/10 hover:border-red-500/20"
                     >
-                      Delete
+                      {t(language, "common.delete")}
                     </button>
                   </article>
                 ))
               ) : (
                 <p className="rounded-lg border border-[#27272a] bg-[#121214] px-4 py-6 text-xs text-zinc-500 italic text-center">
-                  No study sessions recorded. Use panel on left to log focus sessions.
+                  {t(language, "academics.emptyStudySessions", "No study sessions recorded. Use panel on left to log focus sessions.")}
                 </p>
               )}
             </div>

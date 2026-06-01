@@ -9,6 +9,20 @@ Supabase support one module at a time.
 This checklist applies to any module that introduces cloud tables, cloud CRUD,
 manual uploads, migration prompts, or sync behavior.
 
+Atlas also includes a lightweight manual helper in Settings:
+
+- Location: `/settings` > `Cloud QA Checklist`.
+- Purpose: guide the same manual module checks from inside the app.
+- It does not run SQL.
+- It does not test RLS automatically.
+- It does not access secrets.
+- It does not read private record contents.
+- It does not change app data, sync state, XP, streaks, dashboard, or module
+  logic.
+- Checkbox completion is stored locally under `atlas.cloudQaChecklist` as
+  dev-helper state only.
+- Current helper cards cover Notes, Tasks, Goals, Academics, and Gym POCs.
+
 ## 2. Pre-Flight Checks
 
 - [ ] Confirm the current branch.

@@ -1,6 +1,8 @@
 "use client";
 
 import type { AtlasTask } from "@/lib/tasks";
+import { t } from "@/lib/i18n";
+import { useAtlasSettings } from "@/lib/settings";
 
 type TaskCardProps = {
   task: AtlasTask;
@@ -26,6 +28,9 @@ export function TaskCard({
   onMoveToday,
   onDelete,
 }: TaskCardProps) {
+  const { settings } = useAtlasSettings();
+  const language = settings.language;
+
   return (
     <article className="rounded-xl border border-[#27272a] bg-[#18181b] p-5 shadow-lg flex flex-col justify-between hover:border-zinc-500 transition-all duration-300">
       <div>
@@ -45,23 +50,23 @@ export function TaskCard({
 
         <div className="mt-4 flex flex-wrap gap-1.5 text-[10px] font-bold uppercase tracking-wider">
           <span className="rounded bg-zinc-800 border border-[#27272a] px-2 py-0.5 text-zinc-400">
-            {task.area}
+            {t(language, `enum.taskArea.${task.area}`, task.area)}
           </span>
           <span className="rounded bg-zinc-800 border border-[#27272a] px-2 py-0.5 text-zinc-400">
-            {task.taskType}
+            {t(language, `enum.taskType.${task.taskType}`, task.taskType)}
           </span>
           <span className={`rounded px-2 py-0.5 ${priorityTone[task.priority]}`}>
-            {task.priority}
+            {t(language, `enum.priority.${task.priority}`, task.priority)}
           </span>
           <span className="rounded bg-zinc-800 border border-[#27272a] px-2 py-0.5 text-zinc-400">
-            {task.energyRequired} energy
+            {t(language, `enum.energy.${task.energyRequired}`, task.energyRequired)} {t(language, "task.energySuffix")}
           </span>
           <span className="rounded bg-zinc-800 border border-[#27272a] px-2 py-0.5 text-zinc-400 font-mono">
             {task.estimatedMinutes} min
           </span>
           {task.dueDate ? (
             <span className="rounded bg-zinc-800 border border-[#27272a] px-2 py-0.5 text-zinc-400 font-mono">
-              due {task.dueDate}
+              {t(language, "task.due")} {task.dueDate}
             </span>
           ) : null}
         </div>
@@ -74,7 +79,7 @@ export function TaskCard({
             onClick={() => onStart(task)}
             className="rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2 text-zinc-300 transition hover:bg-zinc-800 active:scale-95"
           >
-            Start
+            {t(language, "task.start")}
           </button>
         ) : null}
         {task.status !== "completed" && onComplete ? (
@@ -83,7 +88,7 @@ export function TaskCard({
             onClick={() => onComplete(task)}
             className="rounded-lg bg-amber-500 text-zinc-950 px-3.5 py-2 transition hover:bg-amber-400 active:scale-95"
           >
-            Complete
+            {t(language, "task.complete")}
           </button>
         ) : null}
         {task.status !== "skipped" && onSkip ? (
@@ -92,7 +97,7 @@ export function TaskCard({
             onClick={() => onSkip(task)}
             className="rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2 text-zinc-300 transition hover:bg-zinc-800 active:scale-95"
           >
-            Skip
+            {t(language, "task.skip")}
           </button>
         ) : null}
         {task.status === "backlog" && onMoveToday ? (
@@ -101,7 +106,7 @@ export function TaskCard({
             onClick={() => onMoveToday(task)}
             className="rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2 text-zinc-300 transition hover:bg-zinc-800 active:scale-95"
           >
-            Move to today
+            {t(language, "task.moveToday")}
           </button>
         ) : null}
         {onDelete ? (
@@ -110,7 +115,7 @@ export function TaskCard({
             onClick={() => onDelete(task)}
             className="rounded-lg border border-red-500/25 bg-red-500/10 px-3.5 py-2 text-red-400 transition hover:bg-red-500/20 active:scale-95 ml-auto"
           >
-            Delete
+            {t(language, "common.delete")}
           </button>
         ) : null}
       </div>

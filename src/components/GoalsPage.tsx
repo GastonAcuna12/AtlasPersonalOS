@@ -8,6 +8,7 @@ import { getGoalProgress, useGoals, type GoalDraft, type GoalStatus, type Goal }
 import { useXP } from "@/lib/xp";
 import { useSavings, formatMoney, formatDateStable } from "@/lib/finances";
 import { useAtlasSettings } from "@/lib/settings";
+import { t } from "@/lib/i18n";
 import type { Currency } from "@/types/atlas";
 
 const initialDraft: GoalDraft = {
@@ -28,6 +29,7 @@ export function GoalsPage() {
   const xp = useXP();
   const { savings, updateSavings } = useSavings();
   const { settings } = useAtlasSettings();
+  const language = settings.language;
 
   const [isEditingSavings, setIsEditingSavings] = useState(false);
   const [savingsAmountDraft, setSavingsAmountDraft] = useState(savings.currentAmount);
@@ -75,7 +77,7 @@ export function GoalsPage() {
 
   function handleSaveEdit(id: string) {
     if (!editTitle.trim()) {
-      alert("Goal title cannot be empty.");
+      alert(t(language, "goals.errorTitle", "Goal title cannot be empty."));
       return;
     }
 
@@ -104,7 +106,7 @@ export function GoalsPage() {
     event.preventDefault();
 
     if (!draft.title.trim()) {
-      setError("Add a goal title.");
+      setError(t(language, "goals.errorAddTitle", "Add a goal title."));
       return;
     }
 
@@ -129,10 +131,10 @@ export function GoalsPage() {
       <header className="flex flex-col gap-4 border-b border-[#27272a] pb-6 md:flex-row md:items-center md:justify-between">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-500">
-            Objectives &amp; Vision
+            {t(language, "goals.eyebrow", "Objectives & Vision")}
           </p>
           <h1 className="mt-2 text-4xl font-bold tracking-tight text-zinc-100 sm:text-5xl">
-            Goals Tracker
+            {t(language, "goals.title", "Goals Tracker")}
           </h1>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -142,13 +144,13 @@ export function GoalsPage() {
             disabled={goals.length === 0}
             className="rounded-lg border border-[#27272a] bg-[#18181b] px-4 py-2 text-xs font-bold uppercase tracking-wider text-zinc-300 transition hover:bg-zinc-850 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            Export Goals summary
+            {t(language, "goals.exportSummary", "Export Goals summary")}
           </button>
           <Link
             href="/"
             className="rounded-lg border border-[#27272a] bg-[#18181b] px-4 py-2 text-xs font-bold uppercase tracking-wider text-zinc-300 transition hover:bg-zinc-800 hover:text-white"
           >
-            Dashboard
+            {t(language, "common.dashboard")}
           </Link>
         </div>
       </header>
@@ -163,7 +165,7 @@ export function GoalsPage() {
             onClick={() => setShowAddForm(!showAddForm)}
             className="rounded-lg bg-amber-500 hover:bg-amber-400 text-zinc-950 px-4 py-3 text-xs font-bold uppercase tracking-wider transition w-full shadow-md text-center"
           >
-            {showAddForm ? "Close Form" : "+ Create New Goal"}
+            {showAddForm ? t(language, "goals.closeForm", "Close Form") : t(language, "goals.createNew", "+ Create New Goal")}
           </button>
 
           {showAddForm && (
@@ -172,13 +174,13 @@ export function GoalsPage() {
               className="rounded-xl border border-[#27272a] bg-[#18181b] p-6 shadow-xl flex flex-col gap-4.5 animate-fade-in-up"
             >
               <p className="text-xs font-bold text-zinc-400 uppercase tracking-widest border-b border-[#27272a] pb-2 mb-1">
-                New Goal Details
+                {t(language, "goals.newDetails", "New Goal Details")}
               </p>
               
               <label className="grid gap-2 text-xs font-semibold text-zinc-400 uppercase tracking-wider">
-                Goal Title *
+                {t(language, "goals.goalTitle", "Goal Title *")}
                 <input
-                  placeholder="e.g. Build $10,000 emergency fund"
+                  placeholder={t(language, "goals.titlePlaceholder", "e.g. Build $10,000 emergency fund")}
                   value={draft.title}
                   onChange={(event) =>
                     setDraft((current) => ({ ...current, title: event.target.value }))
@@ -189,9 +191,9 @@ export function GoalsPage() {
 
               <div className="grid grid-cols-2 gap-3.5">
                 <label className="grid gap-2 text-xs font-semibold text-zinc-400 uppercase tracking-wider">
-                  Target Area
+                  {t(language, "goals.targetArea", "Target Area")}
                   <input
-                    placeholder="e.g. Personal, Health"
+                    placeholder={t(language, "goals.areaPlaceholder", "e.g. Personal, Health")}
                     value={draft.area}
                     onChange={(event) =>
                       setDraft((current) => ({ ...current, area: event.target.value }))
@@ -201,7 +203,7 @@ export function GoalsPage() {
                 </label>
 
                 <label className="grid gap-2 text-xs font-semibold text-zinc-400 uppercase tracking-wider">
-                  Initial Status
+                  {t(language, "goals.initialStatus", "Initial Status")}
                   <select
                     value={draft.status}
                     onChange={(event) =>
@@ -212,16 +214,16 @@ export function GoalsPage() {
                     }
                     className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2 text-zinc-100 text-sm focus:border-amber-500 focus:outline-none"
                   >
-                    <option value="active">Active</option>
-                    <option value="completed">Completed</option>
-                    <option value="paused">Paused</option>
+                    <option value="active">{t(language, "common.active")}</option>
+                    <option value="completed">{t(language, "common.completed")}</option>
+                    <option value="paused">{t(language, "common.paused")}</option>
                   </select>
                 </label>
               </div>
 
               <div className="grid grid-cols-2 gap-3.5">
                 <label className="grid gap-2 text-xs font-semibold text-zinc-400 uppercase tracking-wider">
-                  Financial Link
+                  {t(language, "goals.financialLink", "Financial Link")}
                   <select
                     value={draft.linkedFinanceMetric}
                     onChange={(event) =>
@@ -232,13 +234,13 @@ export function GoalsPage() {
                     }
                     className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2 text-zinc-100 text-sm focus:border-amber-500 focus:outline-none"
                   >
-                    <option value="none">None</option>
-                    <option value="savings">Savings Vault</option>
+                    <option value="none">{t(language, "common.none")}</option>
+                    <option value="savings">{t(language, "goals.savingsVault", "Savings Vault")}</option>
                   </select>
                 </label>
 
                 <label className="grid gap-2 text-xs font-semibold text-zinc-400 uppercase tracking-wider">
-                  Base Currency
+                  {t(language, "goals.baseCurrency", "Base Currency")}
                   <select
                     value={draft.currency}
                     onChange={(event) =>
@@ -257,9 +259,9 @@ export function GoalsPage() {
 
               <div className="grid gap-3.5">
                 <label className="grid gap-2 text-xs font-semibold text-zinc-400 uppercase tracking-wider">
-                  Metric Unit Description
+                  {t(language, "goals.metricUnit", "Metric Unit Description")}
                   <input
-                    placeholder="e.g. USD, kg, books, miles"
+                    placeholder={t(language, "goals.unitPlaceholder", "e.g. USD, kg, books, miles")}
                     value={draft.unit}
                     onChange={(event) =>
                       setDraft((current) => ({ ...current, unit: event.target.value }))
@@ -270,12 +272,12 @@ export function GoalsPage() {
 
                 <div className="grid grid-cols-2 gap-3.5">
                   <label className="grid gap-2 text-xs font-semibold text-zinc-400 uppercase tracking-wider">
-                    Current Progress
+                    {t(language, "goals.currentProgress", "Current Progress")}
                     <input
                       type="number"
                       disabled={draft.linkedFinanceMetric === "savings"}
                       value={draft.linkedFinanceMetric === "savings" ? "" : draft.currentValue}
-                      placeholder={draft.linkedFinanceMetric === "savings" ? "Auto" : "0"}
+                      placeholder={draft.linkedFinanceMetric === "savings" ? t(language, "goals.auto", "Auto") : "0"}
                       onChange={(event) =>
                         setDraft((current) => ({
                           ...current,
@@ -287,7 +289,7 @@ export function GoalsPage() {
                   </label>
 
                   <label className="grid gap-2 text-xs font-semibold text-zinc-400 uppercase tracking-wider">
-                    Target Goal Value
+                    {t(language, "goals.targetValue", "Target Goal Value")}
                     <input
                       type="number"
                       value={draft.targetValue}
@@ -304,7 +306,7 @@ export function GoalsPage() {
               </div>
 
               <label className="grid gap-2 text-xs font-semibold text-zinc-400 uppercase tracking-wider">
-                Milestone Deadline
+                {t(language, "goals.milestoneDeadline", "Milestone Deadline")}
                 <input
                   type="date"
                   value={draft.deadline}
@@ -316,9 +318,9 @@ export function GoalsPage() {
               </label>
 
               <label className="grid gap-2 text-xs font-semibold text-zinc-400 uppercase tracking-wider">
-                Objective Action Notes
+                {t(language, "goals.objectiveNotes", "Objective Action Notes")}
                 <textarea
-                  placeholder="Describe strategy, schedule, or details..."
+                  placeholder={t(language, "goals.notesPlaceholder", "Describe strategy, schedule, or details...")}
                   rows={3}
                   value={draft.notes}
                   onChange={(event) =>
@@ -336,7 +338,7 @@ export function GoalsPage() {
                 type="submit"
                 className="rounded-lg bg-amber-500 hover:bg-amber-400 text-zinc-950 px-4 py-3 text-xs font-bold uppercase tracking-wider transition w-full"
               >
-                Save Goal Objective
+                {t(language, "goals.saveObjective", "Save Goal Objective")}
               </button>
             </form>
           )}
@@ -344,14 +346,14 @@ export function GoalsPage() {
           {/* Compact Savings Vault Control */}
           <div className="rounded-xl border border-amber-500/20 bg-[#18181b] p-5 shadow-lg flex flex-col gap-3.5 mt-2">
             <div>
-              <p className="text-[10px] font-bold text-amber-500 uppercase tracking-wider leading-none mb-1">Vault Balance</p>
-              <h3 className="text-sm font-bold text-zinc-300">Goal Savings Vault</h3>
+              <p className="text-[10px] font-bold text-amber-500 uppercase tracking-wider leading-none mb-1">{t(language, "goals.vaultBalance", "Vault Balance")}</p>
+              <h3 className="text-sm font-bold text-zinc-300">{t(language, "goals.savingsVault", "Goal Savings Vault")}</h3>
             </div>
 
             {isEditingSavings ? (
               <div className="flex flex-col gap-3 rounded-lg bg-[#121214] p-3.5 border border-[#27272a] animate-fade-in-up">
                 <label className="grid gap-1.5 text-[10px] font-semibold text-zinc-400 uppercase tracking-wider">
-                  Amount
+                  {t(language, "goals.amount", "Amount")}
                   <input
                     type="number"
                     value={savingsAmountDraft}
@@ -360,7 +362,7 @@ export function GoalsPage() {
                   />
                 </label>
                 <label className="grid gap-1.5 text-[10px] font-semibold text-zinc-400 uppercase tracking-wider">
-                  Currency
+                  {t(language, "goals.currency", "Currency")}
                   <select
                     value={savingsCurrencyDraft}
                     onChange={(e) => setSavingsCurrencyDraft(e.target.value as Currency)}
@@ -375,7 +377,7 @@ export function GoalsPage() {
                     onClick={handleSaveSavings}
                     className="rounded bg-amber-500 hover:bg-amber-400 text-zinc-950 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider transition flex-1 text-center cursor-pointer"
                   >
-                    Save
+                    {t(language, "common.save")}
                   </button>
                   <button
                     onClick={() => setIsEditingSavings(false)}
@@ -399,28 +401,28 @@ export function GoalsPage() {
                     }}
                     className="text-[10px] font-bold uppercase tracking-wider text-amber-400 hover:text-amber-300 transition hover:underline cursor-pointer"
                   >
-                    Adjust Balance
+                    {t(language, "goals.adjustBalance", "Adjust Balance")}
                   </button>
                 </div>
                 {savings.updatedAt && (
                   <p className="text-[9px] text-zinc-500 italic leading-none">
-                    Synced: {formatDateStable(savings.updatedAt)}
+                    {t(language, "goals.synced", "Synced")}: {formatDateStable(savings.updatedAt)}
                   </p>
                 )}
               </div>
             )}
 
             <div className="text-[10px] text-zinc-400 bg-amber-500/5 border border-amber-500/10 p-3 rounded-lg leading-normal flex flex-col gap-1.5">
-              <p className="font-bold text-amber-450 uppercase tracking-wide leading-none">🔒 Reserved Savings Notice</p>
-              <p>These funds are completely reserved for target milestones and excluded from spendable Available Money.</p>
+              <p className="font-bold text-amber-450 uppercase tracking-wide leading-none">🔒 {t(language, "goals.reservedNotice", "Reserved Savings Notice")}</p>
+              <p>{t(language, "goals.reservedDescription", "These funds are completely reserved for target milestones and excluded from spendable Available Money.")}</p>
             </div>
           </div>
         </div>
 
         {/* Right Column: Goal list */}
         <section className="rounded-xl border border-[#27272a] bg-[#18181b] p-6 shadow-xl">
-          <h3 className="text-base font-bold text-zinc-100">Active Goals Directory</h3>
-          <p className="text-xs text-zinc-400 mt-1">Review active targets, metrics, and linked saving progress.</p>
+          <h3 className="text-base font-bold text-zinc-100">{t(language, "goals.activeDirectory", "Active Goals Directory")}</h3>
+          <p className="text-xs text-zinc-400 mt-1">{t(language, "goals.directoryDescription", "Review active targets, metrics, and linked saving progress.")}</p>
           
           <div className="mt-6 grid gap-4">
             {goals.length > 0 ? (
@@ -441,17 +443,17 @@ export function GoalsPage() {
                     {isEditing ? (
                       <div className="grid gap-4.5 text-xs">
                         <div className="flex justify-between items-center border-b border-[#27272a] pb-2">
-                          <span className="font-bold text-amber-500 uppercase tracking-widest text-[10px]">Editing Goal Objective</span>
+                          <span className="font-bold text-amber-500 uppercase tracking-widest text-[10px]">{t(language, "goals.editingObjective", "Editing Goal Objective")}</span>
                           <button
                             onClick={() => setEditingGoalId(null)}
                             className="text-zinc-400 hover:text-white"
                           >
-                            Discard
+                            {t(language, "goals.discard", "Discard")}
                           </button>
                         </div>
                         
                         <label className="grid gap-2 font-semibold text-zinc-400 uppercase tracking-wider">
-                          Goal Title
+                          {t(language, "goals.goalTitleShort", "Goal Title")}
                           <input
                             type="text"
                             value={editTitle}
@@ -462,7 +464,7 @@ export function GoalsPage() {
 
                         <div className="grid grid-cols-2 gap-3.5">
                           <label className="grid gap-2 font-semibold text-zinc-400 uppercase tracking-wider">
-                            Area
+                            {t(language, "common.area")}
                             <input
                               type="text"
                               value={editArea}
@@ -472,22 +474,22 @@ export function GoalsPage() {
                           </label>
 
                           <label className="grid gap-2 font-semibold text-zinc-400 uppercase tracking-wider">
-                            Status
+                            {t(language, "common.status")}
                             <select
                               value={editStatus}
                               onChange={(e) => setEditStatus(e.target.value as GoalStatus)}
                               className="rounded-lg border border-[#27272a] bg-[#18181b] px-3 py-1.5 text-zinc-100 focus:outline-none"
                             >
-                              <option value="active">Active</option>
-                              <option value="completed">Completed</option>
-                              <option value="paused">Paused</option>
+                              <option value="active">{t(language, "common.active")}</option>
+                              <option value="completed">{t(language, "common.completed")}</option>
+                              <option value="paused">{t(language, "common.paused")}</option>
                             </select>
                           </label>
                         </div>
 
                         <div className="grid grid-cols-2 gap-3.5">
                           <label className="grid gap-2 font-semibold text-zinc-400 uppercase tracking-wider">
-                            Financial Link
+                            {t(language, "goals.financialLink", "Financial Link")}
                             <select
                               value={editLinkedFinanceMetric}
                               onChange={(e) =>
@@ -495,13 +497,13 @@ export function GoalsPage() {
                               }
                               className="rounded-lg border border-[#27272a] bg-[#18181b] px-3 py-1.5 text-zinc-100 focus:outline-none"
                             >
-                              <option value="none">None</option>
-                              <option value="savings">Savings Vault</option>
+                              <option value="none">{t(language, "common.none")}</option>
+                              <option value="savings">{t(language, "goals.savingsVault", "Savings Vault")}</option>
                             </select>
                           </label>
 
                           <label className="grid gap-2 font-semibold text-zinc-400 uppercase tracking-wider">
-                            Currency
+                            {t(language, "goals.currency", "Currency")}
                             <select
                               value={editCurrency}
                               onChange={(e) => setEditCurrency(e.target.value as Currency)}
@@ -515,7 +517,7 @@ export function GoalsPage() {
 
                         <div className="grid gap-3.5">
                           <label className="grid gap-2 font-semibold text-zinc-400 uppercase tracking-wider">
-                            Unit
+                            {t(language, "goals.unit", "Unit")}
                             <input
                               type="text"
                               value={editUnit}
@@ -526,19 +528,19 @@ export function GoalsPage() {
 
                           <div className="grid grid-cols-2 gap-3.5">
                             <label className="grid gap-2 font-semibold text-zinc-400 uppercase tracking-wider">
-                              Current Progress
+                              {t(language, "goals.currentProgress", "Current Progress")}
                               <input
                                 type="number"
                                 disabled={editLinkedFinanceMetric === "savings"}
                                 value={editLinkedFinanceMetric === "savings" ? "" : editCurrentValue}
-                                placeholder={editLinkedFinanceMetric === "savings" ? "Auto" : "0"}
+                                placeholder={editLinkedFinanceMetric === "savings" ? t(language, "goals.auto", "Auto") : "0"}
                                 onChange={(e) => setEditCurrentValue(Number(e.target.value) || 0)}
                                 className="rounded-lg border border-[#27272a] bg-[#18181b] px-3 py-1.5 text-zinc-100 focus:outline-none disabled:opacity-40"
                               />
                             </label>
 
                             <label className="grid gap-2 font-semibold text-zinc-400 uppercase tracking-wider">
-                              Target Goal Value
+                              {t(language, "goals.targetValue", "Target Goal Value")}
                               <input
                                 type="number"
                                 value={editTargetValue}
@@ -550,7 +552,7 @@ export function GoalsPage() {
                         </div>
 
                         <label className="grid gap-2 font-semibold text-zinc-400 uppercase tracking-wider">
-                          Deadline
+                          {t(language, "goals.deadline", "Deadline")}
                           <input
                             type="date"
                             value={editDeadline}
@@ -560,7 +562,7 @@ export function GoalsPage() {
                         </label>
 
                         <label className="grid gap-2 font-semibold text-zinc-400 uppercase tracking-wider">
-                          Notes
+                          {t(language, "common.notes")}
                           <textarea
                             rows={2}
                             value={editNotes}
@@ -575,14 +577,14 @@ export function GoalsPage() {
                             onClick={() => handleSaveEdit(goal.id)}
                             className="rounded-lg bg-amber-500 hover:bg-amber-400 text-zinc-950 px-4 py-2 font-bold uppercase tracking-wider transition"
                           >
-                            Save Changes
+                            {t(language, "goals.saveChanges", "Save Changes")}
                           </button>
                           <button
                             type="button"
                             onClick={() => setEditingGoalId(null)}
                             className="rounded-lg border border-[#27272a] bg-zinc-800 hover:bg-zinc-700 px-4 py-2 font-bold uppercase tracking-wider text-zinc-300 transition"
                           >
-                            Cancel
+                            {t(language, "common.cancel")}
                           </button>
                         </div>
                       </div>
@@ -598,16 +600,16 @@ export function GoalsPage() {
                                 {goal.area}
                               </span>
                               <span className="rounded bg-amber-500/10 border border-amber-500/25 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-amber-500 capitalize">
-                                {goal.status}
+                                {t(language, `goals.status.${goal.status}`, goal.status)}
                               </span>
                               {goal.linkedFinanceMetric === "savings" && (
                                 <span className="rounded bg-emerald-500/10 border border-emerald-500/25 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-emerald-400">
-                                  Funded by savings
+                                  {t(language, "goals.fundedBySavings", "Funded by savings")}
                                 </span>
                               )}
                             </div>
                             <p className="mt-1.5 text-xs text-zinc-500 font-bold uppercase tracking-wide">
-                              {goal.deadline ? `Deadline Target: ${goal.deadline}` : "No specific deadline"}
+                              {goal.deadline ? `${t(language, "goals.deadlineTarget", "Deadline Target")}: ${goal.deadline}` : t(language, "goals.noDeadline", "No specific deadline")}
                             </p>
                           </div>
                           <div className="flex gap-2 shrink-0">
@@ -616,14 +618,14 @@ export function GoalsPage() {
                               onClick={() => startEditing(goal)}
                               className="rounded-lg border border-[#27272a] bg-[#18181b] px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-zinc-300 transition hover:bg-zinc-800 hover:text-white"
                             >
-                              Edit
+                              {t(language, "goals.edit", "Edit")}
                             </button>
                             <button
                               type="button"
                               onClick={() => deleteGoal(goal.id)}
                               className="rounded-lg border border-[#27272a] bg-[#18181b] px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-red-400 transition hover:bg-red-500/10 hover:border-red-500/20"
                             >
-                              Delete
+                              {t(language, "common.delete")}
                             </button>
                           </div>
                         </div>
@@ -639,7 +641,7 @@ export function GoalsPage() {
                             <span>
                               {goal.linkedFinanceMetric === "savings" ? (
                                 <>
-                                  Savings balance vs{" "}
+                                  {t(language, "goals.savingsBalanceVs", "Savings balance vs")}{" "}
                                   {new Intl.NumberFormat().format(goal.targetValue)}{" "}
                                   {goal.unit || goal.currency}
                                 </>
@@ -667,7 +669,7 @@ export function GoalsPage() {
               })
             ) : (
               <p className="rounded-lg border border-[#27272a] bg-[#121214] px-4 py-6 text-xs text-zinc-500 italic text-center">
-                No goals created yet. Use panel on the left to set active targets.
+                {t(language, "goals.empty", "No goals created yet. Use panel on the left to set active targets.")}
               </p>
             )}
           </div>

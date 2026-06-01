@@ -3,6 +3,8 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { t } from "@/lib/i18n";
+import { useAtlasSettings } from "@/lib/settings";
 
 interface NavItem {
   label: string;
@@ -13,10 +15,12 @@ interface NavItem {
 export function SidebarNav() {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
+  const { settings } = useAtlasSettings();
+  const language = settings.language;
 
   const navItems: NavItem[] = [
     {
-      label: "Today",
+      label: t(language, "nav.today"),
       href: "/today",
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -25,7 +29,7 @@ export function SidebarNav() {
       ),
     },
     {
-      label: "Work",
+      label: t(language, "nav.work"),
       href: "/work",
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -34,7 +38,7 @@ export function SidebarNav() {
       ),
     },
     {
-      label: "Finances",
+      label: t(language, "nav.finances"),
       href: "/finances",
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -43,7 +47,7 @@ export function SidebarNav() {
       ),
     },
     {
-      label: "Gym",
+      label: t(language, "nav.gym"),
       href: "/gym",
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -52,7 +56,7 @@ export function SidebarNav() {
       ),
     },
     {
-      label: "Academics",
+      label: t(language, "nav.academics"),
       href: "/academics",
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -61,7 +65,7 @@ export function SidebarNav() {
       ),
     },
     {
-      label: "Goals",
+      label: t(language, "nav.goals"),
       href: "/goals",
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -70,7 +74,7 @@ export function SidebarNav() {
       ),
     },
     {
-      label: "Notes",
+      label: t(language, "nav.notes"),
       href: "/notes",
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -79,7 +83,7 @@ export function SidebarNav() {
       ),
     },
     {
-      label: "Review",
+      label: t(language, "nav.review"),
       href: "/review",
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -88,7 +92,7 @@ export function SidebarNav() {
       ),
     },
     {
-      label: "Calendar",
+      label: t(language, "nav.calendar"),
       href: "/calendar",
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -97,7 +101,7 @@ export function SidebarNav() {
       ),
     },
     {
-      label: "Settings",
+      label: t(language, "nav.settings"),
       href: "/settings",
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -116,13 +120,13 @@ export function SidebarNav() {
           <span className="h-2.5 w-2.5 rounded-full bg-amber-500 animate-pulse"></span>
           <div>
             <h1 className="text-base font-bold uppercase tracking-wider text-zinc-100">Atlas</h1>
-            <p className="text-[8px] text-zinc-500 font-medium uppercase tracking-widest leading-none">Personal OS</p>
+            <p className="text-[8px] text-zinc-500 font-medium uppercase tracking-widest leading-none">{t(language, "nav.personalOs")}</p>
           </div>
         </Link>
         <button
           onClick={() => setIsOpen(!isOpen)}
           className="p-2 text-zinc-400 hover:text-zinc-100 focus:outline-none"
-          aria-label="Toggle navigation menu"
+          aria-label={t(language, "nav.toggle")}
         >
           {isOpen ? (
             <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -169,7 +173,7 @@ export function SidebarNav() {
             <span className="h-3 w-3 rounded-full bg-amber-500 shrink-0 animate-pulse"></span>
             <div>
               <h1 className="text-xl font-bold uppercase tracking-wider text-zinc-100">Atlas</h1>
-              <p className="text-[10px] text-zinc-500 font-medium uppercase tracking-widest mt-0.5">Personal OS</p>
+              <p className="text-[10px] text-zinc-500 font-medium uppercase tracking-widest mt-0.5">{t(language, "nav.personalOs")}</p>
             </div>
           </Link>
           <nav aria-label="Atlas modules" className="grid gap-1.5 text-sm font-medium">
@@ -195,7 +199,7 @@ export function SidebarNav() {
           </nav>
         </div>
         <div className="mt-8 pt-4 border-t border-[#27272a] text-[10px] text-zinc-500 font-mono flex items-center justify-between">
-          <span>v1.3.0 · Offline Vault</span>
+          <span>v1.3.0 · {t(language, "nav.offlineVault")}</span>
           <span className="h-2 w-2 rounded-full bg-green-500/60 shadow-[0_0_8px_rgba(34,197,94,0.4)]"></span>
         </div>
       </aside>
