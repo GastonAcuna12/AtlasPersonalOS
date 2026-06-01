@@ -14,6 +14,8 @@ Daily Wrap, or daily planning status.
 - A non-running SQL setup file at `supabase/sql/002_tasks.sql`.
 - Separate display for loaded cloud tasks.
 - Manual cloud actions only.
+- SQL check constraints for Atlas task status, priority, energy, area, type,
+  and nonnegative estimated minutes.
 
 ## What Remains Disabled
 
@@ -64,6 +66,24 @@ Atlas local task statuses are `backlog`, `today`, `in_progress`, `completed`,
 and `skipped`, so the SQL default uses `backlog` instead of a generic `active`
 status.
 
+## Data Constraints
+
+The SQL now constrains enum-like task fields to the same values used by the
+Atlas shared task model:
+
+- `status`: `backlog`, `today`, `in_progress`, `completed`, `skipped`
+- `priority`: `low`, `medium`, `high`, `critical`
+- `energy_required`: `low`, `medium`, `high`
+- `area`: `Work`, `Academic`, `Personal`, `Finance`, `Fitness`, `Atlas`,
+  `Content`, `Other`
+- `task_type`: `Deep Work`, `Quick Task`, `University`, `Client Work`,
+  `Admin`, `Creative`, `Health`, `Finance`, `Errand`, `Review`
+- `estimated_minutes`: must be null or greater than or equal to `0`
+
+Nullable fields still allow `null`. The constraints prevent invalid non-null
+cloud task values from being inserted or updated while preserving the current
+local-first app behavior.
+
 ## RLS Policy Plan
 
 Every cloud task must be owned by a Supabase Auth user through `user_id`.
@@ -91,6 +111,7 @@ To test manually:
 3. Run it manually.
 4. Confirm RLS is enabled on `public.tasks`.
 5. Confirm all four ownership policies exist.
+6. Rerun the two-user RLS test after applying SQL updates.
 
 Do not add service role keys to Atlas client code.
 

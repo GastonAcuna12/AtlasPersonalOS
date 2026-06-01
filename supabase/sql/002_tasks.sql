@@ -33,6 +33,54 @@ comment on column public.tasks.user_id is
 comment on column public.tasks.status is
   'Atlas task status text: backlog, today, in_progress, completed, or skipped.';
 
+alter table public.tasks
+  drop constraint if exists tasks_area_check,
+  drop constraint if exists tasks_task_type_check,
+  drop constraint if exists tasks_priority_check,
+  drop constraint if exists tasks_status_check,
+  drop constraint if exists tasks_energy_required_check,
+  drop constraint if exists tasks_estimated_minutes_check;
+
+alter table public.tasks
+  add constraint tasks_area_check
+    check (
+      area is null
+      or area in ('Work', 'Academic', 'Personal', 'Finance', 'Fitness', 'Atlas', 'Content', 'Other')
+    ),
+  add constraint tasks_task_type_check
+    check (
+      task_type is null
+      or task_type in (
+        'Deep Work',
+        'Quick Task',
+        'University',
+        'Client Work',
+        'Admin',
+        'Creative',
+        'Health',
+        'Finance',
+        'Errand',
+        'Review'
+      )
+    ),
+  add constraint tasks_priority_check
+    check (
+      priority is null
+      or priority in ('low', 'medium', 'high', 'critical')
+    ),
+  add constraint tasks_status_check
+    check (status in ('backlog', 'today', 'in_progress', 'completed', 'skipped')),
+  add constraint tasks_energy_required_check
+    check (
+      energy_required is null
+      or energy_required in ('low', 'medium', 'high')
+    ),
+  add constraint tasks_estimated_minutes_check
+    check (
+      estimated_minutes is null
+      or estimated_minutes >= 0
+    );
+
 create index if not exists tasks_user_id_idx on public.tasks(user_id);
 create index if not exists tasks_updated_at_idx on public.tasks(updated_at desc);
 create index if not exists tasks_planned_date_idx on public.tasks(planned_date);
