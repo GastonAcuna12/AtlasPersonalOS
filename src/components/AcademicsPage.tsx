@@ -2,11 +2,9 @@
 
 import Link from "next/link";
 import { FormEvent, useState } from "react";
-import { AcademicsCloudPanel } from "@/components/AcademicsCloudPanel";
 import { TaskCard } from "@/components/tasks/TaskCard";
 import {
   ACADEMIC_TYPES,
-  getAcademicTasks,
   getAcademicOverview,
   getAcademicTasksForToday,
   getAcademicWorkload,
@@ -101,8 +99,6 @@ export function AcademicsPage() {
   const workloadStatus = getAcademicWorkloadStatus(tasks);
   const deadlines = getUpcomingAcademicDeadlines(tasks).slice(0, 8);
   const todayAcademicTasks = getAcademicTasksForToday(tasks);
-  const academicTasks = getAcademicTasks(tasks);
-
   function completeTask(task: AtlasTask) {
     updateTask(task.id, {
       status: "completed",
@@ -239,12 +235,6 @@ export function AcademicsPage() {
           </button>
         </div>
       </header>
-
-      <AcademicsCloudPanel
-        localSubjects={subjects}
-        localAcademicTasks={academicTasks}
-        localStudySessions={sessions}
-      />
 
       {/* Overview stats */}
       <section className="grid gap-4 mt-6 grid-cols-2 lg:grid-cols-6">

@@ -16,7 +16,6 @@ import {
 import { useXP } from "@/lib/xp";
 import { useAtlasSettings } from "@/lib/settings";
 import { t } from "@/lib/i18n";
-import { FinancesCloudPanel } from "@/components/FinancesCloudPanel";
 
 import type { Currency, PaymentMethod, TransactionDraft, TransactionType } from "@/types/atlas";
 
@@ -227,8 +226,6 @@ export function FinancesPage() {
           </Link>
         </div>
       </header>
-
-      <FinancesCloudPanel localTransactions={transactions} />
 
       {/* Main Section */}
       <section className="mt-8 grid gap-8 lg:grid-cols-[360px_1fr] items-start">

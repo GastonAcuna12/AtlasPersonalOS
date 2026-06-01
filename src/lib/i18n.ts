@@ -1165,6 +1165,19 @@ const moduleEn = {
   "settings.obsidian.eyebrow": "Knowledge Mapping",
   "settings.obsidian.title": "Obsidian Integration",
   "settings.obsidian.description": "These generated templates represent snapshots of your local workspace. Drag downloaded files into your vault directory. They include parsed statistics, metadata, and links mapped perfectly to Obsidian frontmatter structures.",
+  "settings.cloudDiagnostics.eyebrow": "Cloud Diagnostics",
+  "settings.cloudDiagnostics.title": "Supabase POC tools",
+  "settings.cloudDiagnostics.description":
+    "Developer/testing area for manual Supabase proof-of-concept checks. These tools are centralized here so daily Atlas modules stay focused on local-first work.",
+  "settings.cloudDiagnostics.noSync": "No sync",
+  "settings.cloudDiagnostics.noMigration": "No migration",
+  "settings.cloudDiagnostics.noLocalImpact": "No local impact",
+  "settings.cloudDiagnostics.temporary":
+    "These POC panels are temporary until real sync and migration UX are designed. Loading or creating cloud test records does not change local Atlas data.",
+  "settings.cloudDiagnostics.openModuleToSelect":
+    "Open the module page to create a local item if a selected-copy control has nothing available.",
+  "settings.cloudDiagnostics.localRecords": "local records available",
+  "settings.cloudDiagnostics.expand": "Open",
   "work.eyebrow": "Operations & Delivery",
   "work.title": "Work Board",
   "work.activeClients": "Active Clients",
@@ -1973,6 +1986,19 @@ const moduleEs: Record<ModuleTranslationKey, string> = {
   "settings.obsidian.eyebrow": "Mapeo de conocimiento",
   "settings.obsidian.title": "Integración con Obsidian",
   "settings.obsidian.description": "Estas plantillas generadas representan snapshots de tu workspace local. Arrastra los archivos descargados a tu bóveda. Incluyen estadísticas, metadata y links mapeados a estructuras de frontmatter de Obsidian.",
+  "settings.cloudDiagnostics.eyebrow": "Diagnóstico de nube",
+  "settings.cloudDiagnostics.title": "Herramientas POC de Supabase",
+  "settings.cloudDiagnostics.description":
+    "Área de desarrollo/testing para verificaciones manuales de pruebas de concepto con Supabase. Estas herramientas están centralizadas aquí para que los módulos diarios de Atlas sigan enfocados en el trabajo local-first.",
+  "settings.cloudDiagnostics.noSync": "Sin sync",
+  "settings.cloudDiagnostics.noMigration": "Sin migración",
+  "settings.cloudDiagnostics.noLocalImpact": "Sin impacto local",
+  "settings.cloudDiagnostics.temporary":
+    "Estos paneles POC son temporales hasta diseñar la UX real de sincronización y migración. Cargar o crear registros cloud de prueba no cambia los datos locales de Atlas.",
+  "settings.cloudDiagnostics.openModuleToSelect":
+    "Abre la página del módulo para crear un item local si un control de copia seleccionada no tiene nada disponible.",
+  "settings.cloudDiagnostics.localRecords": "registros locales disponibles",
+  "settings.cloudDiagnostics.expand": "Abrir",
   "work.eyebrow": "Operaciones y entregas",
   "work.title": "Tablero de trabajo",
   "work.activeClients": "Clientes activos",

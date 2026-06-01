@@ -8,7 +8,6 @@ import {
 } from "@/lib/markdownExport";
 import { useNotes, type NoteDraft } from "@/lib/notes";
 import { useXP } from "@/lib/xp";
-import { NotesCloudPanel } from "@/components/NotesCloudPanel";
 import { useAtlasSettings } from "@/lib/settings";
 import { t } from "@/lib/i18n";
 
@@ -133,8 +132,6 @@ export function NotesPage() {
             ✓ {message}
           </div>
         )}
-
-        <NotesCloudPanel localNotes={notes} />
 
         {/* Collapsible Form — Progressive Disclosure */}
         {showCreateForm && (

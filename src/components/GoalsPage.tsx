@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { FormEvent, useState } from "react";
-import { GoalsCloudPanel } from "@/components/GoalsCloudPanel";
 import { downloadGoalsSummaryMarkdown } from "@/lib/markdownExport";
 import { getGoalProgress, useGoals, type GoalDraft, type GoalStatus, type Goal } from "@/lib/goals";
 import { useXP } from "@/lib/xp";
@@ -154,8 +153,6 @@ export function GoalsPage() {
           </Link>
         </div>
       </header>
-
-      <GoalsCloudPanel localGoals={goals} />
 
       {/* Main Section */}
       <section className="mt-8 grid gap-8 lg:grid-cols-[360px_1fr] items-start">

@@ -15,6 +15,7 @@ import {
   downloadWeeklyReviewMarkdown,
 } from "@/lib/markdownExport";
 import {
+  getAcademicTasks,
   useAcademicSubjects,
   useStudySessions,
 } from "@/lib/academics";
@@ -42,6 +43,7 @@ import { useXP } from "@/lib/xp";
 import { useDailyWraps } from "@/lib/dailyWraps";
 import type { Currency, DayMode } from "@/types/atlas";
 import { loadSampleData } from "@/lib/sampleData";
+import { CloudDiagnostics } from "@/components/CloudDiagnostics";
 import { CloudQAChecklist } from "@/components/CloudQAChecklist";
 import { MigrationDecisionPanel } from "@/components/MigrationDecisionPanel";
 
@@ -80,6 +82,7 @@ export function SettingsPage() {
   const today = todayISO();
   const todayStats = calculateTodayStats(tasks, today);
   const todaySections = groupTasksForToday(tasks, today);
+  const academicTasks = getAcademicTasks(tasks);
 
   const accountSyncState = (() => {
     if (!auth.isConfigured) {
@@ -607,6 +610,19 @@ export function SettingsPage() {
 
           {/* Right Column — QA checklist & Scope */}
           <div className="grid gap-6">
+            <CloudDiagnostics
+              notes={notes}
+              tasks={tasks}
+              goals={goals}
+              subjects={subjects}
+              academicTasks={academicTasks}
+              studySessions={sessions}
+              gymLogs={workouts}
+              clients={clients}
+              workItems={workItems}
+              transactions={transactions}
+            />
+
             <CloudQAChecklist />
             
             {/* Live QA Checklist Box */}

@@ -15,7 +15,6 @@ import {
 } from "@/lib/gym";
 import { useXP } from "@/lib/xp";
 import { StreakBadge } from "@/components/StreakBadge";
-import { GymCloudPanel } from "@/components/GymCloudPanel";
 import { useAtlasSettings } from "@/lib/settings";
 import { t } from "@/lib/i18n";
 
@@ -182,8 +181,6 @@ export function GymPage() {
           <span>✓</span> {successMessage}
         </div>
       )}
-
-      <GymCloudPanel localGymLogs={workouts} />
 
       {/* Primary Section */}
       <section className="mt-8 grid gap-8 lg:grid-cols-[1fr_360px] items-start">

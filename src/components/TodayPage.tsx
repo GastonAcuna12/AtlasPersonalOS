@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { TasksCloudPanel } from "@/components/TasksCloudPanel";
 import { TaskCard } from "@/components/tasks/TaskCard";
 import { TaskQuickAddForm } from "@/components/tasks/TaskQuickAddForm";
 import { downloadTodayPlanMarkdown } from "@/lib/markdownExport";
@@ -352,8 +351,6 @@ export function TodayPage() {
           </Link>
         </div>
       </header>
-
-      <TasksCloudPanel localTasks={tasks} />
 
       {/* Main Section */}
       <section className="mt-8 grid gap-8 lg:grid-cols-[360px_1fr] items-start">

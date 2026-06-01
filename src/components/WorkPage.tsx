@@ -32,7 +32,6 @@ import { useXP } from "@/lib/xp";
 import { formatMoney } from "@/lib/finances";
 import { useAtlasSettings } from "@/lib/settings";
 import { t } from "@/lib/i18n";
-import { WorkCloudPanel } from "@/components/WorkCloudPanel";
 import type { TaskPriority, Currency } from "@/types/atlas";
 
 const initialClientDraft: ClientDraft = {
@@ -361,8 +360,6 @@ export function WorkPage() {
           {t(language, "common.dashboard")}
         </Link>
       </header>
-
-      <WorkCloudPanel localClients={clients} localWorkItems={workItems} />
 
       {/* Overview Statistics Cards */}
       <section className="grid gap-4 mt-6 grid-cols-2 lg:grid-cols-5">
