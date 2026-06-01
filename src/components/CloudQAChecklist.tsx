@@ -14,13 +14,15 @@ type CloudQAModule = {
     | "cloudQa.module.tasks"
     | "cloudQa.module.goals"
     | "cloudQa.module.academics"
-    | "cloudQa.module.gym";
+    | "cloudQa.module.gym"
+    | "cloudQa.module.work";
   panelNameKey:
     | "cloudQa.panelName.notes"
     | "cloudQa.panelName.tasks"
     | "cloudQa.panelName.goals"
     | "cloudQa.panelName.academics"
-    | "cloudQa.panelName.gym";
+    | "cloudQa.panelName.gym"
+    | "cloudQa.panelName.work";
   sqlFile: string;
   route: string;
 };
@@ -66,6 +68,13 @@ const CLOUD_QA_MODULES: CloudQAModule[] = [
     panelNameKey: "cloudQa.panelName.gym",
     sqlFile: "supabase/sql/005_gym.sql",
     route: "/gym",
+  },
+  {
+    id: "work",
+    nameKey: "cloudQa.module.work",
+    panelNameKey: "cloudQa.panelName.work",
+    sqlFile: "supabase/sql/006_work.sql",
+    route: "/work",
   },
 ];
 

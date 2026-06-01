@@ -21,7 +21,7 @@ Atlas also includes a lightweight manual helper in Settings:
   logic.
 - Checkbox completion is stored locally under `atlas.cloudQaChecklist` as
   dev-helper state only.
-- Current helper cards cover Notes, Tasks, Goals, Academics, and Gym POCs.
+- Current helper cards cover Notes, Tasks, Goals, Academics, Gym, and Work POCs.
 
 ## 2. Pre-Flight Checks
 
