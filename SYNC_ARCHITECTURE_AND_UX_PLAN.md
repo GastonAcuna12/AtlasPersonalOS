@@ -332,6 +332,11 @@ client trust, and long-term planning.
 
 ## 14. Recommended Next Steps
 
+Update: Atlas now has a metadata-only general sync foundation documented in
+`SYNC_FOUNDATION.md`. It adds sync types, a module registry, local sync metadata
+storage, and read-only Settings status UI. It does not enable real sync,
+migration, background upload, or cloud-driven module behavior.
+
 1. Harden Tasks SQL constraints and rerun the Tasks two-user RLS test after
    applying the updated SQL manually.
 2. Keep this sync architecture and UX plan as the decision baseline.

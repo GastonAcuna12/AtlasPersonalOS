@@ -46,6 +46,7 @@ import { loadSampleData } from "@/lib/sampleData";
 import { CloudDiagnostics } from "@/components/CloudDiagnostics";
 import { CloudQAChecklist } from "@/components/CloudQAChecklist";
 import { MigrationDecisionPanel } from "@/components/MigrationDecisionPanel";
+import { SyncStatusPanel } from "@/components/SyncStatusPanel";
 
 export function SettingsPage() {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -355,6 +356,8 @@ export function SettingsPage() {
                 </div>
               </div>
             </div>
+
+            <SyncStatusPanel />
 
             <MigrationDecisionPanel />
             
