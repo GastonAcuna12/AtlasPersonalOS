@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { ATLAS_STORAGE_KEYS, useStoredValue, writeToStorage } from "@/lib/storage";
-import { TaskCard } from "@/components/tasks/TaskCard";
-import { TaskQuickAddForm } from "@/components/tasks/TaskQuickAddForm";
+import { TaskCard } from "./TaskCard";
+import { TaskQuickAddForm } from "./TaskQuickAddForm";
 import { downloadTodayPlanMarkdown } from "@/lib/markdownExport";
 import { shouldShowReviewReminder, useWeeklyReviews } from "@/lib/reviews";
 import { DAY_MODES, useAtlasSettings, type DayMode } from "@/lib/settings";

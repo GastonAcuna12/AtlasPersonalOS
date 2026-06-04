@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { FormEvent, useState } from "react";
-import { TaskCard } from "@/components/tasks/TaskCard";
+import { TaskCard } from "@/features/tasks/components/TaskCard";
 import {
   ACADEMIC_TYPES,
   getAcademicOverview,
