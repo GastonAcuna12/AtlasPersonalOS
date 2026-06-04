@@ -11,7 +11,7 @@ import type {
   WorkoutLog,
   DailyWrap,
 } from "@/types/atlas";
-import { getGoalProgress } from "@/lib/goals";
+import { getGoalProgress, isDailyHabitGoal } from "@/lib/goals";
 
 export type DeadlineItem = {
   id: string;
@@ -116,7 +116,7 @@ export function getAllDeadlines(
 
   // Goals with deadlines
   goals
-    .filter((g) => g.deadline && g.status === "active")
+    .filter((g) => g.deadline && g.status === "active" && !isDailyHabitGoal(g))
     .forEach((g) => {
       deadlines.push({
         id: g.id,
@@ -220,6 +220,7 @@ export function getPriorityBriefing(
   // Top urgent goal (due within 7 days or overdue)
   const urgentGoals = goals.filter((g) => {
     if (g.status !== "active") return false;
+    if (isDailyHabitGoal(g)) return false;
     if (!g.deadline) return false;
     const diff = daysBetween(today, g.deadline);
     return diff <= 7;
@@ -327,7 +328,7 @@ export function getCalendarEvents(
 
   // 3. Goal Deadlines
   goals.forEach((g) => {
-    if (g.deadline) {
+    if (g.deadline && !isDailyHabitGoal(g)) {
       events.push({
         id: g.id,
         title: g.title,

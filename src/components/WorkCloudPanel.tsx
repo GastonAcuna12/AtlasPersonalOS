@@ -269,7 +269,7 @@ export function WorkCloudPanel({
       <section className="mt-6 rounded-xl border border-[#27272a] bg-[#18181b] p-5">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-widest text-sky-400">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-[#7F97A9]">
               {t(language, "cloud.work.title")}
             </p>
             <p className="mt-2 text-sm font-semibold text-zinc-100">
@@ -291,10 +291,10 @@ export function WorkCloudPanel({
   }
 
   return (
-    <section className="mt-6 rounded-xl border border-sky-500/25 bg-[#18181b] p-6 shadow-xl">
+    <section className="mt-6 rounded-xl border border-[#6F8799]/25 bg-[#18181b] p-6 shadow-xl">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div>
-          <p className="text-[10px] font-bold uppercase tracking-widest text-sky-400">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-[#7F97A9]">
             {t(language, "cloud.work.title")}
           </p>
           <h2 className="mt-2 text-2xl font-bold tracking-tight text-zinc-100">
@@ -305,7 +305,7 @@ export function WorkCloudPanel({
             {t(language, "common.cloudDataSeparate")}
           </p>
         </div>
-        <span className="w-fit rounded-full border border-emerald-500/25 bg-emerald-500/10 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-emerald-400">
+        <span className="w-fit rounded-full border border-[#8A9A5B]/25 bg-[#8A9A5B]/10 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-[#9AAB6B]">
           {t(language, "settings.accountSync.signedIn")}
         </span>
       </div>
@@ -326,7 +326,7 @@ export function WorkCloudPanel({
             type="button"
             onClick={handleCreateTestCloudClient}
             disabled={activeAction !== null}
-            className="rounded-lg border border-sky-500/25 bg-sky-500/10 px-4 py-3 text-xs font-bold uppercase tracking-wider text-sky-300 transition hover:bg-sky-500/20 disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded-lg border border-[#6F8799]/25 bg-[#6F8799]/10 px-4 py-3 text-xs font-bold uppercase tracking-wider text-sky-300 transition hover:bg-[#6F8799]/20 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {activeAction === "create-client"
               ? t(language, "common.creating")
@@ -336,7 +336,7 @@ export function WorkCloudPanel({
             type="button"
             onClick={handleCreateTestCloudWorkItem}
             disabled={activeAction !== null}
-            className="rounded-lg border border-sky-500/25 bg-sky-500/10 px-4 py-3 text-xs font-bold uppercase tracking-wider text-sky-300 transition hover:bg-sky-500/20 disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded-lg border border-[#6F8799]/25 bg-[#6F8799]/10 px-4 py-3 text-xs font-bold uppercase tracking-wider text-sky-300 transition hover:bg-[#6F8799]/20 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {activeAction === "create-item"
               ? t(language, "common.creating")
@@ -364,7 +364,7 @@ export function WorkCloudPanel({
               value={selectedClientValue}
               onChange={(event) => setSelectedClientId(event.target.value)}
               disabled={localClients.length === 0 || activeAction !== null}
-              className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2.5 text-zinc-100 focus:outline-none focus:border-sky-500/50 disabled:cursor-not-allowed disabled:opacity-50"
+              className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2.5 text-zinc-100 focus:outline-none focus:border-[#6F8799]/50 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {localClients.length === 0 ? (
                 <option value="">{t(language, "cloud.noLocalWorkClients")}</option>
@@ -381,7 +381,7 @@ export function WorkCloudPanel({
             type="button"
             onClick={handleUploadSelectedClient}
             disabled={!selectedClient || activeAction !== null}
-            className="self-end rounded-lg border border-amber-500/25 bg-amber-500/10 px-4 py-3 text-xs font-bold uppercase tracking-wider text-amber-400 transition hover:bg-amber-500/20 disabled:cursor-not-allowed disabled:opacity-50"
+            className="self-end rounded-lg border border-[#C8A96A]/25 bg-[#C8A96A]/10 px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#D4B87A] transition hover:bg-[#C8A96A]/20 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {activeAction === "upload-client"
               ? t(language, "common.uploading")
@@ -396,7 +396,7 @@ export function WorkCloudPanel({
               value={selectedWorkItemValue}
               onChange={(event) => setSelectedWorkItemId(event.target.value)}
               disabled={localWorkItems.length === 0 || activeAction !== null}
-              className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2.5 text-zinc-100 focus:outline-none focus:border-sky-500/50 disabled:cursor-not-allowed disabled:opacity-50"
+              className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2.5 text-zinc-100 focus:outline-none focus:border-[#6F8799]/50 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {localWorkItems.length === 0 ? (
                 <option value="">{t(language, "cloud.noLocalWorkItems")}</option>
@@ -413,7 +413,7 @@ export function WorkCloudPanel({
             type="button"
             onClick={handleUploadSelectedWorkItem}
             disabled={!selectedWorkItem || activeAction !== null}
-            className="self-end rounded-lg border border-amber-500/25 bg-amber-500/10 px-4 py-3 text-xs font-bold uppercase tracking-wider text-amber-400 transition hover:bg-amber-500/20 disabled:cursor-not-allowed disabled:opacity-50"
+            className="self-end rounded-lg border border-[#C8A96A]/25 bg-[#C8A96A]/10 px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#D4B87A] transition hover:bg-[#C8A96A]/20 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {activeAction === "upload-item"
               ? t(language, "common.uploading")
@@ -423,13 +423,13 @@ export function WorkCloudPanel({
       </div>
 
       {message ? (
-        <p className="mt-4 rounded-lg border border-emerald-500/30 bg-emerald-500/5 px-4 py-3 text-xs font-semibold text-emerald-400">
+        <p className="mt-4 rounded-lg border border-[#8A9A5B]/30 bg-[#8A9A5B]/5 px-4 py-3 text-xs font-semibold text-[#9AAB6B]">
           {message}
         </p>
       ) : null}
 
       {error ? (
-        <p className="mt-4 rounded-lg border border-red-500/30 bg-red-500/5 px-4 py-3 text-xs font-semibold text-red-300">
+        <p className="mt-4 rounded-lg border border-[#B26A5B]/30 bg-[#B26A5B]/5 px-4 py-3 text-xs font-semibold text-[#E8E4DD]">
           {error}
         </p>
       ) : null}

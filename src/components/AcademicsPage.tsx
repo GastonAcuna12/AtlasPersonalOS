@@ -191,7 +191,7 @@ export function AcademicsPage() {
       {/* Header */}
       <header className="flex flex-col gap-4 border-b border-[#27272a] pb-6 md:flex-row md:items-center md:justify-between">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-500">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#C8A96A]">
             {t(language, "academics.eyebrow", "University Planning")}
           </p>
           <div className="mt-2 flex flex-wrap items-center gap-3">
@@ -200,12 +200,12 @@ export function AcademicsPage() {
             </h1>
             <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-bold border uppercase tracking-wider ${
               workloadStatus.status === "Clear"
-                ? "bg-emerald-500/10 border-emerald-500/25 text-emerald-400"
+                ? "bg-[#8A9A5B]/10 border-[#8A9A5B]/25 text-[#9AAB6B]"
                 : workloadStatus.status === "Light"
-                ? "bg-green-500/10 border-green-500/25 text-green-400"
+                ? "bg-[#8A9A5B]/10 border-[#8A9A5B]/25 text-[#9AAB6B]"
                 : workloadStatus.status === "Manageable"
-                ? "bg-blue-500/10 border-blue-500/25 text-blue-400"
-                : "bg-red-500/10 border-red-500/25 text-red-400"
+                ? "bg-[#6F8799]/10 border-[#6F8799]/25 text-[#7F97A9]"
+                : "bg-[#B26A5B]/10 border-[#B26A5B]/25 text-[#C27A6B]"
             }`}>
               {workloadStatus.status} {t(language, "academics.workload", "Workload")}
             </span>
@@ -262,7 +262,7 @@ export function AcademicsPage() {
           <div>
             <button
               onClick={() => setShowSubjectForm(!showSubjectForm)}
-              className="rounded-lg bg-amber-500 hover:bg-amber-400 text-zinc-950 px-4 py-2.5 text-xs font-bold uppercase tracking-wider transition w-full shadow-md text-center"
+              className="rounded-lg bg-[#C8A96A] hover:bg-[#D4B87A] text-zinc-950 px-4 py-2.5 text-xs font-bold uppercase tracking-wider transition w-full shadow-md text-center"
             >
               {showSubjectForm ? t(language, "academics.closeSubjectForm", "Close Subject Form") : t(language, "academics.addSubject", "+ Add Subject course")}
             </button>
@@ -284,7 +284,7 @@ export function AcademicsPage() {
                         name: event.target.value,
                       }))
                     }
-                    className="rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2.5 text-zinc-100 text-sm focus:border-amber-500 focus:outline-none"
+                    className="rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2.5 text-zinc-100 text-sm focus:border-[#C8A96A] focus:outline-none"
                   />
                   <input
                     placeholder={t(language, "academics.professorPlaceholder", "Professor / Instructor")}
@@ -295,7 +295,7 @@ export function AcademicsPage() {
                         professor: event.target.value,
                       }))
                     }
-                    className="rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2.5 text-zinc-100 text-sm focus:border-amber-500 focus:outline-none"
+                    className="rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2.5 text-zinc-100 text-sm focus:border-[#C8A96A] focus:outline-none"
                   />
                   <input
                     placeholder={t(language, "academics.schedulePlaceholder", "Schedule details")}
@@ -306,7 +306,7 @@ export function AcademicsPage() {
                         schedule: event.target.value,
                       }))
                     }
-                    className="rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2.5 text-zinc-100 text-sm focus:border-amber-500 focus:outline-none"
+                    className="rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2.5 text-zinc-100 text-sm focus:border-[#C8A96A] focus:outline-none"
                   />
                   <textarea
                     placeholder={t(language, "academics.notesPlaceholder", "Notes (professor contacts, links...)")}
@@ -318,7 +318,7 @@ export function AcademicsPage() {
                         notes: event.target.value,
                       }))
                     }
-                    className="resize-none rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2 text-zinc-100 text-sm focus:border-amber-500 focus:outline-none placeholder:text-zinc-650"
+                    className="resize-none rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2 text-zinc-100 text-sm focus:border-[#C8A96A] focus:outline-none placeholder:text-zinc-650"
                   />
                   <div className="grid gap-1 mt-1">
                     <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wide">{t(language, "academics.colorAccent", "Color Accent")}</span>
@@ -337,7 +337,7 @@ export function AcademicsPage() {
                             }
                             className={`h-6 w-6 rounded-full border transition-all ${color.bgClass} ${color.borderClass} ${
                               isSelected
-                                ? "ring-2 ring-amber-500 ring-offset-2 scale-110"
+                                ? "ring-2 ring-[#C8A96A] ring-offset-2 scale-110"
                                 : "hover:scale-105 border-zinc-700"
                             }`}
                             title={color.name}
@@ -348,11 +348,11 @@ export function AcademicsPage() {
                   </div>
                 </div>
                 {subjectError && (
-                  <p className="text-red-400 text-xs font-semibold">{subjectError}</p>
+                  <p className="text-[#C27A6B] text-xs font-semibold">{subjectError}</p>
                 )}
                 <button
                   type="submit"
-                  className="rounded-lg bg-amber-500 hover:bg-amber-400 text-zinc-950 px-4 py-2.5 text-xs font-bold uppercase tracking-wider transition w-full"
+                  className="rounded-lg bg-[#C8A96A] hover:bg-[#D4B87A] text-zinc-950 px-4 py-2.5 text-xs font-bold uppercase tracking-wider transition w-full"
                 >
                   {t(language, "academics.saveSubject", "Save Subject")}
                 </button>
@@ -364,7 +364,7 @@ export function AcademicsPage() {
           <div>
             <button
               onClick={() => setShowTaskForm(!showTaskForm)}
-              className="rounded-lg bg-amber-500 hover:bg-amber-400 text-zinc-950 px-4 py-2.5 text-xs font-bold uppercase tracking-wider transition w-full shadow-md text-center"
+              className="rounded-lg bg-[#C8A96A] hover:bg-[#D4B87A] text-zinc-950 px-4 py-2.5 text-xs font-bold uppercase tracking-wider transition w-full shadow-md text-center"
             >
               {showTaskForm ? t(language, "academics.closeTaskForm", "Close Task Form") : t(language, "academics.addTask", "+ Add Academic Task")}
             </button>
@@ -386,7 +386,7 @@ export function AcademicsPage() {
                         title: event.target.value,
                       }))
                     }
-                    className="rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2.5 text-zinc-100 text-sm font-semibold focus:border-amber-500 focus:outline-none"
+                    className="rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2.5 text-zinc-100 text-sm font-semibold focus:border-[#C8A96A] focus:outline-none"
                   />
                   <select
                     value={taskDraft.subjectId}
@@ -396,7 +396,7 @@ export function AcademicsPage() {
                         subjectId: event.target.value,
                       }))
                     }
-                    className="rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2.5 text-zinc-100 text-sm focus:border-amber-500 focus:outline-none cursor-pointer w-full block transition-colors duration-200 hover:border-zinc-750"
+                    className="rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2.5 text-zinc-100 text-sm focus:border-[#C8A96A] focus:outline-none cursor-pointer w-full block transition-colors duration-200 hover:border-zinc-750"
                   >
                     <option value="">{t(language, "academics.chooseSubject", "Choose subject")}</option>
                     {activeSubjects.map((subject) => (
@@ -413,7 +413,7 @@ export function AcademicsPage() {
                         academicType: event.target.value as AcademicTaskDraft["academicType"],
                       }))
                     }
-                    className="rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2.5 text-zinc-100 text-sm focus:border-amber-500 focus:outline-none cursor-pointer w-full block transition-colors duration-200 hover:border-zinc-750"
+                    className="rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2.5 text-zinc-100 text-sm focus:border-[#C8A96A] focus:outline-none cursor-pointer w-full block transition-colors duration-200 hover:border-zinc-750"
                   >
                     {ACADEMIC_TYPES.map((type) => (
                       <option key={type} value={type}>
@@ -430,7 +430,7 @@ export function AcademicsPage() {
                           priority: event.target.value as TaskPriority,
                         }))
                       }
-                      className="rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2.5 text-zinc-100 text-sm focus:border-amber-500 focus:outline-none cursor-pointer w-full block transition-colors duration-200 hover:border-zinc-750"
+                      className="rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2.5 text-zinc-100 text-sm focus:border-[#C8A96A] focus:outline-none cursor-pointer w-full block transition-colors duration-200 hover:border-zinc-750"
                     >
                       {TASK_PRIORITIES.map((priority) => (
                         <option key={priority} value={priority}>
@@ -446,7 +446,7 @@ export function AcademicsPage() {
                           energyRequired: event.target.value as TaskEnergy,
                         }))
                       }
-                      className="rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2.5 text-zinc-100 text-sm focus:border-amber-500 focus:outline-none cursor-pointer w-full block transition-colors duration-200 hover:border-zinc-750"
+                      className="rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2.5 text-zinc-100 text-sm focus:border-[#C8A96A] focus:outline-none cursor-pointer w-full block transition-colors duration-200 hover:border-zinc-750"
                     >
                       {TASK_ENERGY_LEVELS.map((energy) => (
                         <option key={energy} value={energy}>
@@ -510,15 +510,15 @@ export function AcademicsPage() {
                         notes: event.target.value,
                       }))
                     }
-                    className="resize-none rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2 text-zinc-100 text-sm focus:border-amber-500 focus:outline-none placeholder:text-zinc-650"
+                    className="resize-none rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2 text-zinc-100 text-sm focus:border-[#C8A96A] focus:outline-none placeholder:text-zinc-650"
                   />
                 </div>
                 {taskError && (
-                  <p className="text-red-400 text-xs font-semibold">{taskError}</p>
+                  <p className="text-[#C27A6B] text-xs font-semibold">{taskError}</p>
                 )}
                 <button
                   type="submit"
-                  className="rounded-lg bg-amber-500 hover:bg-amber-400 text-zinc-950 px-4 py-2.5 text-xs font-bold uppercase tracking-wider transition w-full"
+                  className="rounded-lg bg-[#C8A96A] hover:bg-[#D4B87A] text-zinc-950 px-4 py-2.5 text-xs font-bold uppercase tracking-wider transition w-full"
                 >
                   {t(language, "academics.saveTask", "Save Task")}
                 </button>
@@ -530,7 +530,7 @@ export function AcademicsPage() {
           <div>
             <button
               onClick={() => setShowSessionForm(!showSessionForm)}
-              className="rounded-lg bg-amber-500 hover:bg-amber-400 text-zinc-950 px-4 py-2.5 text-xs font-bold uppercase tracking-wider transition w-full shadow-md text-center"
+              className="rounded-lg bg-[#C8A96A] hover:bg-[#D4B87A] text-zinc-950 px-4 py-2.5 text-xs font-bold uppercase tracking-wider transition w-full shadow-md text-center"
             >
               {showSessionForm ? t(language, "academics.closeSessionForm", "Close Session Form") : t(language, "academics.logStudySession", "+ Log Study Session")}
             </button>
@@ -551,7 +551,7 @@ export function AcademicsPage() {
                         subjectId: event.target.value,
                       }))
                     }
-                    className="rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2.5 text-zinc-100 text-sm focus:border-amber-500 focus:outline-none cursor-pointer w-full block transition-colors duration-200 hover:border-zinc-750"
+                    className="rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2.5 text-zinc-100 text-sm focus:border-[#C8A96A] focus:outline-none cursor-pointer w-full block transition-colors duration-200 hover:border-zinc-750"
                   >
                     <option value="">{t(language, "academics.chooseSubject", "Choose subject")}</option>
                     {activeSubjects.map((subject) => (
@@ -569,7 +569,7 @@ export function AcademicsPage() {
                         date: event.target.value,
                       }))
                     }
-                    className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2 text-zinc-100 text-sm focus:border-amber-500 focus:outline-none"
+                    className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2 text-zinc-100 text-sm focus:border-[#C8A96A] focus:outline-none"
                   />
                   <label className="grid gap-1 text-[10px] font-bold text-zinc-500 uppercase tracking-wide">
                     {t(language, "academics.durationMinutes", "Duration Minutes")}
@@ -583,13 +583,13 @@ export function AcademicsPage() {
                           durationMinutes: Number(event.target.value),
                         }))
                       }
-                      className="rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2 text-zinc-100 text-sm focus:border-amber-500 focus:outline-none"
+                      className="rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2 text-zinc-100 text-sm focus:border-[#C8A96A] focus:outline-none"
                     />
                   </label>
                   <label className="grid gap-2 text-xs font-semibold text-zinc-400 uppercase tracking-wider bg-[#121214] p-3 rounded-lg border border-[#27272a]">
                     <div className="flex justify-between">
                       <span>{t(language, "academics.focusLevel", "Focus Level")}</span>
-                      <span className="text-amber-500 font-bold">{sessionDraft.focusLevel}/10</span>
+                      <span className="text-[#C8A96A] font-bold">{sessionDraft.focusLevel}/10</span>
                     </div>
                     <input
                       type="range"
@@ -615,15 +615,15 @@ export function AcademicsPage() {
                         notes: event.target.value,
                       }))
                     }
-                    className="resize-none rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2 text-zinc-100 text-sm focus:border-amber-500 focus:outline-none placeholder:text-zinc-650"
+                    className="resize-none rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2 text-zinc-100 text-sm focus:border-[#C8A96A] focus:outline-none placeholder:text-zinc-650"
                   />
                 </div>
                 {sessionError && (
-                  <p className="text-red-400 text-xs font-semibold">{sessionError}</p>
+                  <p className="text-[#C27A6B] text-xs font-semibold">{sessionError}</p>
                 )}
                 <button
                   type="submit"
-                  className="rounded-lg bg-amber-500 hover:bg-amber-400 text-zinc-950 px-4 py-2.5 text-xs font-bold uppercase tracking-wider transition w-full"
+                  className="rounded-lg bg-[#C8A96A] hover:bg-[#D4B87A] text-zinc-950 px-4 py-2.5 text-xs font-bold uppercase tracking-wider transition w-full"
                 >
                   {t(language, "academics.saveSession", "Save Session")}
                 </button>
@@ -715,9 +715,9 @@ export function AcademicsPage() {
                         key={task.id}
                         className={`rounded-lg border border-[#27272a] border-l-4 px-4 py-3.5 ${colorInfo.borderClass} ${
                           task.isOverdue
-                            ? "bg-red-500/5 text-red-400 border-red-500/20"
+                            ? "bg-[#B26A5B]/5 text-[#C27A6B] border-[#B26A5B]/20"
                             : task.isDueToday
-                            ? "bg-amber-500/5 text-amber-400 border-amber-500/20"
+                            ? "bg-[#C8A96A]/5 text-[#D4B87A] border-[#C8A96A]/20"
                             : "bg-[#121214]/60 text-zinc-300"
                         }`}
                       >
@@ -767,12 +767,12 @@ export function AcademicsPage() {
                 </div>
                 <div className={`rounded-lg border px-4 py-3.5 text-center transition ${
                   workloadStatus.status === "Clear"
-                    ? "bg-emerald-500/10 border-emerald-500/25 text-emerald-400"
+                    ? "bg-[#8A9A5B]/10 border-[#8A9A5B]/25 text-[#9AAB6B]"
                     : workloadStatus.status === "Light"
-                    ? "bg-green-500/10 border-green-500/25 text-green-400"
+                    ? "bg-[#8A9A5B]/10 border-[#8A9A5B]/25 text-[#9AAB6B]"
                     : workloadStatus.status === "Manageable"
-                    ? "bg-blue-500/10 border-blue-500/25 text-blue-400"
-                    : "bg-red-500/10 border-red-500/25 text-red-400"
+                    ? "bg-[#6F8799]/10 border-[#6F8799]/25 text-[#7F97A9]"
+                    : "bg-[#B26A5B]/10 border-[#B26A5B]/25 text-[#C27A6B]"
                 }`}>
                   <p className="text-[10px] font-bold uppercase tracking-wider">{t(language, "academics.weeklyWorkloadLevel", "Weekly Workload Level")}</p>
                   <p className="mt-1 text-xl font-extrabold">
@@ -856,7 +856,7 @@ export function AcademicsPage() {
                     <button
                       type="button"
                       onClick={() => deleteStudySession(session.id)}
-                      className="rounded-lg border border-[#27272a] bg-[#18181b] px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider text-red-400 transition hover:bg-red-500/10 hover:border-red-500/20"
+                      className="rounded-lg border border-[#27272a] bg-[#18181b] px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider text-[#C27A6B] transition hover:bg-[#B26A5B]/10 hover:border-[#B26A5B]/20"
                     >
                       {t(language, "common.delete")}
                     </button>

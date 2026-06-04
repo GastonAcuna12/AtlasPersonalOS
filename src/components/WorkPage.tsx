@@ -346,7 +346,7 @@ export function WorkPage() {
       {/* Header */}
       <header className="flex flex-col gap-4 border-b border-[#27272a] pb-6 md:flex-row md:items-center md:justify-between">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-500">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#C8A96A]">
             {t(language, "work.eyebrow", "Operations & Delivery")}
           </p>
           <h1 className="mt-2 text-4xl font-bold tracking-tight text-zinc-100 sm:text-5xl">
@@ -383,7 +383,7 @@ export function WorkPage() {
           onClick={() => setActiveTab("board")}
           className={`pb-3 font-bold text-sm border-b-2 transition duration-200 uppercase tracking-wider ${
             activeTab === "board"
-              ? "border-amber-500 text-amber-500"
+              ? "border-[#C8A96A] text-[#C8A96A]"
               : "border-transparent text-zinc-500 hover:text-zinc-300"
           }`}
         >
@@ -393,7 +393,7 @@ export function WorkPage() {
           onClick={() => setActiveTab("clients")}
           className={`pb-3 font-bold text-sm border-b-2 transition duration-200 uppercase tracking-wider ${
             activeTab === "clients"
-              ? "border-amber-500 text-amber-500"
+              ? "border-[#C8A96A] text-[#C8A96A]"
               : "border-transparent text-zinc-500 hover:text-zinc-300"
           }`}
         >
@@ -409,7 +409,7 @@ export function WorkPage() {
             <h2 className="text-base font-bold text-zinc-200 uppercase tracking-wide">{t(language, "work.kanbanPipeline", "Kanban Pipeline")}</h2>
             <button
               onClick={() => setShowNewItemForm(!showNewItemForm)}
-              className="rounded-lg bg-amber-500 hover:bg-amber-400 text-zinc-950 px-4 py-2.5 text-xs font-bold uppercase tracking-wider transition-all duration-200 shadow-md"
+              className="rounded-lg bg-[#C8A96A] hover:bg-[#D4B87A] text-zinc-950 px-4 py-2.5 text-xs font-bold uppercase tracking-wider transition-all duration-200 shadow-md"
             >
               {showNewItemForm ? t(language, "work.cancelNewItem", "Cancel New Item") : t(language, "work.newWorkItem", "+ New Work Item")}
             </button>
@@ -428,7 +428,7 @@ export function WorkPage() {
                   onChange={(e) =>
                     setWorkItemDraft((c) => ({ ...c, clientId: e.target.value }))
                   }
-                  className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2 text-zinc-100 text-sm focus:border-amber-500 focus:outline-none"
+                  className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2 text-zinc-100 text-sm focus:border-[#C8A96A] focus:outline-none"
                 >
                   <option value="">{t(language, "work.selectClient", "Select a client")}</option>
                   {activeClients.map((client) => (
@@ -447,7 +447,7 @@ export function WorkPage() {
                   onChange={(e) =>
                     setWorkItemDraft((c) => ({ ...c, title: e.target.value }))
                   }
-                  className="rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2 text-zinc-100 text-sm focus:border-amber-500 focus:outline-none font-semibold"
+                  className="rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2 text-zinc-100 text-sm focus:border-[#C8A96A] focus:outline-none font-semibold"
                 />
               </label>
 
@@ -461,7 +461,7 @@ export function WorkPage() {
                       type: e.target.value as WorkItemType,
                     }))
                   }
-                  className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2 text-zinc-100 text-sm focus:border-amber-500 focus:outline-none"
+                  className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2 text-zinc-100 text-sm focus:border-[#C8A96A] focus:outline-none"
                 >
                   {WORK_ITEM_TYPES.map((t) => (
                     <option key={t} value={t}>
@@ -481,7 +481,7 @@ export function WorkPage() {
                       status: e.target.value as WorkItemStatus,
                     }))
                   }
-                  className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2 text-zinc-100 text-sm focus:border-amber-500 focus:outline-none"
+                  className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2 text-zinc-100 text-sm focus:border-[#C8A96A] focus:outline-none"
                 >
                   {WORK_ITEM_STATUSES.map((s) => (
                     <option key={s} value={s}>
@@ -501,7 +501,7 @@ export function WorkPage() {
                       priority: e.target.value as TaskPriority,
                     }))
                   }
-                  className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2 text-zinc-100 text-sm focus:border-amber-500 focus:outline-none"
+                  className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2 text-zinc-100 text-sm focus:border-[#C8A96A] focus:outline-none"
                 >
                   {PRIORITIES.map((p) => (
                     <option key={p} value={p}>
@@ -521,7 +521,7 @@ export function WorkPage() {
                       difficulty: e.target.value as Difficulty,
                     }))
                   }
-                  className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2 text-zinc-100 text-sm focus:border-amber-500 focus:outline-none"
+                  className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2 text-zinc-100 text-sm focus:border-[#C8A96A] focus:outline-none"
                 >
                   {DIFFICULTIES.map((d) => (
                     <option key={d} value={d}>
@@ -546,7 +546,7 @@ export function WorkPage() {
                           value: Number(e.target.value) || undefined,
                         }))
                       }
-                      className="rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2 text-zinc-100 text-sm focus:border-amber-500 focus:outline-none"
+                      className="rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2 text-zinc-100 text-sm focus:border-[#C8A96A] focus:outline-none"
                     />
                   </label>
                   <label className="grid gap-2 text-xs font-semibold text-zinc-400 uppercase tracking-wider">
@@ -559,7 +559,7 @@ export function WorkPage() {
                           currency: e.target.value as Currency,
                         }))
                       }
-                      className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2 text-zinc-100 text-sm focus:border-amber-500 focus:outline-none"
+                      className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2 text-zinc-100 text-sm focus:border-[#C8A96A] focus:outline-none"
                     >
                       <option value="USD">USD</option>
                       <option value="PYG">PYG</option>
@@ -568,7 +568,7 @@ export function WorkPage() {
                 </>
               ) : (
                 <div className="rounded-lg bg-[#121214] border border-[#27272a] p-3 text-xs text-zinc-400 flex flex-col justify-center sm:col-span-2">
-                  <span className="font-bold text-amber-500 uppercase text-[9px] tracking-widest leading-none mb-1">{t(language, "work.billingPolicy", "Billing Policy")}</span>
+                  <span className="font-bold text-[#C8A96A] uppercase text-[9px] tracking-widest leading-none mb-1">{t(language, "work.billingPolicy", "Billing Policy")}</span>
                   {selectedClientForNewItem.billingType === "fixed_monthly"
                     ? `${t(language, "work.fixedRetainer", "Fixed Retainer")}: ${t(language, "work.billedAt", "Billed at")} ${formatMoney(selectedClientForNewItem.monthlyRate ?? 0, selectedClientForNewItem.currency ?? "USD")}/mo.`
                     : selectedClientForNewItem.billingType === "hourly"
@@ -589,7 +589,7 @@ export function WorkPage() {
                       estimatedMinutes: Number(e.target.value) || undefined,
                     }))
                   }
-                  className="rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2 text-zinc-100 text-sm focus:border-amber-500 focus:outline-none"
+                  className="rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2 text-zinc-100 text-sm focus:border-[#C8A96A] focus:outline-none"
                 />
               </label>
 
@@ -601,7 +601,7 @@ export function WorkPage() {
                   onChange={(e) =>
                     setWorkItemDraft((c) => ({ ...c, plannedDate: e.target.value }))
                   }
-                  className="rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2.5 text-zinc-100 text-sm focus:border-amber-500 focus:outline-none"
+                  className="rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2.5 text-zinc-100 text-sm focus:border-[#C8A96A] focus:outline-none"
                 />
               </label>
 
@@ -613,7 +613,7 @@ export function WorkPage() {
                   onChange={(e) =>
                     setWorkItemDraft((c) => ({ ...c, deadline: e.target.value }))
                   }
-                  className="rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2.5 text-zinc-100 text-sm focus:border-amber-500 focus:outline-none"
+                  className="rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2.5 text-zinc-100 text-sm focus:border-[#C8A96A] focus:outline-none"
                 />
               </label>
 
@@ -625,7 +625,7 @@ export function WorkPage() {
                   onChange={(e) =>
                     setWorkItemDraft((c) => ({ ...c, referenceUrl: e.target.value }))
                   }
-                  className="rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2.5 text-zinc-100 text-sm focus:border-amber-500 focus:outline-none"
+                  className="rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2.5 text-zinc-100 text-sm focus:border-[#C8A96A] focus:outline-none"
                 />
               </label>
 
@@ -638,19 +638,19 @@ export function WorkPage() {
                   onChange={(e) =>
                     setWorkItemDraft((c) => ({ ...c, description: e.target.value }))
                   }
-                  className="resize-none rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2.5 text-zinc-100 text-sm focus:border-amber-500 focus:outline-none placeholder:text-zinc-650"
+                  className="resize-none rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2.5 text-zinc-100 text-sm focus:border-[#C8A96A] focus:outline-none placeholder:text-zinc-650"
                 />
               </label>
 
               {errorWorkItem && (
-                <p className="text-red-400 text-xs font-semibold sm:col-span-2 md:col-span-3 lg:col-span-4">
+                <p className="text-[#C27A6B] text-xs font-semibold sm:col-span-2 md:col-span-3 lg:col-span-4">
                   {errorWorkItem}
                 </p>
               )}
 
               <button
                 type="submit"
-                className="rounded-lg bg-amber-500 hover:bg-amber-400 text-zinc-950 px-4 py-3 text-xs font-bold uppercase tracking-wider transition sm:col-span-2 md:col-span-1"
+                className="rounded-lg bg-[#C8A96A] hover:bg-[#D4B87A] text-zinc-950 px-4 py-3 text-xs font-bold uppercase tracking-wider transition sm:col-span-2 md:col-span-1"
               >
                 {t(language, "work.createItem", "Create Item")}
               </button>
@@ -658,7 +658,7 @@ export function WorkPage() {
           )}
 
           {/* Kanban Columns Scrollable Grid */}
-          <div className="flex gap-4 overflow-x-auto pb-4 w-full min-w-0">
+          <div className="flex gap-4 overflow-x-auto scrollbar-none pb-4 w-full min-w-0">
             {(["backlog", "planned", "in_progress", "waiting_feedback"] as WorkItemStatus[]).map(
               (colStatus) => {
                 const colItems = groupedWorkItems[colStatus];
@@ -670,7 +670,7 @@ export function WorkPage() {
                     onDrop={(e) => handleDrop(e, colStatus)}
                     className={`rounded-xl border p-4 min-w-[290px] max-w-[330px] w-full shrink-0 flex flex-col gap-3 h-fit transition-all duration-200 ${
                       dragOverColumn === colStatus
-                        ? "ring-2 ring-amber-500/20 border-amber-500/30 bg-[#121214]/80 shadow-md"
+                        ? "ring-2 ring-[#C8A96A]/20 border-[#C8A96A]/30 bg-[#121214]/80 shadow-md"
                         : "border-[#27272a] bg-[#121214]/50"
                     }`}
                   >
@@ -678,7 +678,7 @@ export function WorkPage() {
                       <span className="font-bold text-xs text-zinc-400 uppercase tracking-widest">
                         {workStatusLabel(colStatus)}
                       </span>
-                      <span className="rounded-full bg-[#18181b] border border-[#27272a] px-2.5 py-0.5 text-xs font-bold text-amber-500">
+                      <span className="rounded-full bg-[#18181b] border border-[#27272a] px-2.5 py-0.5 text-xs font-bold text-[#C8A96A]">
                         {colItems.length}
                       </span>
                     </div>
@@ -694,13 +694,13 @@ export function WorkPage() {
                               onDragStart={(e) => handleDragStart(e, item.id)}
                               onDragEnd={handleDragEnd}
                               className={`rounded-lg border bg-[#18181b] p-4.5 shadow-md flex flex-col gap-3 relative group transition duration-200 hover:border-zinc-500 cursor-grab active:cursor-grabbing ${
-                                draggingItemId === item.id ? "opacity-40 border-dashed border-amber-500/40" : "border-[#27272a]"
+                                draggingItemId === item.id ? "opacity-40 border-dashed border-[#C8A96A]/40" : "border-[#27272a]"
                               }`}
                             >
                               {editingWorkItemId === item.id ? (
                                 <div className="grid gap-3 text-xs text-left">
                                   <div className="flex justify-between items-center border-b border-[#27272a] pb-1.5">
-                                    <span className="font-bold text-amber-500 uppercase tracking-widest text-[9px]">{t(language, "work.editItem", "Edit Work Item")}</span>
+                                    <span className="font-bold text-[#C8A96A] uppercase tracking-widest text-[9px]">{t(language, "work.editItem", "Edit Work Item")}</span>
                                     <button
                                       type="button"
                                       onClick={() => setEditingWorkItemId(null)}
@@ -715,7 +715,7 @@ export function WorkPage() {
                                     <input
                                       value={editWorkTitle}
                                       onChange={(e) => setEditWorkTitle(e.target.value)}
-                                      className="rounded border border-[#27272a] bg-[#121214] px-2 py-1 text-xs font-semibold text-zinc-150 focus:outline-none focus:border-amber-500 w-full"
+                                      className="rounded border border-[#27272a] bg-[#121214] px-2 py-1 text-xs font-semibold text-zinc-150 focus:outline-none focus:border-[#C8A96A] w-full"
                                     />
                                   </label>
 
@@ -850,7 +850,7 @@ export function WorkPage() {
                                     <button
                                       type="button"
                                       onClick={() => handleSaveWorkItemEdit(item.id)}
-                                      className="rounded bg-amber-500 hover:bg-amber-400 text-zinc-950 px-3 py-1.5 font-bold uppercase tracking-wider transition text-[10px]"
+                                      className="rounded bg-[#C8A96A] hover:bg-[#D4B87A] text-zinc-950 px-3 py-1.5 font-bold uppercase tracking-wider transition text-[10px]"
                                     >
                                       {t(language, "common.save")}
                                     </button>
@@ -874,7 +874,7 @@ export function WorkPage() {
                                       >
                                         ⠿
                                       </span>
-                                      <span className="text-[10px] font-bold uppercase tracking-wider text-amber-500 truncate max-w-[140px]" title={client?.name}>
+                                      <span className="text-[10px] font-bold uppercase tracking-wider text-[#C8A96A] truncate max-w-[140px]" title={client?.name}>
                                         {client?.name ?? t(language, "work.noClient", "No client")}
                                       </span>
                                     </div>
@@ -882,14 +882,14 @@ export function WorkPage() {
                                       <button
                                         type="button"
                                         onClick={() => handleStartEditingWorkItem(item)}
-                                        className="text-zinc-500 hover:text-amber-500 text-[10px] uppercase font-bold transition duration-150"
+                                        className="text-zinc-500 hover:text-[#C8A96A] text-[10px] uppercase font-bold transition duration-150"
                                         title={t(language, "work.editItemTitle", "Edit item")}
                                       >
                                         {t(language, "work.edit", "Edit")}
                                       </button>
                                       <button
                                         onClick={() => deleteWorkItem(item.id)}
-                                        className="text-zinc-600 hover:text-red-400 text-xs transition duration-150 shrink-0"
+                                        className="text-zinc-600 hover:text-[#C27A6B] text-xs transition duration-150 shrink-0"
                                         title={t(language, "work.deleteItemTitle", "Delete item")}
                                       >
                                         ✕
@@ -913,7 +913,7 @@ export function WorkPage() {
                                         href={item.referenceUrl}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-500 hover:text-amber-400 transition hover:underline cursor-pointer"
+                                        className="inline-flex items-center gap-1 text-[10px] font-bold text-[#C8A96A] hover:text-[#D4B87A] transition hover:underline cursor-pointer"
                                       >
                                         🔗 {t(language, "work.openReference", "Open reference")}
                                       </a>
@@ -961,11 +961,11 @@ export function WorkPage() {
                                           </span>
                                         ) : null
                                       ) : client.billingType === "fixed_monthly" ? (
-                                        <span className="rounded bg-amber-500/10 px-1.5 py-0.5 text-[9px] font-bold text-amber-500 border border-amber-500/25 whitespace-nowrap">
+                                        <span className="rounded bg-[#C8A96A]/10 px-1.5 py-0.5 text-[9px] font-bold text-[#C8A96A] border border-[#C8A96A]/25 whitespace-nowrap">
                                           {t(language, "work.billing.fixedShort", "Fixed")}
                                         </span>
                                       ) : client.billingType === "hourly" ? (
-                                        <span className="rounded bg-blue-500/10 px-1.5 py-0.5 text-[9px] font-bold text-blue-500 border border-blue-500/25 whitespace-nowrap">
+                                        <span className="rounded bg-[#6F8799]/10 px-1.5 py-0.5 text-[9px] font-bold text-[#6F8799] border border-[#6F8799]/25 whitespace-nowrap">
                                           {t(language, "work.billing.hourlyShort", "Hourly")}
                                         </span>
                                       ) : (
@@ -1022,7 +1022,7 @@ export function WorkPage() {
               onDrop={(e) => handleDrop(e, "completed")}
               className={`rounded-xl border p-4 min-w-[290px] max-w-[330px] w-full shrink-0 flex flex-col gap-3 h-fit col-span-1 transition-all duration-200 ${
                 dragOverColumn === "completed"
-                  ? "ring-2 ring-amber-500/20 border-amber-500/30 bg-[#121214]/80 shadow-md"
+                  ? "ring-2 ring-[#C8A96A]/20 border-[#C8A96A]/30 bg-[#121214]/80 shadow-md"
                   : "border-[#27272a] bg-[#121214]/50"
               }`}
             >
@@ -1030,7 +1030,7 @@ export function WorkPage() {
                 <span className="font-bold text-xs text-zinc-400 uppercase tracking-widest">
                   {t(language, "common.completed")}
                 </span>
-                <span className="rounded-full bg-[#18181b] border border-[#27272a] px-2.5 py-0.5 text-xs font-bold text-emerald-500">
+                <span className="rounded-full bg-[#18181b] border border-[#27272a] px-2.5 py-0.5 text-xs font-bold text-[#8A9A5B]">
                   {groupedWorkItems.completed.length}
                 </span>
               </div>
@@ -1046,7 +1046,7 @@ export function WorkPage() {
                       onDragStart={(e) => handleDragStart(e, item.id)}
                       onDragEnd={handleDragEnd}
                       className={`rounded-lg border bg-[#18181b]/55 p-3.5 shadow-md flex flex-col gap-1.5 transition duration-200 hover:border-zinc-500 cursor-grab active:cursor-grabbing ${
-                        draggingItemId === item.id ? "opacity-40 border-dashed border-amber-500/40" : "border-[#27272a]"
+                        draggingItemId === item.id ? "opacity-40 border-dashed border-[#C8A96A]/40" : "border-[#27272a]"
                       }`}
                     >
                       <div className="flex justify-between items-center gap-2">
@@ -1070,7 +1070,7 @@ export function WorkPage() {
                             href={item.referenceUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1 text-[9px] font-bold text-amber-500/80 hover:text-amber-400 transition hover:underline cursor-pointer"
+                            className="inline-flex items-center gap-1 text-[9px] font-bold text-[#C8A96A]/80 hover:text-[#D4B87A] transition hover:underline cursor-pointer"
                           >
                             🔗 {t(language, "work.openReference", "Open reference")}
                           </a>
@@ -1083,7 +1083,7 @@ export function WorkPage() {
                         <button
                           type="button"
                           onClick={() => handleMoveWorkItemStatus(item, "in_progress")}
-                          className="text-[9px] font-bold text-amber-500 hover:underline uppercase tracking-wide cursor-pointer"
+                          className="text-[9px] font-bold text-[#C8A96A] hover:underline uppercase tracking-wide cursor-pointer"
                         >
                           {t(language, "work.reopen", "Reopen")}
                         </button>
@@ -1100,7 +1100,7 @@ export function WorkPage() {
                   <button
                     type="button"
                     onClick={() => setShowAllCompleted(!showAllCompleted)}
-                    className="mt-1 text-[10px] font-bold text-amber-500 hover:text-amber-400 hover:underline uppercase tracking-wider cursor-pointer w-full text-center py-1.5 bg-[#18181b]/30 rounded border border-[#27272a] transition"
+                    className="mt-1 text-[10px] font-bold text-[#C8A96A] hover:text-[#D4B87A] hover:underline uppercase tracking-wider cursor-pointer w-full text-center py-1.5 bg-[#18181b]/30 rounded border border-[#27272a] transition"
                   >
                     {showAllCompleted ? t(language, "work.showLess", "Show Less") : `${t(language, "work.showAllCompleted", "Show All Completed")} (${groupedWorkItems.completed.length})`}
                   </button>
@@ -1116,7 +1116,7 @@ export function WorkPage() {
           <div className="flex flex-col gap-4">
             <button
               onClick={() => setShowNewClientForm(!showNewClientForm)}
-              className="rounded-lg bg-amber-500 hover:bg-amber-400 text-zinc-950 px-4 py-3 text-xs font-bold uppercase tracking-wider transition w-full shadow-md text-center"
+              className="rounded-lg bg-[#C8A96A] hover:bg-[#D4B87A] text-zinc-950 px-4 py-3 text-xs font-bold uppercase tracking-wider transition w-full shadow-md text-center"
             >
               {showNewClientForm ? t(language, "work.closeForm", "Close Form") : t(language, "work.addNewClient", "+ Add New Client")}
             </button>
@@ -1137,7 +1137,7 @@ export function WorkPage() {
                     placeholder={t(language, "work.clientNamePlaceholder", "e.g. Media Agency X")}
                     value={clientDraft.name}
                     onChange={(e) => setClientDraft((c) => ({ ...c, name: e.target.value }))}
-                    className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2 text-zinc-100 text-sm font-semibold focus:border-amber-500 focus:outline-none"
+                    className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2 text-zinc-100 text-sm font-semibold focus:border-[#C8A96A] focus:outline-none"
                   />
                 </label>
 
@@ -1148,7 +1148,7 @@ export function WorkPage() {
                     onChange={(e) =>
                       setClientDraft((c) => ({ ...c, type: e.target.value as ClientType }))
                     }
-                    className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2 text-zinc-100 text-sm focus:border-amber-500 focus:outline-none"
+                    className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2 text-zinc-100 text-sm focus:border-[#C8A96A] focus:outline-none"
                   >
                     {CLIENT_TYPES.map((t) => (
                       <option key={t} value={t}>
@@ -1168,7 +1168,7 @@ export function WorkPage() {
                         difficulty: e.target.value as Difficulty,
                       }))
                     }
-                    className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2 text-zinc-100 text-sm focus:border-amber-500 focus:outline-none"
+                    className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2 text-zinc-100 text-sm focus:border-[#C8A96A] focus:outline-none"
                   >
                     {DIFFICULTIES.map((d) => (
                       <option key={d} value={d}>
@@ -1188,7 +1188,7 @@ export function WorkPage() {
                         billingType: e.target.value as BillingType,
                       }))
                     }
-                    className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2 text-zinc-100 text-sm focus:border-amber-500 focus:outline-none"
+                    className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2 text-zinc-100 text-sm focus:border-[#C8A96A] focus:outline-none"
                   >
                     <option value="per_item">{t(language, "work.billing.perItem", "Per deliverable value")}</option>
                     <option value="fixed_monthly">{t(language, "work.billing.fixedMonthly", "Fixed monthly retainer")}</option>
@@ -1210,7 +1210,7 @@ export function WorkPage() {
                           defaultRate: Number(e.target.value) || undefined,
                         }))
                       }
-                      className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2 text-zinc-100 text-sm focus:border-amber-500 focus:outline-none"
+                      className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2 text-zinc-100 text-sm focus:border-[#C8A96A] focus:outline-none"
                     />
                   </label>
                 )}
@@ -1228,7 +1228,7 @@ export function WorkPage() {
                           monthlyRate: Number(e.target.value) || undefined,
                         }))
                       }
-                      className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2 text-zinc-100 text-sm focus:border-amber-500 focus:outline-none"
+                      className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2 text-zinc-100 text-sm focus:border-[#C8A96A] focus:outline-none"
                     />
                   </label>
                 )}
@@ -1246,7 +1246,7 @@ export function WorkPage() {
                           hourlyRate: Number(e.target.value) || undefined,
                         }))
                       }
-                      className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2 text-zinc-100 text-sm focus:border-amber-500 focus:outline-none"
+                      className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2 text-zinc-100 text-sm focus:border-[#C8A96A] focus:outline-none"
                     />
                   </label>
                 )}
@@ -1262,7 +1262,7 @@ export function WorkPage() {
                           currency: e.target.value as Currency,
                         }))
                       }
-                      className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2 text-zinc-100 text-sm focus:border-amber-500 focus:outline-none"
+                      className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2 text-zinc-100 text-sm focus:border-[#C8A96A] focus:outline-none"
                     >
                       <option value="USD">USD ($)</option>
                       <option value="PYG">PYG (Gs)</option>
@@ -1277,19 +1277,19 @@ export function WorkPage() {
                     rows={3}
                     value={clientDraft.notes}
                     onChange={(e) => setClientDraft((c) => ({ ...c, notes: e.target.value }))}
-                    className="resize-none rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2 text-zinc-100 text-sm focus:border-amber-500 focus:outline-none placeholder:text-zinc-650"
+                    className="resize-none rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2 text-zinc-100 text-sm focus:border-[#C8A96A] focus:outline-none placeholder:text-zinc-650"
                   />
                 </label>
 
                 {errorClient && (
-                  <p className="text-red-400 text-xs font-semibold">
+                  <p className="text-[#C27A6B] text-xs font-semibold">
                     {errorClient}
                   </p>
                 )}
 
                 <button
                   type="submit"
-                  className="rounded-lg bg-amber-500 hover:bg-amber-400 text-zinc-950 px-4 py-2.5 text-xs font-bold uppercase tracking-wider transition w-full"
+                  className="rounded-lg bg-[#C8A96A] hover:bg-[#D4B87A] text-zinc-950 px-4 py-2.5 text-xs font-bold uppercase tracking-wider transition w-full"
                 >
                   {t(language, "work.saveProfile", "Save Profile")}
                 </button>
@@ -1319,7 +1319,7 @@ export function WorkPage() {
                     {isEditing ? (
                       <div className="grid gap-4.5 text-xs">
                         <div className="flex justify-between items-center border-b border-[#27272a] pb-2">
-                          <span className="font-bold text-amber-500 uppercase tracking-widest text-[10px]">{t(language, "work.editingProfile", "Editing Profile")}</span>
+                          <span className="font-bold text-[#C8A96A] uppercase tracking-widest text-[10px]">{t(language, "work.editingProfile", "Editing Profile")}</span>
                           <button
                             onClick={() => setEditingClientId(null)}
                             className="text-zinc-400 hover:text-white"
@@ -1333,7 +1333,7 @@ export function WorkPage() {
                           <input
                             value={editClientName}
                             onChange={(e) => setEditClientName(e.target.value)}
-                            className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-1.5 text-sm font-semibold text-zinc-100 focus:outline-none focus:border-amber-500"
+                            className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-1.5 text-sm font-semibold text-zinc-100 focus:outline-none focus:border-[#C8A96A]"
                           />
                         </label>
 
@@ -1451,7 +1451,7 @@ export function WorkPage() {
                           <button
                             type="button"
                             onClick={() => handleSaveClientEdit(client.id)}
-                            className="rounded-lg bg-amber-500 hover:bg-amber-400 text-zinc-950 px-4 py-2 font-bold uppercase tracking-wider transition"
+                            className="rounded-lg bg-[#C8A96A] hover:bg-[#D4B87A] text-zinc-950 px-4 py-2 font-bold uppercase tracking-wider transition"
                           >
                             {t(language, "work.saveChanges", "Save changes")}
                           </button>
@@ -1475,7 +1475,7 @@ export function WorkPage() {
                               <span className="rounded bg-zinc-900 border border-[#27272a] px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-zinc-400">
                                 {clientTypeLabel(client.type)}
                               </span>
-                              <span className="rounded bg-amber-500/10 border border-amber-500/25 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-amber-500 capitalize">
+                              <span className="rounded bg-[#C8A96A]/10 border border-[#C8A96A]/25 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-[#C8A96A] capitalize">
                                 {t(language, `work.clientStatus.${client.status}`, client.status)}
                               </span>
                             </div>
