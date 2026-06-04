@@ -162,7 +162,7 @@ export function GoalsCloudPanel({ localGoals }: GoalsCloudPanelProps) {
       <section className="mt-6 rounded-xl border border-[#27272a] bg-[#18181b] p-5">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-widest text-sky-400">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-[#7F97A9]">
               {t(language, "cloud.goals.title")}
             </p>
             <p className="mt-2 text-sm font-semibold text-zinc-100">
@@ -184,10 +184,10 @@ export function GoalsCloudPanel({ localGoals }: GoalsCloudPanelProps) {
   }
 
   return (
-    <section className="mt-6 rounded-xl border border-sky-500/25 bg-[#18181b] p-6 shadow-xl">
+    <section className="mt-6 rounded-xl border border-[#6F8799]/25 bg-[#18181b] p-6 shadow-xl">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div>
-          <p className="text-[10px] font-bold uppercase tracking-widest text-sky-400">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-[#7F97A9]">
             {t(language, "cloud.goals.title")}
           </p>
           <h2 className="mt-2 text-2xl font-bold tracking-tight text-zinc-100">
@@ -197,7 +197,7 @@ export function GoalsCloudPanel({ localGoals }: GoalsCloudPanelProps) {
             {t(language, "common.manualCloudPreview")}. {t(language, "common.cloudDataSeparate")}
           </p>
         </div>
-        <span className="w-fit rounded-full border border-emerald-500/25 bg-emerald-500/10 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-emerald-400">
+        <span className="w-fit rounded-full border border-[#8A9A5B]/25 bg-[#8A9A5B]/10 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-[#9AAB6B]">
           {t(language, "settings.accountSync.signedIn")}
         </span>
       </div>
@@ -216,7 +216,7 @@ export function GoalsCloudPanel({ localGoals }: GoalsCloudPanelProps) {
             type="button"
             onClick={handleCreateTestCloudGoal}
             disabled={activeAction !== null}
-            className="rounded-lg border border-sky-500/25 bg-sky-500/10 px-4 py-3 text-xs font-bold uppercase tracking-wider text-sky-300 transition hover:bg-sky-500/20 disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded-lg border border-[#6F8799]/25 bg-[#6F8799]/10 px-4 py-3 text-xs font-bold uppercase tracking-wider text-sky-300 transition hover:bg-[#6F8799]/20 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {activeAction === "create"
               ? t(language, "common.creating")
@@ -243,7 +243,7 @@ export function GoalsCloudPanel({ localGoals }: GoalsCloudPanelProps) {
             value={selectedValue}
             onChange={(event) => setSelectedGoalId(event.target.value)}
             disabled={localGoals.length === 0 || activeAction !== null}
-            className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2.5 text-zinc-100 focus:outline-none focus:border-sky-500/50 disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2.5 text-zinc-100 focus:outline-none focus:border-[#6F8799]/50 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {localGoals.length === 0 ? (
               <option value="">{t(language, "cloud.noLocalGoals", "No local goals available")}</option>
@@ -260,20 +260,20 @@ export function GoalsCloudPanel({ localGoals }: GoalsCloudPanelProps) {
           type="button"
           onClick={handleUploadSelectedGoal}
           disabled={!selectedGoal || activeAction !== null}
-          className="self-end rounded-lg border border-amber-500/25 bg-amber-500/10 px-4 py-3 text-xs font-bold uppercase tracking-wider text-amber-400 transition hover:bg-amber-500/20 disabled:cursor-not-allowed disabled:opacity-50"
+          className="self-end rounded-lg border border-[#C8A96A]/25 bg-[#C8A96A]/10 px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#D4B87A] transition hover:bg-[#C8A96A]/20 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {activeAction === "upload" ? t(language, "common.uploading") : t(language, "cloud.uploadGoal")}
         </button>
       </div>
 
       {message ? (
-        <p className="mt-4 rounded-lg border border-emerald-500/30 bg-emerald-500/5 px-4 py-3 text-xs font-semibold text-emerald-400">
+        <p className="mt-4 rounded-lg border border-[#8A9A5B]/30 bg-[#8A9A5B]/5 px-4 py-3 text-xs font-semibold text-[#9AAB6B]">
           {message}
         </p>
       ) : null}
 
       {error ? (
-        <p className="mt-4 rounded-lg border border-red-500/30 bg-red-500/5 px-4 py-3 text-xs font-semibold text-red-300">
+        <p className="mt-4 rounded-lg border border-[#B26A5B]/30 bg-[#B26A5B]/5 px-4 py-3 text-xs font-semibold text-[#E8E4DD]">
           {error}
         </p>
       ) : null}
@@ -325,7 +325,7 @@ export function GoalsCloudPanel({ localGoals }: GoalsCloudPanelProps) {
                           </span>
                         ) : null}
                         {goal.linkedFinanceMetric === "savings" ? (
-                          <span className="rounded-full border border-emerald-500/25 bg-emerald-500/10 px-2 py-0.5 text-[9px] font-semibold text-emerald-400">
+                          <span className="rounded-full border border-[#8A9A5B]/25 bg-[#8A9A5B]/10 px-2 py-0.5 text-[9px] font-semibold text-[#9AAB6B]">
                             {t(language, "goals.savingsLinked", "savings linked")}
                           </span>
                         ) : null}
@@ -335,7 +335,7 @@ export function GoalsCloudPanel({ localGoals }: GoalsCloudPanelProps) {
                     <div className="mt-3">
                       <div className="h-1.5 overflow-hidden rounded-full border border-[#27272a] bg-zinc-850">
                         <div
-                          className="h-full rounded-full bg-gradient-to-r from-sky-500 to-cyan-300 transition-all duration-300"
+                          className="h-full rounded-full bg-gradient-to-r from-[#6F8799] to-cyan-300 transition-all duration-300"
                           style={{ width: `${progress ?? 0}%` }}
                         />
                       </div>
