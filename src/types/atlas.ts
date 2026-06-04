@@ -18,9 +18,78 @@ export type Transaction = {
   paymentMethod: PaymentMethod;
   tag?: string;
   createdAt: string;
+  accountId?: string;
 };
 
 export type TransactionDraft = Omit<Transaction, "id" | "createdAt">;
+
+export type FinanceAccountType =
+  | "cash"
+  | "bank"
+  | "wallet"
+  | "credit_card"
+  | "savings"
+  | "investment"
+  | "other";
+
+export type FinanceAccount = {
+  id: string;
+  name: string;
+  type: FinanceAccountType;
+  currency: Currency;
+  initialBalance: number;
+  isActive: boolean;
+  color?: string;
+  icon?: string;
+  institution?: string;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type PlannedExpenseStatus =
+  | "pending"
+  | "paid"
+  | "skipped"
+  | "cancelled";
+
+export type PlannedExpenseRecurrence = "none" | "monthly";
+
+export type PlannedExpense = {
+  id: string;
+  title: string;
+  amount: number;
+  currency: Currency;
+  category: string;
+  dueDate: string;
+  paymentMethod?: PaymentMethod;
+  notes?: string;
+  status: PlannedExpenseStatus;
+  recurrence: PlannedExpenseRecurrence;
+  dayOfMonth?: number;
+  createdAt: string;
+  updatedAt: string;
+  paidTransactionId?: string;
+  lastGeneratedForMonth?: string;
+  cashflowType?: "expense" | "income";
+  accountId?: string;
+};
+
+export type PlannedExpenseDraft = Pick<
+  PlannedExpense,
+  | "title"
+  | "amount"
+  | "currency"
+  | "category"
+  | "dueDate"
+  | "recurrence"
+> &
+  Partial<
+    Pick<
+      PlannedExpense,
+      "paymentMethod" | "notes" | "dayOfMonth" | "cashflowType" | "accountId"
+    >
+  >;
 
 export type FinanceFilters = {
   month: string;
@@ -109,6 +178,8 @@ export type AtlasTask = {
   subjectId?: string;
   academicType?: AcademicTaskType;
   grade?: string;
+  scheduledTime?: string;
+  completionNotes?: string;
 };
 
 export type TaskDraft = Omit<
@@ -172,11 +243,28 @@ export type Note = {
   content: string;
   createdAt: string;
   updatedAt: string;
+  deletedAt?: string | null;
+  syncState?: "local_only" | "dirty" | "synced" | "conflict" | "deleted";
+  cloudId?: string;
+  lastSyncedAt?: string;
+  localId?: string;
 };
 
 export type NoteDraft = Pick<Note, "title" | "area" | "tags" | "content">;
 
 export type GoalStatus = "active" | "completed" | "paused";
+export type GoalType = "standard" | "daily_habit";
+export type HabitFrequency = "daily";
+export type HabitCheckInStatus = "completed" | "missed" | "skipped";
+
+export type HabitCheckIn = {
+  date: string;
+  status: HabitCheckInStatus;
+  value?: number;
+  note?: string;
+  createdAt: string;
+  updatedAt: string;
+};
 
 export type Goal = {
   id: string;
@@ -192,6 +280,13 @@ export type Goal = {
   linkedFinanceMetric?: "none" | "savings";
   currency?: Currency;
   unit?: string;
+  goalType?: GoalType;
+  habitFrequency?: HabitFrequency;
+  habitTargetPerDay?: number;
+  habitUnit?: string;
+  habitStartDate?: string;
+  habitEndDate?: string;
+  habitCheckIns?: Record<string, HabitCheckIn>;
 };
 
 export type GoalDraft = Pick<
@@ -207,6 +302,13 @@ export type GoalDraft = Pick<
   linkedFinanceMetric?: "none" | "savings";
   currency?: Currency;
   unit?: string;
+  goalType?: GoalType;
+  habitFrequency?: HabitFrequency;
+  habitTargetPerDay?: number;
+  habitUnit?: string;
+  habitStartDate?: string;
+  habitEndDate?: string;
+  habitCheckIns?: Record<string, HabitCheckIn>;
 };
 
 export type ReviewArea =
@@ -279,15 +381,35 @@ export type DayMode =
   | "Low Energy Day"
   | "Recovery Day";
 
+export type AtlasModule =
+  | "today"
+  | "work"
+  | "finances"
+  | "gym"
+  | "academics"
+  | "goals"
+  | "notes"
+  | "review"
+  | "calendar";
+
+export type EnabledModules = Record<AtlasModule, boolean>;
+
+export type WorkspacePreset = "student" | "freelancer" | "personal_finance" | "full" | "custom";
+
 export type AtlasSettings = {
   dayMode: DayMode;
   language: "en" | "es";
   gymWeeklyTarget: number;
+  enabledModules: EnabledModules;
+  onboardingCompleted: boolean;
+  workspacePreset?: WorkspacePreset;
   baseCurrency?: Currency;
   exchangeRateUsdToPyg?: number;
   usdToPygRate?: number;
   exchangeRateUpdatedAt?: string;
   exchangeRateSource?: "manual" | "live";
+  defaultFinanceAccountId?: string;
+  availableMoneyMode?: "legacy" | "account_aware";
 };
 
 // --- Savings ---
@@ -433,6 +555,8 @@ export type FinanceSettings = {
   exchangeRateUpdatedAt: string;
   exchangeRateSource: "manual" | "live";
   usdToPygRate: number;
+  defaultFinanceAccountId?: string;
+  availableMoneyMode?: "legacy" | "account_aware";
 };
 
 export type StreakState = {
@@ -444,12 +568,32 @@ export type CalendarEvent = {
   id: string;
   title: string;
   date: string;
-  type: "task" | "work_item" | "goal" | "workout" | "daily_wrap" | "weekly_review";
+  type: "task" | "work_item" | "goal" | "habit_goal" | "workout" | "daily_wrap" | "weekly_review" | "planned_expense";
   status?: string;
   value?: number;
   currency?: Currency;
   extraInfo?: string;
 };
+
+// --- Finances Budget Types ---
+export type FinanceBudget = {
+  id: string;
+  name: string;
+  category: string;
+  amount: number;
+  currency: Currency;
+  period: "monthly";
+  isActive: boolean;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+  warningThresholdPercent?: number; // default 80
+  rolloverEnabled?: boolean; // default false
+  startMonth?: string; // YYYY-MM
+  endMonth?: string; // YYYY-MM
+};
+
+export type FinanceBudgetDraft = Omit<FinanceBudget, "id" | "createdAt" | "updatedAt">;
 
 // --- Backwards-Compatible Aliases ---
 export type Task = AtlasTask;

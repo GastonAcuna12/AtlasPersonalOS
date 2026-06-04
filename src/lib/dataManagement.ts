@@ -25,6 +25,7 @@ export type { AtlasStorageDomain, AtlasStorageKey };
 
 type AtlasData = {
   transactions: unknown[];
+  plannedExpenses: unknown[];
   gymLogs: unknown[];
   tasks: unknown[];
   subjects: unknown[];
@@ -42,6 +43,9 @@ type AtlasData = {
   dailyWraps: unknown[];
   academicTasks?: unknown[];
   xpEvents?: unknown[];
+  financeBudgets?: unknown[];
+  financeAccounts?: unknown[];
+  focusTask?: unknown;
 };
 
 export type AtlasBackup = {
@@ -68,23 +72,27 @@ const DEFAULT_SAVINGS: SavingsState = {
 
 const STORAGE_DOMAIN_FALLBACKS = {
   transactions: EMPTY_ARRAY,
+  plannedExpenses: EMPTY_ARRAY,
+  savings: DEFAULT_SAVINGS,
+  financeSettings: DEFAULT_FINANCE_SETTINGS,
+  financeBudgets: EMPTY_ARRAY,
+  financeAccounts: EMPTY_ARRAY,
   gymLogs: EMPTY_ARRAY,
   tasks: EMPTY_ARRAY,
+  dailyPlans: EMPTY_ARRAY,
+  dailyWraps: EMPTY_ARRAY,
   subjects: EMPTY_ARRAY,
+  academicTasks: EMPTY_ARRAY,
   studySessions: EMPTY_ARRAY,
   notes: EMPTY_ARRAY,
   goals: EMPTY_ARRAY,
   weeklyReviews: EMPTY_ARRAY,
-  xp: EMPTY_XP,
-  appSettings: DEFAULT_APP_SETTINGS,
-  financeSettings: DEFAULT_FINANCE_SETTINGS,
-  savings: DEFAULT_SAVINGS,
-  dailyPlans: EMPTY_ARRAY,
   clients: EMPTY_ARRAY,
   workItems: EMPTY_ARRAY,
-  dailyWraps: EMPTY_ARRAY,
-  academicTasks: EMPTY_ARRAY,
+  xp: EMPTY_XP,
   xpEvents: EMPTY_ARRAY,
+  appSettings: DEFAULT_APP_SETTINGS,
+  focusTask: null,
 } satisfies Record<AtlasStorageDomain, unknown>;
 
 function isObject(value: unknown): value is Record<string, unknown> {
