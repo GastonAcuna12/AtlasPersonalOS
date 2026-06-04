@@ -139,7 +139,41 @@ type CoreTranslationKey =
   | "account.workspace.noRecordsDescription"
   | "account.error.unconfigured"
   | "account.error.emailPassword"
-  | "account.message.signedOut";
+  | "account.message.signedOut"
+  | "review.helper.wins"
+  | "review.helper.winsEmpty"
+  | "review.helper.problems"
+  | "review.helper.problemsLowEnergy"
+  | "review.helper.lessons"
+  | "review.helper.lessonsEmpty"
+  | "review.helper.whatFeltOff"
+  | "review.helper.whatToImprove"
+  | "review.helper.nextWeekFocus"
+  | "review.helper.biggestWin"
+  | "review.helper.biggestProblem"
+  | "review.helper.oneThingToStop"
+  | "review.helper.oneThingToContinue"
+  | "review.helper.oneThingToStart"
+  | "review.helper.moodSummary"
+  | "review.helper.moodSummaryStatic"
+  | "review.signal.eyebrow"
+  | "review.signal.title"
+  | "review.signal.momentumLabel"
+  | "review.signal.task"
+  | "review.signal.tasks"
+  | "review.signal.dominantArea"
+  | "review.signal.dominantType"
+  | "review.signal.noArea"
+  | "review.signal.noType"
+  | "review.signal.empty"
+  | "review.signal.highVelocity"
+  | "review.signal.highVelocityDesc"
+  | "review.signal.deeplyReflective"
+  | "review.signal.deeplyReflectiveDesc"
+  | "review.signal.highDiscipline"
+  | "review.signal.highDisciplineDesc"
+  | "review.signal.steadyProgress"
+  | "review.signal.steadyProgressDesc";
 
 type Dictionary = Record<CoreTranslationKey, string>;
 
@@ -309,6 +343,40 @@ export const dictionaries: Record<Language, Dictionary> = {
     "account.error.emailPassword": "Enter an email and password.",
     "account.message.signedOut":
       "Signed out. Atlas remains available in local-first mode.",
+    "review.helper.wins": "Inspiration: You completed {count} tasks this week, such as '{sample}' — you could use one of these as evidence.",
+    "review.helper.winsEmpty": "No completed tasks recorded this week. Did you accomplish anything outside your agenda?",
+    "review.helper.problems": "Consider any bottlenecks, unexpected blockers, or friction in your routine this week.",
+    "review.helper.problemsLowEnergy": "Consider any bottlenecks in your routine, keeping in mind that your weekly energy averaged a soft {energy}/10.",
+    "review.helper.lessons": "You captured {count} reflection notes during tasks this week — review them above to help extract a lesson.",
+    "review.helper.lessonsEmpty": "Consider what you learned this week to refine your planning or time estimates next week.",
+    "review.helper.whatFeltOff": "Reflect on any minor misalignments, energy drains, or tasks that didn't feel quite right.",
+    "review.helper.whatToImprove": "Think of one practical, simple change you can make to your schedule or environment next week.",
+    "review.helper.nextWeekFocus": "Encourage yourself to carry forward one key lesson or unfinished priority into the coming week.",
+    "review.helper.biggestWin": "Select the most meaningful accomplishment from your completed tasks above.",
+    "review.helper.biggestProblem": "Consider any low-energy days or task completion blockers listed in your daily chronology.",
+    "review.helper.oneThingToStop": "Is there a habit, distraction, or repetitive bottleneck you would like to gently phase out?",
+    "review.helper.oneThingToContinue": "Identify a practice, tool, or boundary that served you well and is worth maintaining.",
+    "review.helper.oneThingToStart": "What is a small, low-pressure experiment or habit you'd like to try out next week?",
+    "review.helper.moodSummary": "Your daily logs indicate a calm average mood of {mood}/10 across the week.",
+    "review.helper.moodSummaryStatic": "Reflect gently on how your emotions and mental state fluctuated or stayed stable.",
+    "review.signal.eyebrow": "System Signals",
+    "review.signal.title": "Weekly Insights",
+    "review.signal.momentumLabel": "Weekly Momentum",
+    "review.signal.task": "task",
+    "review.signal.tasks": "tasks",
+    "review.signal.dominantArea": "Dominant Area",
+    "review.signal.dominantType": "Dominant Type",
+    "review.signal.noArea": "No dominant task area",
+    "review.signal.noType": "No dominant task type",
+    "review.signal.empty": "Complete daily reviews and tasks to generate weekly signals.",
+    "review.signal.highVelocity": "High Velocity",
+    "review.signal.highVelocityDesc": "You completed a high volume of tasks, maintaining strong operational momentum.",
+    "review.signal.deeplyReflective": "Deeply Reflective",
+    "review.signal.deeplyReflectiveDesc": "You logged completion notes on over half of your tasks, building high self-awareness.",
+    "review.signal.highDiscipline": "High Discipline",
+    "review.signal.highDisciplineDesc": "You pushed through low-energy days to complete your planned objectives.",
+    "review.signal.steadyProgress": "Steady Progress",
+    "review.signal.steadyProgressDesc": "You maintained a balanced pace across planning, execution, and daily reflections.",
   },
   es: {
     "nav.today": "Hoy",
@@ -476,6 +544,40 @@ export const dictionaries: Record<Language, Dictionary> = {
     "account.error.emailPassword": "Ingresa email y contraseña.",
     "account.message.signedOut":
       "Sesión cerrada. Atlas sigue disponible en modo local-first.",
+    "review.helper.wins": "Inspiración: Completaste {count} tareas esta semana (ej. '{sample}') — podrías usar una de ellas como evidencia.",
+    "review.helper.winsEmpty": "No registraste tareas completadas esta semana. ¿Lograste algo fuera de tu agenda?",
+    "review.helper.problems": "Considera cualquier obstáculo, bloqueo inesperado o fricción en tu rutina de esta semana.",
+    "review.helper.problemsLowEnergy": "Considera cualquier obstáculo en tu rutina, teniendo en cuenta que tu energía semanal promedió un suave {energy}/10.",
+    "review.helper.lessons": "Registraste {count} notas de reflexión al completar tareas esta semana — revísalas arriba para extraer algún aprendizaje.",
+    "review.helper.lessonsEmpty": "Considera qué aprendiste esta semana para perfeccionar tu planificación o estimaciones de tiempo.",
+    "review.helper.whatFeltOff": "Reflexiona sobre pequeños desalineamientos, desgastes de energía o tareas que no se sintieron del todo bien.",
+    "review.helper.whatToImprove": "Piensa en un cambio práctico y sencillo que puedas hacer en tu horario o entorno la próxima semana.",
+    "review.helper.nextWeekFocus": "Anímate a llevar un aprendizaje clave o prioridad pendiente hacia la próxima semana.",
+    "review.helper.biggestWin": "Selecciona el logro más destacado de tu lista de tareas completadas de arriba.",
+    "review.helper.biggestProblem": "Considera días de baja energía o bloqueos en la finalización de tareas en tu cronología diaria.",
+    "review.helper.oneThingToStop": "¿Hay algún hábito, distracción o cuello de botella repetitivo que te gustaría eliminar gradualmente?",
+    "review.helper.oneThingToContinue": "Identifica una práctica, herramienta o límite que te haya servido y que valga la pena mantener.",
+    "review.helper.oneThingToStart": "¿Qué pequeño experimento o hábito de baja presión te gustaría probar la próxima semana?",
+    "review.helper.moodSummary": "Tus registros diarios indican un promedio de ánimo de {mood}/10 a lo largo de la semana.",
+    "review.helper.moodSummaryStatic": "Reflexiona sobre cómo fluctuaron o se mantuvieron estables tus emociones y tu estado mental.",
+    "review.signal.eyebrow": "Señales del Sistema",
+    "review.signal.title": "Insights Semanales",
+    "review.signal.momentumLabel": "Impulso Semanal",
+    "review.signal.task": "tarea",
+    "review.signal.tasks": "tareas",
+    "review.signal.dominantArea": "Área Dominante",
+    "review.signal.dominantType": "Tipo Dominante",
+    "review.signal.noArea": "Sin área dominante",
+    "review.signal.noType": "Sin tipo dominante",
+    "review.signal.empty": "Completa cierres diarios y tareas para generar señales semanales.",
+    "review.signal.highVelocity": "Alta Velocidad",
+    "review.signal.highVelocityDesc": "Completaste un gran volumen de tareas, manteniendo un fuerte impulso operativo.",
+    "review.signal.deeplyReflective": "Profundamente Reflexivo",
+    "review.signal.deeplyReflectiveDesc": "Registraste notas de conclusión en más de la mitad de tus tareas, desarrollando alta autoconsciencia.",
+    "review.signal.highDiscipline": "Alta Disciplina",
+    "review.signal.highDisciplineDesc": "Te esforzaste en días de baja energía para completar tus objetivos planificados.",
+    "review.signal.steadyProgress": "Progreso Constante",
+    "review.signal.steadyProgressDesc": "Mantuviste un ritmo equilibrado entre planificación, ejecución y reflexiones diarias.",
   },
 };
 
@@ -495,6 +597,8 @@ const moduleEn = {
   "common.pending": "Pending",
   "common.closed": "Closed",
   "common.overdue": "Overdue",
+  "common.today": "Today",
+  "common.tomorrow": "Tomorrow",
   "common.status": "Status",
   "common.priority": "Priority",
   "common.area": "Area",
@@ -634,6 +738,18 @@ const moduleEn = {
   "dashboard.wrapUp": "Wrap-up",
   "today.eyebrow": "Daily Agenda",
   "today.title": "Today",
+  "today.focus.title": "Current Focus",
+  "today.focus.action": "Focus",
+  "today.focus.clear": "Clear Focus",
+  "today.focus.empty": "Pick one task to focus on.",
+  "today.focus.estimated": "Estimated",
+  "today.focus.noTask": "Focused task is no longer available.",
+  "today.focus.completePrompt": "What did you complete?",
+  "today.focus.notesPlaceholder": "Optional completion notes...",
+  "today.focus.finishTask": "Finish task",
+  "today.focus.finishWithoutNotes": "Finish without notes",
+  "today.focus.back": "Back",
+  "today.focus.markDone": "Mark done",
   "today.planningComplete": "Planning Complete",
   "today.exportPlan": "Export Today plan",
   "today.completePlanning": "Complete Planning (+25 XP)",
@@ -744,18 +860,25 @@ const moduleEn = {
   "review.metric.workItems": "Work Items",
   "review.metric.gymDays": "Gym Days",
   "review.metric.xpEarned": "XP Earned",
+  "today.section.scheduled": "Scheduled",
   "today.section.priorityFocus": "Priority Focus",
   "today.section.quickWins": "Quick Wins",
   "today.section.academic": "University / Academic",
   "today.section.work": "Client / Work",
   "today.section.personal": "Personal Maintenance",
+  "today.section.remaining": "Remaining",
   "today.section.backlog": "Backlog Suggestions",
+  "today.overdue.alert": "Overdue",
+  "today.overdue.description": "{n} overdue task(s) need attention",
+  "today.overdue.more": "more tasks not shown",
   "task.quickCapture": "Quick capture",
   "task.addAgenda": "Add Agenda Task",
   "task.title": "Task Title *",
   "task.titlePlaceholder": "e.g. Prepare lecture notes",
   "task.notesDetails": "Notes / Details",
-  "task.notesPlaceholder": "Add links, focus details, or guides...",
+  "task.notesPlaceholder": "Add context, links, or instructions...",
+  "task.scheduledTime": "Scheduled Time",
+  "task.rescheduleTomorrow": "Reschedule to tomorrow",
   "task.taskType": "Task Type",
   "task.estimatedDuration": "Estimated Duration (Minutes)",
   "task.plannedDate": "Planned Date",
@@ -1344,6 +1467,55 @@ const moduleEn = {
   "work.arrangementDetails": "Arrangement details",
   "work.retainerRate": "Retainer Rate",
   "work.emptyClients": "No clients added yet. Complete form to build client base.",
+  "settings.presets.current": "Current Workspace Preset",
+  "settings.presets.title": "Workspace Presets",
+  "settings.presets.desc": "Quickly switch between pre-configured workspace modes.",
+  "settings.presets.rerunOnboarding": "Rerun Onboarding Quiz",
+  "settings.presets.enabledModules": "Enabled modules:",
+  "settings.presets.warning": "Warning: switching preset will instantly toggle modules.",
+  "settings.presets.apply": "Apply Preset",
+  "settings.presets.applied": "Preset Applied",
+  "settings.presets.success": "Preset applied successfully.",
+  "settings.presets.confirmTitle": "Apply this preset?",
+  "settings.presets.confirmDesc": "This will toggle your visible modules.",
+  "onboarding.preset.student.name": "Academic",
+  "onboarding.preset.student.desc": "Optimized for students",
+  "onboarding.preset.freelancer.name": "Freelancer",
+  "onboarding.preset.freelancer.desc": "Focus on clients and billing",
+  "onboarding.preset.finance.name": "Financial",
+  "onboarding.preset.finance.desc": "Budgeting and cash flow",
+  "onboarding.preset.personal_finance.name": "Personal Finance",
+  "onboarding.preset.personal_finance.desc": "Savings and budgeting",
+  "onboarding.preset.full.name": "Atlas Full",
+  "onboarding.preset.full.desc": "All modules enabled",
+  "onboarding.preset.custom.name": "Custom",
+  "onboarding.preset.custom.desc": "Your custom setup",
+  "onboarding.recommendedWorkspace": "Recommended Workspace",
+  "onboarding.recommendedWorkspaceDesc": "Based on your quiz answers.",
+  "onboarding.applyRecommendation": "Apply Recommendation",
+  "onboarding.choosePresetManually": "Choose manually",
+  "onboarding.quizRecommendation": "Quiz Recommendation",
+  "onboarding.manualSelection": "Manual Selection",
+  "common.next": "Next",
+  "common.back": "Back",
+  "common.apply": "Apply",
+  "common.close": "Close",
+  "common.edit": "Edit",
+  "common.confirm": "Confirm",
+  "common.warning": "Warning",
+  "common.info": "Info",
+  "today.overdueBanner": "Overdue Tasks",
+  "today.rescheduleToTomorrow": "Reschedule to Tomorrow",
+  "task.moreOptions": "More options",
+  "finances.projection.title": "Commitment Projection",
+  "finances.projection.horizon7": "7 Days",
+  "finances.projection.horizon30": "30 Days",
+  "finances.projection.commitments": "Commitments",
+  "finances.projection.safeAfter": "Safe to Spend After",
+  "finances.monthlyFlow.title": "Monthly Cash Flow",
+  "finances.monthlyFlow.income": "Income",
+  "finances.monthlyFlow.expenses": "Expenses",
+  "finances.monthlyFlow.net": "Net",
 } as const;
 
 type ModuleTranslationKey = keyof typeof moduleEn;
@@ -1364,6 +1536,8 @@ const moduleEs: Record<ModuleTranslationKey, string> = {
   "common.pending": "Pendiente",
   "common.closed": "Cerrado",
   "common.overdue": "Vencido",
+  "common.today": "Hoy",
+  "common.tomorrow": "Mañana",
   "common.status": "Estado",
   "common.priority": "Prioridad",
   "common.area": "Área",
@@ -1503,6 +1677,18 @@ const moduleEs: Record<ModuleTranslationKey, string> = {
   "dashboard.wrapUp": "Cierre",
   "today.eyebrow": "Agenda diaria",
   "today.title": "Hoy",
+  "today.focus.title": "Foco actual",
+  "today.focus.action": "Enfocar",
+  "today.focus.clear": "Quitar foco",
+  "today.focus.empty": "Elegí una tarea para enfocarte.",
+  "today.focus.estimated": "Estimado",
+  "today.focus.noTask": "La tarea enfocada ya no está disponible.",
+  "today.focus.completePrompt": "¿Qué completaste?",
+  "today.focus.notesPlaceholder": "Notas de cierre opcionales...",
+  "today.focus.finishTask": "Terminar tarea",
+  "today.focus.finishWithoutNotes": "Terminar sin notas",
+  "today.focus.back": "Atrás",
+  "today.focus.markDone": "Marcar como hecha",
   "today.planningComplete": "Planificación completa",
   "today.exportPlan": "Exportar plan de hoy",
   "today.completePlanning": "Completar planificación (+25 XP)",
@@ -1613,18 +1799,25 @@ const moduleEs: Record<ModuleTranslationKey, string> = {
   "review.metric.workItems": "Items de trabajo",
   "review.metric.gymDays": "Días de gym",
   "review.metric.xpEarned": "XP ganada",
-  "today.section.priorityFocus": "Foco prioritario",
-  "today.section.quickWins": "Victorias rápidas",
+  "today.section.scheduled": "Programadas",
+  "today.section.priorityFocus": "Enfoque principal",
+  "today.section.quickWins": "Tareas rápidas",
   "today.section.academic": "Universidad / académico",
   "today.section.work": "Cliente / trabajo",
   "today.section.personal": "Mantenimiento personal",
+  "today.section.remaining": "Restantes",
   "today.section.backlog": "Sugerencias del backlog",
+  "today.overdue.alert": "Atrasadas",
+  "today.overdue.description": "{n} tarea(s) atrasada(s) necesitan atención",
+  "today.overdue.more": "tareas adicionales ocultas",
   "task.quickCapture": "Captura rápida",
   "task.addAgenda": "Agregar tarea de agenda",
   "task.title": "Título de tarea *",
   "task.titlePlaceholder": "Ej.: Preparar apuntes de clase",
   "task.notesDetails": "Notas / detalles",
-  "task.notesPlaceholder": "Agrega links, detalles de foco o guías...",
+  "task.notesPlaceholder": "Agregar contexto, links o instrucciones...",
+  "task.scheduledTime": "Hora programada",
+  "task.rescheduleTomorrow": "Reprogramar para mañana",
   "task.taskType": "Tipo de tarea",
   "task.estimatedDuration": "Duración estimada (minutos)",
   "task.plannedDate": "Fecha planificada",
@@ -2207,12 +2400,61 @@ const moduleEs: Record<ModuleTranslationKey, string> = {
   "work.billingMode": "Modo de cobro",
   "work.defaultRatePerItem": "Tarifa por item ($)",
   "work.monthlyRateRetainer": "Retainer mensual ($)",
-  "work.hourlyRateRetainer": "Retainer por hora ($/h)",
+  "work.hourlyRateRetainer": "Tarifa por hora ($/h)",
   "work.saveChanges": "Guardar cambios",
   "work.difficultyPrefix": "Dificultad",
   "work.arrangementDetails": "Detalles del acuerdo",
   "work.retainerRate": "Tarifa retainer",
   "work.emptyClients": "Aún no hay clientes. Completa el formulario para construir tu base de clientes.",
+  "settings.presets.current": "Preset de Workspace Actual",
+  "settings.presets.title": "Presets de Workspace",
+  "settings.presets.desc": "Cambia rápidamente entre modos de workspace preconfigurados.",
+  "settings.presets.rerunOnboarding": "Volver a hacer el Quiz de Onboarding",
+  "settings.presets.enabledModules": "Módulos habilitados:",
+  "settings.presets.warning": "Advertencia: cambiar el preset alternará los módulos al instante.",
+  "settings.presets.apply": "Aplicar Preset",
+  "settings.presets.applied": "Preset Aplicado",
+  "settings.presets.success": "Preset aplicado con éxito.",
+  "settings.presets.confirmTitle": "¿Aplicar este preset?",
+  "settings.presets.confirmDesc": "Esto alternará tus módulos visibles.",
+  "onboarding.preset.student.name": "Académico",
+  "onboarding.preset.student.desc": "Optimizado para estudiantes",
+  "onboarding.preset.freelancer.name": "Freelancer",
+  "onboarding.preset.freelancer.desc": "Enfoque en clientes y facturación",
+  "onboarding.preset.finance.name": "Financiero",
+  "onboarding.preset.finance.desc": "Presupuestos y flujo de caja",
+  "onboarding.preset.personal_finance.name": "Finanzas Personales",
+  "onboarding.preset.personal_finance.desc": "Ahorros y presupuestos",
+  "onboarding.preset.full.name": "Atlas Completo",
+  "onboarding.preset.full.desc": "Todos los módulos habilitados",
+  "onboarding.preset.custom.name": "Personalizado",
+  "onboarding.preset.custom.desc": "Tu configuración personalizada",
+  "onboarding.recommendedWorkspace": "Workspace Recomendado",
+  "onboarding.recommendedWorkspaceDesc": "Basado en tus respuestas del quiz.",
+  "onboarding.applyRecommendation": "Aplicar Recomendación",
+  "onboarding.choosePresetManually": "Elegir manualmente",
+  "onboarding.quizRecommendation": "Recomendación del Quiz",
+  "onboarding.manualSelection": "Selección Manual",
+  "common.next": "Siguiente",
+  "common.back": "Atrás",
+  "common.apply": "Aplicar",
+  "common.close": "Cerrar",
+  "common.edit": "Editar",
+  "common.confirm": "Confirmar",
+  "common.warning": "Advertencia",
+  "common.info": "Info",
+  "today.overdueBanner": "Tareas Vencidas",
+  "today.rescheduleToTomorrow": "Reprogramar para mañana",
+  "task.moreOptions": "Más opciones",
+  "finances.projection.title": "Proyección de Compromisos",
+  "finances.projection.horizon7": "7 Días",
+  "finances.projection.horizon30": "30 Días",
+  "finances.projection.commitments": "Compromisos",
+  "finances.projection.safeAfter": "Seguro para Gastar Después",
+  "finances.monthlyFlow.title": "Flujo de Caja Mensual",
+  "finances.monthlyFlow.income": "Ingresos",
+  "finances.monthlyFlow.expenses": "Gastos",
+  "finances.monthlyFlow.net": "Neto",
 };
 
 const moduleFallbackEs: Record<string, string> = {
@@ -2584,17 +2826,29 @@ export function getLanguageLocale(language: Language) {
   return language === "es" ? "es" : "en";
 }
 
-export function t(language: Language, key: TranslationKey | string, fallback?: string) {
+export function t(language: Language | string, key: TranslationKey | string, fallback?: string) {
+  let normLang = "en";
+  if (typeof language === "string") {
+    if (language.toLowerCase().startsWith("es")) normLang = "es";
+  }
+
   const coreKey = key as CoreTranslationKey;
   const moduleKey = key as ModuleTranslationKey;
 
-  return (
-    dictionaries[language]?.[coreKey] ??
-    moduleEs[language === "es" ? moduleKey : ("" as ModuleTranslationKey)] ??
-    (language === "es" ? moduleFallbackEs[key] : undefined) ??
+  const resolved = dictionaries[normLang as Language]?.[coreKey] ??
+    moduleEs[normLang === "es" ? moduleKey : ("" as ModuleTranslationKey)] ??
+    (normLang === "es" ? moduleFallbackEs[key] : undefined) ??
     moduleEn[moduleKey] ??
     dictionaries.en[coreKey] ??
-    fallback ??
-    key
-  );
+    fallback;
+
+  if (resolved !== undefined) return resolved;
+
+  if (process.env.NODE_ENV !== "production") {
+    console.warn(`[i18n] Missing translation for key: "${key}" (lang: ${normLang})`);
+  }
+
+  const parts = key.split(".");
+  const lastPart = parts[parts.length - 1] || key;
+  return lastPart.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
 }

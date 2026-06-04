@@ -24,6 +24,7 @@ import { useXP } from "@/lib/xp";
 import { generateDailyWrapSummary, useDailyWraps } from "@/lib/dailyWraps";
 import { useAtlasSettings } from "@/lib/settings";
 import { t } from "@/lib/i18n";
+import { useTasks } from "@/lib/tasks";
 
 const reflectionFields = [
   ["wins", "What went well this week?"],
@@ -120,6 +121,15 @@ export function WeeklyReviewPage() {
       .sort((a, b) => a.date.localeCompare(b.date));
   }, [dailyWraps, draft.weekStart, draft.weekEnd]);
 
+  const { tasks } = useTasks();
+  const weekCompletedTasks = useMemo(() => {
+    return tasks.filter((task) => {
+      if (task.status !== "completed" || !task.completedAt) return false;
+      const completedDate = task.completedAt.slice(0, 10);
+      return completedDate >= draft.weekStart && completedDate <= draft.weekEnd;
+    });
+  }, [tasks, draft.weekStart, draft.weekEnd]);
+
   const weekWrapAverages = useMemo(() => {
     if (weekWraps.length === 0) return null;
     const moods = weekWraps.filter((w) => w.mood !== undefined).map((w) => w.mood!);
@@ -140,6 +150,156 @@ export function WeeklyReviewPage() {
       wrapCount: weekWraps.length,
     };
   }, [weekWraps]);
+
+  const dominantArea = useMemo(() => {
+    if (weekCompletedTasks.length === 0) return null;
+    const counts: Record<string, number> = {};
+    weekCompletedTasks.forEach((t) => {
+      if (t.area) {
+        counts[t.area] = (counts[t.area] || 0) + 1;
+      }
+    });
+    let maxArea = "";
+    let maxCount = 0;
+    Object.entries(counts).forEach(([area, count]) => {
+      if (count > maxCount) {
+        maxCount = count;
+        maxArea = area;
+      }
+    });
+    return maxArea ? { area: maxArea, count: maxCount } : null;
+  }, [weekCompletedTasks]);
+
+  const dominantType = useMemo(() => {
+    if (weekCompletedTasks.length === 0) return null;
+    const counts: Record<string, number> = {};
+    weekCompletedTasks.forEach((t) => {
+      if (t.taskType) {
+        counts[t.taskType] = (counts[t.taskType] || 0) + 1;
+      }
+    });
+    let maxType = "";
+    let maxCount = 0;
+    Object.entries(counts).forEach(([type, count]) => {
+      if (count > maxCount) {
+        maxCount = count;
+        maxType = type;
+      }
+    });
+    return maxType ? { type: maxType, count: maxCount } : null;
+  }, [weekCompletedTasks]);
+
+  const weekSignal = useMemo(() => {
+    const completedTasks = weekCompletedTasks.length;
+    if (completedTasks === 0) {
+      return {
+        key: "review.signal.empty",
+        colorClass: "bg-[#27272a]/10 border-[#27272a]/25 text-zinc-500",
+      };
+    }
+
+    if (completedTasks >= 8) {
+      return {
+        key: "review.signal.highVelocity",
+        colorClass: "bg-[#C8A96A]/10 border-[#C8A96A]/25 text-[#C8A96A]",
+      };
+    }
+
+    const tasksWithNotes = weekCompletedTasks.filter(t => t.completionNotes?.trim()).length;
+    if (tasksWithNotes / completedTasks >= 0.5) {
+      return {
+        key: "review.signal.deeplyReflective",
+        colorClass: "bg-[#8B7A99]/10 border-[#8B7A99]/25 text-[#9B8AA9]",
+      };
+    }
+
+    const avgEnergy = weekWrapAverages?.avgEnergy || null;
+    const avgProd = weekWrapAverages?.avgProductivity || null;
+    if (avgEnergy !== null && avgEnergy < 5.0 && avgProd !== null && avgProd >= 6.0) {
+      return {
+        key: "review.signal.highDiscipline",
+        colorClass: "bg-[#B26A5B]/10 border-[#B26A5B]/25 text-[#C27A6B]",
+      };
+    }
+
+    return {
+      key: "review.signal.steadyProgress",
+      colorClass: "bg-[#6F8799]/10 border-[#6F8799]/25 text-[#7F97A9]",
+    };
+  }, [weekCompletedTasks, weekWrapAverages]);
+
+  function getFieldHelperText(key: string) {
+    if (key === "wins") {
+      if (weekCompletedTasks.length > 0) {
+        const sampleTitles = weekCompletedTasks.slice(0, 2).map(t => t.title).join(", ");
+        return t(language, "review.helper.wins")
+          .replace("{count}", weekCompletedTasks.length.toString())
+          .replace("{sample}", sampleTitles);
+      }
+      return t(language, "review.helper.winsEmpty");
+    }
+
+    if (key === "problems") {
+      if (weekWrapAverages?.avgEnergy && weekWrapAverages.avgEnergy < 6) {
+        return t(language, "review.helper.problemsLowEnergy")
+          .replace("{energy}", weekWrapAverages.avgEnergy.toString());
+      }
+      return t(language, "review.helper.problems");
+    }
+
+    if (key === "lessons") {
+      const tasksWithNotes = weekCompletedTasks.filter(t => t.completionNotes?.trim());
+      if (tasksWithNotes.length > 0) {
+        return t(language, "review.helper.lessons")
+          .replace("{count}", tasksWithNotes.length.toString());
+      }
+      return t(language, "review.helper.lessonsEmpty");
+    }
+
+    if (key === "whatFeltOff") {
+      return t(language, "review.helper.whatFeltOff");
+    }
+
+    if (key === "whatToImprove") {
+      return t(language, "review.helper.whatToImprove");
+    }
+
+    if (key === "nextWeekFocus") {
+      return t(language, "review.helper.nextWeekFocus");
+    }
+
+    if (key === "biggestWin") {
+      if (weekCompletedTasks.length > 0) {
+        return t(language, "review.helper.biggestWin");
+      }
+    }
+
+    if (key === "biggestProblem") {
+      return t(language, "review.helper.biggestProblem");
+    }
+
+    if (key === "oneThingToStop") {
+      return t(language, "review.helper.oneThingToStop");
+    }
+
+    if (key === "oneThingToContinue") {
+      return t(language, "review.helper.oneThingToContinue");
+    }
+
+    if (key === "oneThingToStart") {
+      return t(language, "review.helper.oneThingToStart");
+    }
+
+    if (key === "moodSummary") {
+      if (weekWrapAverages?.avgMood) {
+        return t(language, "review.helper.moodSummary")
+          .replace("{mood}", weekWrapAverages.avgMood.toString());
+      }
+      return t(language, "review.helper.moodSummaryStatic");
+    }
+
+    return null;
+  }
 
   const previewReview = {
     ...draft,
@@ -196,7 +356,7 @@ export function WeeklyReviewPage() {
         {/* Header */}
         <header className="flex flex-col gap-4 border-b border-[#27272a] pb-6 md:flex-row md:items-center md:justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-500">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#C8A96A]">
               {t(language, "review.eyebrow", "Workspace Reflection")}
             </p>
             <h1 className="mt-2 text-4xl font-bold tracking-tight text-zinc-100 sm:text-5xl">
@@ -216,7 +376,7 @@ export function WeeklyReviewPage() {
 
         {/* Global Feedback Notifications */}
         {message && (
-          <div className="mt-4 rounded-lg border border-emerald-500/30 bg-emerald-500/5 px-4 py-3 text-xs font-semibold text-emerald-400">
+          <div className="mt-4 rounded-lg border border-[#8A9A5B]/30 bg-[#8A9A5B]/5 px-4 py-3 text-xs font-semibold text-[#9AAB6B]">
             ✓ {message}
           </div>
         )}
@@ -227,7 +387,7 @@ export function WeeklyReviewPage() {
           <aside className="grid gap-6 content-start">
             {/* Week Status */}
             <section className="rounded-xl border border-[#27272a] bg-[#18181b] p-6 shadow-xl">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-amber-500">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-[#C8A96A]">
                 {t(language, "review.auditing", "Auditing")}
               </p>
               <h2 className="mt-2 text-xl font-bold text-zinc-100">
@@ -239,7 +399,7 @@ export function WeeklyReviewPage() {
               <button
                 type="submit"
                 form="weekly-review-form"
-                className="mt-5 w-full rounded-lg bg-amber-500 hover:bg-amber-400 py-3 text-xs font-bold text-zinc-950 transition uppercase tracking-wider text-center"
+                className="mt-5 w-full rounded-lg bg-[#C8A96A] hover:bg-[#D4B87A] py-3 text-xs font-bold text-zinc-950 transition uppercase tracking-wider text-center"
               >
                 {t(language, "review.saveWeekly", "Save Weekly Review")}
               </button>
@@ -261,17 +421,17 @@ export function WeeklyReviewPage() {
                 <div className="rounded-lg border border-[#27272a] bg-[#121214] p-3.5">
                   <p className="text-zinc-500">{t(language, "review.strongestArea", "Strongest area")}</p>
                   <p className="mt-2 text-sm font-bold text-zinc-200">
-                    {strongestArea?.label} &middot; <span className="text-emerald-400">{strongestArea?.rating}/10</span>
+                    {strongestArea?.label} &middot; <span className="text-[#9AAB6B]">{strongestArea?.rating}/10</span>
                   </p>
                 </div>
                 <div className="rounded-lg border border-[#27272a] bg-[#121214] p-3.5">
                   <p className="text-zinc-500">{t(language, "review.weakestArea", "Weakest area")}</p>
                   <p className="mt-2 text-sm font-bold text-zinc-200">
-                    {weakestArea?.label} &middot; <span className="text-red-400">{weakestArea?.rating}/10</span>
+                    {weakestArea?.label} &middot; <span className="text-[#C27A6B]">{weakestArea?.rating}/10</span>
                   </p>
                 </div>
-                <div className="rounded-lg border border-amber-500/25 bg-amber-500/5 p-3.5">
-                  <p className="text-amber-500/80">{t(language, "common.status")}</p>
+                <div className="rounded-lg border border-[#C8A96A]/25 bg-[#C8A96A]/5 p-3.5">
+                  <p className="text-[#C8A96A]/80">{t(language, "common.status")}</p>
                   <p className="mt-2 text-sm font-bold text-zinc-100 uppercase tracking-wide">
                     {statusLabel}
                   </p>
@@ -289,7 +449,7 @@ export function WeeklyReviewPage() {
             >
               {/* Range sliders */}
               <section className="rounded-xl border border-[#27272a] bg-[#18181b] p-6 shadow-xl">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-amber-500 mb-2">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-[#C8A96A] mb-2">
                   {t(language, "review.evaluation", "Evaluation")}
                 </p>
                 <h3 className="text-lg font-bold text-zinc-100">{t(language, "review.areaRatings", "Area Ratings")}</h3>
@@ -301,7 +461,7 @@ export function WeeklyReviewPage() {
                     >
                       <span className="flex items-center justify-between gap-3">
                         {getReviewAreaLabel(area.key, language)}
-                        <span className="font-bold text-amber-500 text-sm">
+                        <span className="font-bold text-[#C8A96A] text-sm">
                           {draft.ratings[area.key]}/10
                         </span>
                       </span>
@@ -313,7 +473,7 @@ export function WeeklyReviewPage() {
                         onChange={(event) =>
                           updateRating(area.key, event.target.value)
                         }
-                        className="accent-amber-500 cursor-pointer w-full"
+                        className="accent-[#C8A96A] cursor-pointer w-full"
                       />
                       <span className="w-fit rounded bg-[#18181b] border border-[#27272a] px-2 py-0.5 text-[10px] text-zinc-400">
                         {getRatingStatusLabel(draft.ratings[area.key], language)}
@@ -327,7 +487,7 @@ export function WeeklyReviewPage() {
               <section className="rounded-xl border border-[#27272a] bg-[#18181b] p-6 shadow-xl">
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-baseline sm:justify-between border-b border-[#27272a]/60 pb-3 mb-4">
                   <div>
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-500">
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-[#8A9A5B]">
                       {t(language, "review.chronologySnapshot", "Chronology Snapshot")}
                     </p>
                     <h3 className="mt-1 text-lg font-bold text-zinc-100">
@@ -378,7 +538,7 @@ export function WeeklyReviewPage() {
                       </div>
                       <div className="rounded-lg border border-[#27272a] bg-[#121214] p-2.5 text-center">
                         <p className="text-[9px] font-bold text-zinc-500 uppercase">{t(language, "review.metric.xpEarned")}</p>
-                        <p className="text-sm font-bold text-amber-500 mt-0.5">+{weekWrapAverages.totalXP}</p>
+                        <p className="text-sm font-bold text-[#C8A96A] mt-0.5">+{weekWrapAverages.totalXP}</p>
                       </div>
                     </div>
 
@@ -434,6 +594,135 @@ export function WeeklyReviewPage() {
                 )}
               </section>
 
+              {/* Accomplishments Snapshot */}
+              <section className="rounded-xl border border-[#27272a] bg-[#18181b] p-6 shadow-xl">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-baseline sm:justify-between border-b border-[#27272a]/60 pb-3 mb-4">
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-[#8A9A5B]">
+                      {t(language, "review.accomplishmentsSnapshot", "Accomplishments Snapshot")}
+                    </p>
+                    <h3 className="mt-1 text-lg font-bold text-zinc-100">
+                      {t(language, "review.tasksCompletedThisWeek", "Tasks Completed this Week")}
+                    </h3>
+                  </div>
+                  <div className="flex gap-2">
+                    <span className="rounded-full bg-[#8A9A5B]/10 border border-[#8A9A5B]/25 px-2.5 py-0.5 text-[10px] font-bold text-[#9AAB6B]">
+                      {weekCompletedTasks.length} {t(language, "review.completedTasksCount", "completed")}
+                    </span>
+                    <span className="rounded-full bg-[#8B7A99]/10 border border-[#8B7A99]/25 px-2.5 py-0.5 text-[10px] font-bold text-[#9B8AA9]">
+                      {weekCompletedTasks.filter(t => t.completionNotes?.trim()).length} {t(language, "review.reflectionsCount", "reflections")}
+                    </span>
+                  </div>
+                </div>
+
+                {weekCompletedTasks.length > 0 ? (
+                  <div className="grid gap-3 max-h-[350px] overflow-y-auto pr-1">
+                    {weekCompletedTasks.map((task) => (
+                      <div
+                        key={task.id}
+                        className="rounded-lg border border-[#27272a] bg-[#121214] p-3.5 text-xs flex flex-col gap-2"
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <h4 className="font-bold text-zinc-200 break-words">{task.title}</h4>
+                            <p className="text-[9px] text-zinc-500 mt-1 uppercase font-bold tracking-wider font-semibold">
+                              {t(language, `enum.taskArea.${task.area}`, task.area)} &middot; {t(language, `enum.taskType.${task.taskType}`, task.taskType)} &middot; {task.estimatedMinutes} min
+                            </p>
+                          </div>
+                          {task.completedAt && (
+                            <span className="text-[10px] text-zinc-500 font-mono shrink-0">
+                              {formatReviewDate(task.completedAt.slice(0, 10), language)}
+                            </span>
+                          )}
+                        </div>
+                        {task.completionNotes?.trim() && (
+                          <div className="mt-1.5 border-t border-[#27272a]/60 pt-2 text-zinc-400 italic">
+                            <span className="text-[9px] font-bold uppercase tracking-wider text-[#9AAB6B] block mb-1">
+                              💡 {t(language, "review.reflectionsHighlight", "Reflection Note")}
+                            </span>
+                            &ldquo;{task.completionNotes.trim()}&rdquo;
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="rounded-lg border border-[#27272a] bg-[#121214] px-4 py-4 text-xs text-zinc-500 italic">
+                    {t(language, "review.noCompletedTasks", "No tasks completed during this week range.")}
+                  </p>
+                )}
+              </section>
+
+              {/* Weekly Insights */}
+              <section className="rounded-xl border border-[#27272a] bg-[#18181b] p-6 shadow-xl">
+                <div className="border-b border-[#27272a]/60 pb-3 mb-4">
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-[#8B7A99]">
+                    {t(language, "review.signal.eyebrow", "System Signals")}
+                  </p>
+                  <h3 className="mt-1 text-lg font-bold text-zinc-100">
+                    {t(language, "review.signal.title", "Weekly Insights")}
+                  </h3>
+                </div>
+
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {/* Signal Card */}
+                  <div className="rounded-lg border border-[#27272a] bg-[#121214] p-4 flex flex-col justify-between">
+                    <div>
+                      <p className="text-[10px] font-bold uppercase text-zinc-500 tracking-wider">
+                        {t(language, "review.signal.momentumLabel", "Weekly Momentum")}
+                      </p>
+                      <span className={`inline-block mt-2 rounded-full border px-2.5 py-0.5 text-xs font-semibold ${weekSignal.colorClass}`}>
+                        {t(language, weekSignal.key)}
+                      </span>
+                    </div>
+                    {weekSignal.key !== "review.signal.empty" && (
+                      <p className="text-xs text-zinc-400 mt-3 leading-relaxed">
+                        {t(language, `${weekSignal.key}Desc`)}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Category Card */}
+                  <div className="rounded-lg border border-[#27272a] bg-[#121214] p-4 flex flex-col gap-3 justify-center">
+                    <div className="text-xs">
+                      <span className="font-bold text-zinc-500 block uppercase text-[9px] tracking-wider">
+                        {t(language, "review.signal.dominantArea", "Dominant Area")}
+                      </span>
+                      {dominantArea ? (
+                        <p className="text-zinc-200 mt-1 font-semibold">
+                          {t(language, `enum.taskArea.${dominantArea.area}`, dominantArea.area)} &middot;{" "}
+                          <span className="text-zinc-400 font-normal">
+                            {dominantArea.count} {dominantArea.count === 1 ? t(language, "review.signal.task", "task") : t(language, "review.signal.tasks", "tasks")}
+                          </span>
+                        </p>
+                      ) : (
+                        <p className="text-zinc-500 mt-1 italic">
+                          {t(language, "review.signal.noArea", "No dominant area")}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="text-xs border-t border-[#27272a]/60 pt-2.5">
+                      <span className="font-bold text-zinc-500 block uppercase text-[9px] tracking-wider">
+                        {t(language, "review.signal.dominantType", "Dominant Type")}
+                      </span>
+                      {dominantType ? (
+                        <p className="text-zinc-200 mt-1 font-semibold">
+                          {t(language, `enum.taskType.${dominantType.type}`, dominantType.type)} &middot;{" "}
+                          <span className="text-zinc-400 font-normal">
+                            {dominantType.count} {dominantType.count === 1 ? t(language, "review.signal.task", "task") : t(language, "review.signal.tasks", "tasks")}
+                          </span>
+                        </p>
+                      ) : (
+                        <p className="text-zinc-500 mt-1 italic">
+                          {t(language, "review.signal.noType", "No dominant type")}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </section>
+
               {/* Reflection Questions */}
               <section className="rounded-xl border border-[#27272a] bg-[#18181b] p-6 shadow-xl">
                 <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-2">
@@ -446,12 +735,21 @@ export function WeeklyReviewPage() {
                       key={key}
                       className="grid gap-2 text-xs font-semibold text-zinc-400"
                     >
-                      {t(language, `review.field.${key}`, label)}
+                      <span>{t(language, `review.field.${key}`, label)}</span>
+                      {(() => {
+                        const helper = getFieldHelperText(key);
+                        if (!helper) return null;
+                        return (
+                          <span className="text-[10px] font-normal text-zinc-500 mt-0.5 leading-normal block">
+                            {helper}
+                          </span>
+                        );
+                      })()}
                       <textarea
                         rows={4}
                         value={draft[key]}
                         onChange={(event) => updateText(key, event.target.value)}
-                        className="rounded-lg border border-[#27272a] bg-[#121214] p-3 text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-amber-500/50 resize-y transition font-medium"
+                        className="rounded-lg border border-[#27272a] bg-[#121214] p-3 text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-[#C8A96A]/50 resize-y transition font-medium mt-1"
                       />
                     </label>
                   ))}
@@ -470,12 +768,21 @@ export function WeeklyReviewPage() {
                       key={key}
                       className="grid gap-2 text-xs font-semibold text-zinc-400"
                     >
-                      {t(language, `review.field.${key}`, label)}
+                      <span>{t(language, `review.field.${key}`, label)}</span>
+                      {(() => {
+                        const helper = getFieldHelperText(key);
+                        if (!helper) return null;
+                        return (
+                          <span className="text-[10px] font-normal text-zinc-500 mt-0.5 leading-normal block">
+                            {helper}
+                          </span>
+                        );
+                      })()}
                       <textarea
                         rows={3}
                         value={draft[key] ?? ""}
                         onChange={(event) => updateText(key, event.target.value)}
-                        className="rounded-lg border border-[#27272a] bg-[#121214] p-3 text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-amber-500/50 resize-y transition font-medium"
+                        className="rounded-lg border border-[#27272a] bg-[#121214] p-3 text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-[#C8A96A]/50 resize-y transition font-medium mt-1"
                       />
                     </label>
                   ))}
@@ -485,7 +792,7 @@ export function WeeklyReviewPage() {
 
             {/* Saved Reviews History */}
             <section className="rounded-xl border border-[#27272a] bg-[#18181b] p-6 shadow-xl">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-indigo-400 mb-2">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-[#8B7A99] mb-2">
                 {t(language, "review.archives", "Archives")}
               </p>
               <h3 className="text-lg font-bold text-zinc-100">{t(language, "review.previousReviews", "Previous Reviews")}</h3>
@@ -520,7 +827,7 @@ export function WeeklyReviewPage() {
                             </span>
                             <div className="flex items-center gap-2">
                               <span className="text-[11px] font-semibold text-zinc-400">
-                                {t(language, "review.average", "Average")}: <span className="text-amber-500 font-bold">{avg}/10</span>
+                                {t(language, "review.average", "Average")}: <span className="text-[#C8A96A] font-bold">{avg}/10</span>
                               </span>
                               <span className="uppercase text-[9px] px-1.5 py-0.5 rounded bg-[#18181b] text-zinc-300 border border-[#27272a]">
                                 {getReviewStatusLabel(review, language)}
@@ -532,12 +839,12 @@ export function WeeklyReviewPage() {
                             {(strongest || weakest) && (
                               <div className="hidden sm:flex items-center gap-2 border-r border-[#27272a]/60 pr-3 mr-1">
                                 {strongest && (
-                                  <span className="text-emerald-400 font-medium">
+                                  <span className="text-[#9AAB6B] font-medium">
                                     ▲ {strongest.label} ({strongest.rating})
                                   </span>
                                 )}
                                 {weakest && (
-                                  <span className="text-red-400 font-medium">
+                                  <span className="text-[#C27A6B] font-medium">
                                     ▼ {weakest.label} ({weakest.rating})
                                   </span>
                                 )}
@@ -588,7 +895,7 @@ export function WeeklyReviewPage() {
                                     const confirmed = window.confirm(`${t(language, "review.deleteConfirm", "Delete weekly review for week")} ${review.weekStart}?`);
                                     if (confirmed) deleteReview(review.id);
                                   }}
-                                  className="rounded-lg border border-red-500/25 bg-red-500/10 px-3 py-2 text-red-400 hover:bg-red-500/20 transition"
+                                  className="rounded-lg border border-[#B26A5B]/25 bg-[#B26A5B]/10 px-3 py-2 text-[#C27A6B] hover:bg-[#B26A5B]/20 transition"
                                 >
                                   {t(language, "common.delete")}
                                 </button>
