@@ -106,7 +106,7 @@ export const SYNC_MODULE_REGISTRY = [
     sensitivity: "high",
     localDomains: ["transactions"],
     localStorageKeys: keysFor(["transactions"]),
-    excludedLocalOnlyDomains: ["savings", "financeSettings"],
+    excludedLocalOnlyDomains: ["plannedExpenses", "savings", "financeSettings"],
     supabaseTables: ["finance_transactions"],
     rolloutOrder: 7,
     currentCapabilities: ["local", "cloud_poc", "sync_not_enabled"],

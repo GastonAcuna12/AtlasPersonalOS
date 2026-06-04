@@ -120,6 +120,7 @@ function computeMigrationPreview(): MigrationPreview {
   const clients = readArrayDomain("clients").length;
   const workItems = readArrayDomain("workItems").length;
   const transactions = readArrayDomain("transactions").length;
+  const plannedExpenses = readArrayDomain("plannedExpenses").length;
   const savings = countObjectDomain("savings");
   const financeSettings = countObjectDomain("financeSettings");
 
@@ -171,6 +172,7 @@ function computeMigrationPreview(): MigrationPreview {
       cloudCount: null,
       parts: { transactions },
       excludedLocalOnly: {
+        plannedExpenses,
         savings,
         financeSettings,
       },
