@@ -37,6 +37,7 @@ function createInitialDraft(
     plannedDate: todayISO(),
     estimatedMinutes: 30,
     energyRequired: "medium",
+    scheduledTime: "",
   };
 }
 
@@ -89,7 +90,7 @@ export function TaskQuickAddForm({
       onSubmit={handleSubmit}
       className="rounded-xl border border-[#27272a] bg-[#18181b] p-6 shadow-xl text-zinc-100"
     >
-      <p className="text-[10px] font-bold uppercase tracking-widest text-amber-500">{t(language, "task.quickCapture")}</p>
+      <p className="text-[10px] font-bold uppercase tracking-widest text-[#C8A96A]">{t(language, "task.quickCapture")}</p>
       <h3 className="text-lg font-bold text-zinc-100 mt-1">{t(language, "task.addAgenda")}</h3>
       
       <div className="mt-4 grid gap-4">
@@ -99,7 +100,7 @@ export function TaskQuickAddForm({
             placeholder={t(language, "task.titlePlaceholder")}
             value={draft.title}
             onChange={(event) => updateDraft("title", event.target.value)}
-            className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2.5 text-sm text-zinc-100 focus:outline-none focus:border-amber-500/50 font-bold"
+            className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2.5 text-sm text-zinc-100 focus:outline-none focus:border-[#C8A96A]/50 font-bold"
             required
           />
         </label>
@@ -111,7 +112,7 @@ export function TaskQuickAddForm({
             rows={3}
             value={draft.description}
             onChange={(event) => updateDraft("description", event.target.value)}
-            className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2.5 text-xs text-zinc-300 focus:outline-none focus:border-amber-500/50 resize-none"
+            className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2.5 text-xs text-zinc-300 focus:outline-none focus:border-[#C8A96A]/50 resize-none"
           />
         </label>
 
@@ -123,7 +124,7 @@ export function TaskQuickAddForm({
               onChange={(event) =>
                 updateDraft("area", event.target.value as TaskArea)
               }
-              className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2 text-xs text-zinc-300 focus:outline-none focus:border-amber-500/50"
+              className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2 text-xs text-zinc-300 focus:outline-none focus:border-[#C8A96A]/50"
             >
               {TASK_AREAS.map((area) => (
                 <option key={area} value={area}>
@@ -139,7 +140,7 @@ export function TaskQuickAddForm({
               onChange={(event) =>
                 updateDraft("taskType", event.target.value as TaskType)
               }
-              className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2 text-xs text-zinc-300 focus:outline-none focus:border-amber-500/50"
+              className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2 text-xs text-zinc-300 focus:outline-none focus:border-[#C8A96A]/50"
             >
               {TASK_TYPES.map((type) => (
                 <option key={type} value={type}>
@@ -158,7 +159,7 @@ export function TaskQuickAddForm({
               onChange={(event) =>
                 updateDraft("priority", event.target.value as TaskPriority)
               }
-              className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2 text-xs text-zinc-300 focus:outline-none focus:border-amber-500/50 cursor-pointer"
+              className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2 text-xs text-zinc-300 focus:outline-none focus:border-[#C8A96A]/50 cursor-pointer"
             >
               {TASK_PRIORITIES.map((priority) => (
                 <option key={priority} value={priority}>
@@ -174,7 +175,7 @@ export function TaskQuickAddForm({
               onChange={(event) =>
                 updateDraft("energyRequired", event.target.value as TaskEnergy)
               }
-              className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2 text-xs text-zinc-300 focus:outline-none focus:border-amber-500/50 cursor-pointer"
+              className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2 text-xs text-zinc-300 focus:outline-none focus:border-[#C8A96A]/50 cursor-pointer"
             >
               {TASK_ENERGY_LEVELS.map((energy) => (
                 <option key={energy} value={energy}>
@@ -194,7 +195,7 @@ export function TaskQuickAddForm({
             onChange={(event) =>
               updateDraft("estimatedMinutes", Number(event.target.value))
             }
-            className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2.5 text-xs text-zinc-300 focus:outline-none focus:border-amber-500/50 font-semibold"
+            className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2.5 text-xs text-zinc-300 focus:outline-none focus:border-[#C8A96A]/50 font-semibold"
           />
         </label>
 
@@ -205,7 +206,7 @@ export function TaskQuickAddForm({
               type="date"
               value={draft.plannedDate}
               onChange={(event) => updateDraft("plannedDate", event.target.value)}
-              className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2 text-xs text-zinc-300 focus:outline-none focus:border-amber-500/50"
+              className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2 text-xs text-zinc-300 focus:outline-none focus:border-[#C8A96A]/50"
             />
           </label>
           <label className="grid gap-1.5 text-xs font-semibold text-zinc-400">
@@ -214,21 +215,31 @@ export function TaskQuickAddForm({
               type="date"
               value={draft.dueDate}
               onChange={(event) => updateDraft("dueDate", event.target.value)}
-              className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2 text-xs text-zinc-300 focus:outline-none focus:border-amber-500/50"
+              className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2 text-xs text-zinc-300 focus:outline-none focus:border-[#C8A96A]/50"
             />
           </label>
         </div>
+
+        <label className="grid gap-1.5 text-xs font-semibold text-zinc-400">
+          {t(language, "task.scheduledTime", "Scheduled Time (Optional)")}
+          <input
+            type="time"
+            value={draft.scheduledTime || ""}
+            onChange={(event) => updateDraft("scheduledTime", event.target.value)}
+            className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2.5 text-xs text-zinc-300 focus:outline-none focus:border-[#C8A96A]/50 font-semibold"
+          />
+        </label>
       </div>
 
       {error && (
-        <p className="mt-4 rounded-lg border border-red-500/30 bg-red-500/5 px-4 py-3 text-xs font-semibold text-red-400">
+        <p className="mt-4 rounded-lg border border-[#B26A5B]/30 bg-[#B26A5B]/5 px-4 py-3 text-xs font-semibold text-[#C27A6B]">
           ⚠️ {error}
         </p>
       )}
 
       <button
         type="submit"
-        className="mt-6 w-full rounded-lg bg-amber-500 text-zinc-950 px-4 py-3 text-xs font-bold uppercase tracking-wider hover:bg-amber-400 transition"
+        className="mt-6 w-full rounded-lg bg-[#C8A96A] text-zinc-950 px-4 py-3 text-xs font-bold uppercase tracking-wider hover:bg-[#D4B87A] transition"
       >
         {t(language, "task.addTask")}
       </button>

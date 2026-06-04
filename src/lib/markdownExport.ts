@@ -23,7 +23,7 @@ import {
   getThisWeekCompletedTasks,
   todayISO,
   type AtlasTask,
-  type TaskSection,
+  type TodayGroupedV2,
 } from "@/lib/tasks";
 
 type TodayPlanExport = {
@@ -34,7 +34,7 @@ type TodayPlanExport = {
   completedTodayCount: number;
   estimatedMinutesRemaining: number;
   xpAvailableToday: number;
-  sections: Record<TaskSection, AtlasTask[]>;
+  sections: TodayGroupedV2;
 };
 
 function yamlValue(value: string | number | null | undefined) {
@@ -206,12 +206,12 @@ export function goalsSummaryToMarkdown(goals: Goal[]) {
 }
 
 export function todayPlanToMarkdown(plan: TodayPlanExport) {
-  const sectionLabels: Record<TaskSection, string> = {
+  const sectionLabels: Record<keyof TodayGroupedV2, string> = {
+    overdue: "Overdue",
+    scheduled: "Scheduled",
     priorityFocus: "Priority Focus",
     quickWins: "Quick Wins",
-    academic: "Academic Tasks",
-    work: "Work Tasks",
-    personal: "Personal Maintenance",
+    remaining: "Remaining",
     backlog: "Backlog Suggestions",
   };
 
@@ -232,7 +232,7 @@ export function todayPlanToMarkdown(plan: TodayPlanExport) {
     `XP available: ${plan.xpAvailableToday}`,
     "",
     ...Object.entries(plan.sections).flatMap(([key, tasks]) => [
-      `## ${sectionLabels[key as TaskSection]}`,
+      `## ${sectionLabels[key as keyof TodayGroupedV2]}`,
       tasks.length
         ? tasks
             .map(

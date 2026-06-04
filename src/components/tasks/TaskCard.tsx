@@ -10,14 +10,17 @@ type TaskCardProps = {
   onComplete?: (task: AtlasTask) => void;
   onSkip?: (task: AtlasTask) => void;
   onMoveToday?: (task: AtlasTask) => void;
+  onRescheduleTomorrow?: (task: AtlasTask) => void;
   onDelete?: (task: AtlasTask) => void;
+  onFocus?: (task: AtlasTask) => void;
+  isOverdue?: boolean;
 };
 
 const priorityTone: Record<AtlasTask["priority"], string> = {
   low: "bg-zinc-800 text-zinc-400 border border-[#27272a]/60",
-  medium: "bg-amber-500/10 text-amber-500 border border-amber-500/20",
-  high: "bg-orange-500/10 text-orange-400 border border-orange-500/20",
-  critical: "bg-red-500/10 text-red-400 border border-red-500/20 animate-pulse",
+  medium: "bg-[#C8A96A]/10 text-[#C8A96A] border border-[#C8A96A]/20",
+  high: "bg-[#C89060]/10 text-[#C89060] border border-[#C89060]/20",
+  critical: "bg-[#B26A5B]/10 text-[#C27A6B] border border-[#B26A5B]/20",
 };
 
 export function TaskCard({
@@ -26,7 +29,10 @@ export function TaskCard({
   onComplete,
   onSkip,
   onMoveToday,
+  onRescheduleTomorrow,
   onDelete,
+  onFocus,
+  isOverdue,
 }: TaskCardProps) {
   const { settings } = useAtlasSettings();
   const language = settings.language;
@@ -43,7 +49,7 @@ export function TaskCard({
               </p>
             ) : null}
           </div>
-          <p className="rounded-lg bg-emerald-500/10 border border-emerald-500/35 px-2.5 py-1 text-xs font-bold text-emerald-400 shrink-0 leading-none h-fit">
+          <p className="rounded-lg bg-[#8A9A5B]/10 border border-[#8A9A5B]/35 px-2.5 py-1 text-xs font-bold text-[#9AAB6B] shrink-0 leading-none h-fit">
             +{task.xpReward} XP
           </p>
         </div>
@@ -65,14 +71,28 @@ export function TaskCard({
             {task.estimatedMinutes} min
           </span>
           {task.dueDate ? (
-            <span className="rounded bg-zinc-800 border border-[#27272a] px-2 py-0.5 text-zinc-400 font-mono">
-              {t(language, "task.due")} {task.dueDate}
+            <span className={`rounded px-2 py-0.5 font-mono ${isOverdue ? 'bg-[#B26A5B]/10 border border-[#B26A5B]/20 text-[#C27A6B]' : 'bg-zinc-800 border border-[#27272a] text-zinc-400'}`}>
+              {t(language, "task.due")} {task.dueDate} {isOverdue && `(${t(language, "common.overdue", "Overdue")})`}
+            </span>
+          ) : null}
+          {task.scheduledTime ? (
+            <span className="rounded bg-[#6F8799]/10 border border-[#6F8799]/20 px-2 py-0.5 text-[#7F97A9] font-mono">
+              🕒 {task.scheduledTime}
             </span>
           ) : null}
         </div>
       </div>
 
       <div className="mt-6 flex flex-wrap gap-2 text-[10px] font-bold uppercase tracking-wider pt-4 border-t border-[#27272a]/60">
+        {task.status !== "completed" && task.status !== "skipped" && onFocus ? (
+          <button
+            type="button"
+            onClick={() => onFocus(task)}
+            className="rounded-lg border border-[#C8A96A]/30 bg-[#C8A96A]/10 px-3.5 py-2 text-[#C8A96A] transition hover:bg-[#C8A96A]/20 hover:border-[#C8A96A]/50 active:scale-95"
+          >
+            {t(language, "today.focus.action", "Focus")}
+          </button>
+        ) : null}
         {task.status !== "in_progress" && onStart ? (
           <button
             type="button"
@@ -86,7 +106,7 @@ export function TaskCard({
           <button
             type="button"
             onClick={() => onComplete(task)}
-            className="rounded-lg bg-amber-500 text-zinc-950 px-3.5 py-2 transition hover:bg-amber-400 active:scale-95"
+            className="rounded-lg bg-[#C8A96A] text-zinc-950 px-3.5 py-2 transition hover:bg-[#D4B87A] active:scale-95"
           >
             {t(language, "task.complete")}
           </button>
@@ -109,11 +129,20 @@ export function TaskCard({
             {t(language, "task.moveToday")}
           </button>
         ) : null}
+        {task.status !== "completed" && onRescheduleTomorrow ? (
+          <button
+            type="button"
+            onClick={() => onRescheduleTomorrow(task)}
+            className="rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2 text-zinc-300 transition hover:bg-zinc-800 active:scale-95"
+          >
+            {t(language, "task.rescheduleTomorrow", "Reschedule to tomorrow")}
+          </button>
+        ) : null}
         {onDelete ? (
           <button
             type="button"
             onClick={() => onDelete(task)}
-            className="rounded-lg border border-red-500/25 bg-red-500/10 px-3.5 py-2 text-red-400 transition hover:bg-red-500/20 active:scale-95 ml-auto"
+            className="rounded-lg border border-[#B26A5B]/25 bg-[#B26A5B]/10 px-3.5 py-2 text-[#C27A6B] transition hover:bg-[#B26A5B]/20 active:scale-95 ml-auto"
           >
             {t(language, "common.delete")}
           </button>

@@ -17,6 +17,7 @@ import type {
   TaskPriority,
   TaskSection,
   TaskType,
+  DayMode,
 } from "@/types/atlas";
 
 export type {
@@ -92,6 +93,8 @@ export function normalizeTask(value: Partial<AtlasTask>): AtlasTask {
     subjectId: value.subjectId ?? "",
     academicType: value.academicType ?? undefined,
     grade: value.grade ?? "",
+    scheduledTime: value.scheduledTime ?? "",
+    completionNotes: value.completionNotes ?? "",
   };
 }
 
@@ -210,6 +213,105 @@ export function groupTasksBySection(tasks: AtlasTask[], date = todayISO()) {
 
 export function groupTasksForToday(tasks: AtlasTask[], date = todayISO()) {
   return groupTasksBySection(tasks, date);
+}
+
+export type TodayGroupedV2 = {
+  overdue: AtlasTask[];
+  scheduled: AtlasTask[];
+  priorityFocus: AtlasTask[];
+  quickWins: AtlasTask[];
+  remaining: AtlasTask[];
+  backlog: AtlasTask[];
+};
+
+export function groupTasksTodayV2(tasks: AtlasTask[], date = todayISO(), dayMode?: DayMode): TodayGroupedV2 {
+  const activeTasks = tasks.filter(t => t.status !== "completed" && t.status !== "skipped");
+  
+  const grouped: TodayGroupedV2 = {
+    overdue: [],
+    scheduled: [],
+    priorityFocus: [],
+    quickWins: [],
+    remaining: [],
+    backlog: []
+  };
+
+  const usedIds = new Set<string>();
+
+  // 1. Overdue: dueDate < date OR plannedDate < date
+  for (const t of activeTasks) {
+    if ((t.dueDate && t.dueDate < date) || (t.plannedDate && t.plannedDate < date)) {
+      grouped.overdue.push(t);
+      usedIds.add(t.id);
+    }
+  }
+
+  // 2. Scheduled: plannedDate === date and scheduledTime exists
+  for (const t of activeTasks) {
+    if (usedIds.has(t.id)) continue;
+    if (t.plannedDate === date && t.scheduledTime) {
+      grouped.scheduled.push(t);
+      usedIds.add(t.id);
+    }
+  }
+
+  // 3. Priority Focus: plannedDate === date and priority is high/critical OR dayMode === deep_work equivalent
+  for (const t of activeTasks) {
+    if (usedIds.has(t.id)) continue;
+    if (
+      t.plannedDate === date &&
+      (t.priority === "high" || t.priority === "critical" || dayMode === "Work Sprint Day")
+    ) {
+      grouped.priorityFocus.push(t);
+      usedIds.add(t.id);
+    }
+  }
+
+  // 4. Quick Wins: plannedDate === date and estimatedMinutes <= 20 OR energy === "low"
+  for (const t of activeTasks) {
+    if (usedIds.has(t.id)) continue;
+    if (
+      t.plannedDate === date &&
+      (t.estimatedMinutes <= 20 || t.energyRequired === "low")
+    ) {
+      grouped.quickWins.push(t);
+      usedIds.add(t.id);
+    }
+  }
+
+  // 5. Remaining: other tasks for today
+  for (const t of activeTasks) {
+    if (usedIds.has(t.id)) continue;
+    if (t.plannedDate === date || t.dueDate === date || t.status === "today" || t.status === "in_progress") {
+      grouped.remaining.push(t);
+      usedIds.add(t.id);
+    }
+  }
+
+  // 6. Backlog: status === "backlog", max 5
+  const backlogCandidates = activeTasks.filter(t => !usedIds.has(t.id) && t.status === "backlog");
+  grouped.backlog = backlogCandidates.slice(0, 5);
+
+  // Sorting
+  grouped.overdue.sort((a, b) => {
+    const aDate = a.dueDate || a.plannedDate || "";
+    const bDate = b.dueDate || b.plannedDate || "";
+    return aDate.localeCompare(bDate);
+  });
+  
+  grouped.scheduled.sort((a, b) => (a.scheduledTime || "").localeCompare(b.scheduledTime || ""));
+  
+  const priorityWeight: Record<TaskPriority, number> = { critical: 4, high: 3, medium: 2, low: 1 };
+  grouped.priorityFocus.sort((a, b) => {
+    const pDiff = priorityWeight[b.priority] - priorityWeight[a.priority];
+    if (pDiff !== 0) return pDiff;
+    return a.estimatedMinutes - b.estimatedMinutes;
+  });
+  
+  grouped.quickWins.sort((a, b) => a.estimatedMinutes - b.estimatedMinutes);
+  grouped.remaining.sort((a, b) => priorityWeight[b.priority] - priorityWeight[a.priority]);
+
+  return grouped;
 }
 
 export function getDailyLoad(minutes: number) {
