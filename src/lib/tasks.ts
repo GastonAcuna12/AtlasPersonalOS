@@ -433,22 +433,82 @@ export function useTasks() {
   }
 
   function updateTask(id: string, changes: Partial<AtlasTask>) {
-    saveTasks(
-      readTasks().map((task) =>
-        task.id === id
-          ? normalizeTask({
-              ...task,
-              ...changes,
-              xpReward: calculateTaskXP({
-                priority: changes.priority ?? task.priority,
-                estimatedMinutes:
-                  changes.estimatedMinutes ?? task.estimatedMinutes,
-                taskType: changes.taskType ?? task.taskType,
-              }),
-            })
-          : task,
-      ),
-    );
+    const currentTasks = readTasks();
+    const targetIndex = currentTasks.findIndex((t) => t.id === id);
+    if (targetIndex === -1) return;
+
+    const originalTask = currentTasks[targetIndex];
+    const newTasks = [...currentTasks];
+
+    // Detect recurring completion/skip only on real transition
+    const isTransitioning =
+      (changes.status === "completed" || changes.status === "skipped") &&
+      originalTask.status !== changes.status;
+
+    if (originalTask.recurrence && isTransitioning) {
+      const occurrenceDate = originalTask.plannedDate || todayISO();
+      const nextDate = calculateNextOccurrenceDate(occurrenceDate, originalTask.recurrence);
+
+      if (nextDate) {
+        // 1. Create static history copy
+        const completedCopy = normalizeTask({
+          ...originalTask,
+          id: `${originalTask.id}-completed-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+          status: changes.status ?? "completed",
+          completedAt: changes.completedAt ?? (changes.status === "completed" ? new Date().toISOString() : null),
+          completionNotes: changes.completionNotes ?? originalTask.completionNotes,
+          // Preserved subtasks as they were at completion/skip time
+          subtasks: originalTask.subtasks,
+          recurrence: undefined,
+          seriesId: originalTask.seriesId || originalTask.id,
+        });
+
+        let nextDueDate = originalTask.dueDate;
+        if (originalTask.dueDate && originalTask.dueDate !== "" && (originalTask.dueDate === originalTask.plannedDate || originalTask.dueDate === occurrenceDate)) {
+          nextDueDate = calculateNextOccurrenceDate(originalTask.dueDate, originalTask.recurrence) || "";
+        }
+
+        const rolledTemplate = normalizeTask({
+          ...originalTask,
+          status: nextDate === todayISO() ? "today" : "backlog",
+          plannedDate: nextDate,
+          dueDate: nextDueDate,
+          completedAt: null,
+          completionNotes: "",
+          // Reset subtasks for the next occurrence
+          subtasks: originalTask.subtasks?.map((sub) => ({
+            ...sub,
+            completed: false,
+            completedAt: undefined,
+          })) ?? [],
+          seriesId: originalTask.seriesId || originalTask.id,
+        });
+
+        newTasks[targetIndex] = rolledTemplate;
+        newTasks.push(completedCopy);
+      } else {
+        // calculateNextOccurrenceDate returned null: convert the template itself
+        newTasks[targetIndex] = normalizeTask({
+          ...originalTask,
+          ...changes,
+          recurrence: undefined,
+          seriesId: originalTask.seriesId || originalTask.id,
+        });
+      }
+    } else {
+      // Normal task update
+      newTasks[targetIndex] = normalizeTask({
+        ...originalTask,
+        ...changes,
+        xpReward: calculateTaskXP({
+          priority: changes.priority ?? originalTask.priority,
+          estimatedMinutes: changes.estimatedMinutes ?? originalTask.estimatedMinutes,
+          taskType: changes.taskType ?? originalTask.taskType,
+        }),
+      });
+    }
+
+    saveTasks(newTasks);
   }
 
   function deleteTask(id: string) {
