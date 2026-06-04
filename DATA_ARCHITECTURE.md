@@ -13,8 +13,10 @@ All data entities route through the centralized registry in `src/lib/storage.ts`
 | Key Identifier | localStorage Key | Entity Scope |
 | :--- | :--- | :--- |
 | `transactions` | `atlas.transactions` | Financial Ledger |
+| `plannedExpenses` | `atlas.plannedExpenses` | Planned & Recurring Finance Commitments |
 | `savings` | `atlas.savings` | Active Reserves Balance |
 | `financeSettings` | `atlas.financeSettings` | Currency & Exchange Rates |
+| `financeBudgets` | `atlas.financeBudgets` | Expense Budgets |
 | `gymLogs` | `atlas.gymLogs` | Workout Logs & Rest Days |
 | `tasks` | `atlas.tasks` | Tasks & Todos (Gen/Acad/Work) |
 | `dailyPlans` | `atlas.dailyPlans` | Intentions & Daily Planning Records |
@@ -23,7 +25,7 @@ All data entities route through the centralized registry in `src/lib/storage.ts`
 | `academicTasks` | `atlas.academicTasks` | Specialized Academic Milestones |
 | `studySessions` | `atlas.studySessions` | Study Duration Logs |
 | `notes` | `atlas.notes` | Notes Library Markdown Docs |
-| `goals` | `atlas.goals` | Linked & Manual Progress Goals |
+| `goals` | `atlas.goals` | Linked, Manual Progress & Daily Habit Goals |
 | `weeklyReviews` | `atlas.weeklyReviews` | Weekly Reflection Journals |
 | `clients` | `atlas.clients` | Freelance Clients & Billing Policy |
 | `workItems` | `atlas.workItems` | Kanban Board Deliverable Tickets |
@@ -65,6 +67,7 @@ TypeScript specifications live inside `src/types/atlas.ts`. They define the shap
 - **AtlasSettings**: Configures interface layout `dayMode` and gym consistency targets.
 - **StreakState**: Maintains consecutive daily streaks and longest historic achievements.
 - **CalendarEvent**: Represents a unified, polymorphic calendar card.
+- **Goal**: Supports standard metric goals, savings-linked goals, and optional `daily_habit` goals with local `YYYY-MM-DD` check-ins.
 - **Backwards-Compatible Aliases**:
   - `Task = AtlasTask`
   - `GymLog = WorkoutLog`
@@ -97,8 +100,10 @@ Data management (`src/lib/dataManagement.ts`) exports workspace contents under a
   "exportedAt": "2026-05-30T18:18:24.000Z",
   "data": {
     "transactions": [],
+    "plannedExpenses": [],
     "savings": {},
     "financeSettings": {},
+    "financeBudgets": [],
     "gymLogs": [],
     "tasks": [],
     "dailyPlans": [],
@@ -138,8 +143,10 @@ This architecture is optimized for a future Cloud migration. Local entities map 
 | Local Domain | Supabase Database Table | Primary Key | Key Columns |
 | :--- | :--- | :--- | :--- |
 | `transactions` | `transactions` | `id` (uuid) | `user_id` (uuid), `amount` (numeric), `currency` (text), `category` (text) |
+| `plannedExpenses` | `planned_expenses` | `id` (uuid) | `user_id` (uuid), `amount` (numeric), `currency` (text), `due_date` (date), `recurrence` (text) |
 | `savings` | `savings` | `user_id` (uuid) | `current_amount` (numeric), `currency` (text) |
 | `financeSettings` | `finance_settings` | `user_id` (uuid) | `base_currency` (text), `usd_to_pyg_rate` (numeric) |
+| `financeBudgets` | `finance_budgets` | `id` (uuid) | `user_id` (uuid), `name` (text), `category` (text), `amount` (numeric), `currency` (text), `is_active` (boolean) |
 | `gymLogs` | `gym_logs` | `id` (uuid) | `user_id` (uuid), `date` (date), `workout_type` (text), `duration` (integer) |
 | `tasks` | `tasks` | `id` (uuid) | `user_id` (uuid), `title` (text), `status` (text), `priority` (text), `due_date` (date) |
 | `notes` | `notes` | `id` (uuid) | `user_id` (uuid), `title` (text), `area` (text), `tags` (text[]), `content` (text) |

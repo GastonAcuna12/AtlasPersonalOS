@@ -105,6 +105,8 @@ The next safe product step is a Notes real sync plan or implementation. Notes
 should graduate first because it is lower risk than tasks, goals, work, or
 finances, and its RLS proof-of-concept has already passed manual testing.
 
+*Note: Phase 1 Notes Sync schema and type hardening has been implemented (local optional fields added, SQL migration 008 created, and NOTES_SYNC_PLAN.md documentation added). Real synchronization is still NOT active, and Notes remains completely local-first.*
+
 ## Safety Checklist
 
 Before real sync is implemented:
