@@ -592,6 +592,7 @@ export function TodayPage() {
                     onRescheduleTomorrow={rescheduleTomorrow}
                     onDelete={handleDeleteTask}
                     onFocus={(t) => setActiveFocusTaskId(t.id)}
+                    onUpdate={updateTask}
                   />
                 ))}
                 {displaySections.overdue.length > 3 && (
@@ -716,6 +717,7 @@ export function TodayPage() {
                       onRescheduleTomorrow={rescheduleTomorrow}
                       onDelete={handleDeleteTask}
                       onFocus={(t) => setActiveFocusTaskId(t.id)}
+                      onUpdate={updateTask}
                     />
                   ))
                 ) : todayWorkItems.length === 0 || sectionKey !== "remaining" ? (

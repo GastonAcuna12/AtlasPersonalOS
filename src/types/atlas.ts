@@ -160,6 +160,14 @@ export type AcademicTaskType =
   | "Practice"
   | "Other";
 
+export type AtlasSubtask = {
+  id: string;
+  title: string;
+  completed: boolean;
+  createdAt: string;
+  completedAt?: string;
+};
+
 export type AtlasTask = {
   id: string;
   title: string;
@@ -180,6 +188,7 @@ export type AtlasTask = {
   grade?: string;
   scheduledTime?: string;
   completionNotes?: string;
+  subtasks?: AtlasSubtask[];
 };
 
 export type TaskDraft = Omit<

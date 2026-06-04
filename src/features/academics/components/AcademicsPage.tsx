@@ -808,6 +808,7 @@ export function AcademicsPage() {
                       })
                     }
                     onDelete={(selectedTask) => deleteTask(selectedTask.id)}
+                    onUpdate={updateTask}
                   />
                 ))
               ) : (

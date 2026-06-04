@@ -235,10 +235,13 @@ export function todayPlanToMarkdown(plan: TodayPlanExport) {
       `## ${sectionLabels[key as keyof TodayGroupedV2]}`,
       tasks.length
         ? tasks
-            .map(
-              (task) =>
-                `- ${task.title} (${task.priority}, ${task.estimatedMinutes} min, +${task.xpReward} XP)`,
-            )
+            .map((task) => {
+              const parentLine = `- ${task.title} (${task.priority}, ${task.estimatedMinutes} min, +${task.xpReward} XP)`;
+              const subtaskLines = (task.subtasks && task.subtasks.length > 0)
+                ? "\n" + task.subtasks.map(sub => `  - [${sub.completed ? 'x' : ' '}] ${sub.title}`).join("\n")
+                : "";
+              return parentLine + subtaskLines;
+            })
             .join("\n")
         : "No tasks.",
       "",

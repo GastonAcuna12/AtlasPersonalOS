@@ -11,6 +11,7 @@ import {
 export { todayISO };
 import type {
   AtlasTask,
+  AtlasSubtask,
   TaskArea,
   TaskDraft,
   TaskEnergy,
@@ -23,6 +24,7 @@ import type {
 export type {
   AcademicTaskType,
   AtlasTask,
+  AtlasSubtask,
   TaskArea,
   TaskDraft,
   TaskEnergy,
@@ -72,6 +74,20 @@ export function normalizeTask(value: Partial<AtlasTask>): AtlasTask {
   const estimatedMinutes = value.estimatedMinutes ?? 30;
   const taskType = value.taskType ?? "Quick Task";
 
+  const rawSubtasks = Array.isArray(value.subtasks) ? value.subtasks : [];
+  const subtasks = rawSubtasks
+    .map((sub: Partial<AtlasSubtask>) => {
+      const title = typeof sub?.title === "string" ? sub.title.trim() : "";
+      return {
+        id: sub?.id ?? `${Date.now()}-${Math.random()}-subtask`,
+        title,
+        completed: !!sub?.completed,
+        createdAt: sub?.createdAt ?? new Date().toISOString(),
+        completedAt: sub?.completed && sub?.completedAt ? sub.completedAt : undefined,
+      };
+    })
+    .filter((sub) => sub.title.length > 0);
+
   return {
     id: value.id ?? `${Date.now()}-task`,
     title: value.title ?? "Untitled task",
@@ -95,6 +111,7 @@ export function normalizeTask(value: Partial<AtlasTask>): AtlasTask {
     grade: value.grade ?? "",
     scheduledTime: value.scheduledTime ?? "",
     completionNotes: value.completionNotes ?? "",
+    subtasks,
   };
 }
 
