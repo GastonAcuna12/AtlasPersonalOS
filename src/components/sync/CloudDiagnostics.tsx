@@ -101,10 +101,10 @@ export function CloudDiagnostics({
   ];
 
   return (
-    <section className="rounded-xl border border-sky-500/20 bg-[#18181b] p-6 shadow-xl">
+    <section className="rounded-xl border border-[#6F8799]/20 bg-[#18181b] p-6 shadow-xl">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <p className="text-[10px] font-bold uppercase tracking-widest text-sky-400">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-[#7F97A9]">
             {t(language, "settings.cloudDiagnostics.eyebrow")}
           </p>
           <h2 className="mt-2 text-2xl font-bold tracking-tight text-zinc-100">
@@ -122,7 +122,7 @@ export function CloudDiagnostics({
           ].map((label) => (
             <span
               key={label}
-              className="rounded-full border border-sky-500/25 bg-sky-500/10 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-sky-300"
+              className="rounded-full border border-[#6F8799]/25 bg-[#6F8799]/10 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-sky-300"
             >
               {label}
             </span>

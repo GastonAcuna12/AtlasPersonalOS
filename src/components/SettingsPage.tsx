@@ -19,6 +19,7 @@ import {
   useAcademicSubjects,
   useStudySessions,
 } from "@/lib/academics";
+import { MODULE_PREFERENCES, isModuleEnabled } from "@/lib/modules";
 import {
   ATLAS_STORAGE_KEY_VALUES,
   clearAtlasLocalData,
@@ -32,7 +33,7 @@ import { getLatestReview, useWeeklyReviews } from "@/lib/reviews";
 import { useAtlasSettings } from "@/lib/settings";
 import {
   calculateTodayStats,
-  groupTasksForToday,
+  groupTasksTodayV2,
   todayISO,
   useTasks,
 } from "@/lib/tasks";
@@ -41,12 +42,14 @@ import { useTransactions } from "@/lib/finances";
 import { useWorkoutLogs } from "@/lib/gym";
 import { useXP } from "@/lib/xp";
 import { useDailyWraps } from "@/lib/dailyWraps";
-import type { Currency, DayMode } from "@/types/atlas";
+import type { Currency, DayMode, WorkspacePreset } from "@/types/atlas";
 import { loadSampleData } from "@/lib/sampleData";
-import { CloudDiagnostics } from "@/components/CloudDiagnostics";
-import { CloudQAChecklist } from "@/components/CloudQAChecklist";
-import { MigrationDecisionPanel } from "@/components/MigrationDecisionPanel";
-import { SyncStatusPanel } from "@/components/SyncStatusPanel";
+import { CloudDiagnostics } from "@/components/sync/CloudDiagnostics";
+import { CloudQAChecklist } from "@/components/sync/CloudQAChecklist";
+import { MigrationDecisionPanel } from "@/components/sync/MigrationDecisionPanel";
+import { SyncStatusPanel } from "@/components/sync/SyncStatusPanel";
+import { NotesSyncPreviewPanel } from "@/components/sync/NotesSyncPreviewPanel";
+import { WORKSPACE_PRESETS, applyWorkspacePreset } from "@/lib/presets";
 
 export function SettingsPage() {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -71,18 +74,20 @@ export function SettingsPage() {
 
   const {
     settings,
+    updateSettings,
     setDayMode,
     setBaseCurrency,
     setExchangeRate,
     setLanguage,
     setGymWeeklyTarget,
+    setModuleEnabled,
   } = useAtlasSettings();
   const language = settings.language;
   
   const latestReview = getLatestReview(reviews);
   const today = todayISO();
   const todayStats = calculateTodayStats(tasks, today);
-  const todaySections = groupTasksForToday(tasks, today);
+  const todaySections = groupTasksTodayV2(tasks, today, settings.dayMode);
   const academicTasks = getAcademicTasks(tasks);
 
   const accountSyncState = (() => {
@@ -100,7 +105,7 @@ export function SettingsPage() {
         status: t(language, "settings.accountSync.signedIn.status"),
         mode: t(language, "settings.accountSync.signedIn.mode"),
         message: t(language, "settings.accountSync.signedIn.message"),
-        badgeClass: "border-emerald-500/30 bg-emerald-500/10 text-emerald-400",
+        badgeClass: "border-[#8A9A5B]/30 bg-[#8A9A5B]/10 text-[#9AAB6B]",
       };
     }
 
@@ -111,7 +116,7 @@ export function SettingsPage() {
         message:
           auth.errorMessage ||
           t(language, "settings.accountSync.error.message"),
-        badgeClass: "border-red-500/30 bg-red-500/10 text-red-300",
+        badgeClass: "border-[#B26A5B]/30 bg-[#B26A5B]/10 text-[#E8E4DD]",
       };
     }
 
@@ -120,7 +125,7 @@ export function SettingsPage() {
         status: t(language, "settings.accountSync.loading.status"),
         mode: t(language, "settings.accountSync.notConfigured.mode"),
         message: t(language, "settings.accountSync.loading.message"),
-        badgeClass: "border-amber-500/30 bg-amber-500/10 text-amber-400",
+        badgeClass: "border-[#C8A96A]/30 bg-[#C8A96A]/10 text-[#D4B87A]",
       };
     }
 
@@ -128,7 +133,7 @@ export function SettingsPage() {
       status: t(language, "settings.accountSync.available.status"),
       mode: t(language, "settings.accountSync.notConfigured.mode"),
       message: t(language, "settings.accountSync.available.message"),
-      badgeClass: "border-sky-500/30 bg-sky-500/10 text-sky-300",
+      badgeClass: "border-[#6F8799]/30 bg-[#6F8799]/10 text-sky-300",
     };
   })();
 
@@ -245,13 +250,49 @@ export function SettingsPage() {
     }
   }
 
+  function handleSelectPreset(presetId: WorkspacePreset) {
+    const isActive = settings.workspacePreset === presetId || 
+      (!settings.workspacePreset && presetId === "custom");
+    if (isActive) return;
+
+    const confirmed = window.confirm(
+      t(language, "settings.presets.confirmTitle") + "\n\n" + t(language, "settings.presets.confirmDesc")
+    );
+    if (!confirmed) return;
+
+    try {
+      const updates = applyWorkspacePreset(settings.enabledModules, presetId);
+      updateSettings(updates);
+      setMessage(t(language, "settings.presets.success"));
+      setError("");
+      
+      // Scroll to top to see notification banner
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } catch (e) {
+      console.error(e);
+      setError(t(language, "common.error", "An error occurred."));
+      setMessage("");
+    }
+  }
+
+  function handleRerunOnboarding() {
+    const confirmed = window.confirm(
+      language === "es"
+        ? "¿Querés ejecutar la configuración inicial de nuevo? Esto solo cambiará qué módulos están visibles, tus datos están totalmente seguros."
+        : "Do you want to run the workspace setup again? This will only change which modules are visible; your data is completely safe."
+    );
+    if (!confirmed) return;
+
+    updateSettings({ onboardingCompleted: false });
+  }
+
   return (
     <main className="min-h-screen bg-[#0d0d0e] text-zinc-100">
       <div className="mx-auto flex min-h-screen w-full max-w-7xl flex-col px-4 py-8 sm:px-6 lg:px-8 animate-fade-in-up">
         {/* Header */}
         <header className="flex flex-col gap-4 border-b border-[#27272a] pb-6 md:flex-row md:items-center md:justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-500">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#C8A96A]">
               {t(language, "settings.eyebrow")}
             </p>
             <h1 className="mt-2 text-4xl font-bold tracking-tight text-zinc-100 sm:text-5xl">
@@ -268,12 +309,12 @@ export function SettingsPage() {
 
         {/* Messaging Notifications */}
         {message && (
-          <div className="mt-4 rounded-lg border border-emerald-500/30 bg-emerald-500/5 px-4 py-3 text-xs font-semibold text-emerald-400 animate-fade-in-up">
+          <div className="mt-4 rounded-lg border border-[#8A9A5B]/30 bg-[#8A9A5B]/5 px-4 py-3 text-xs font-semibold text-[#9AAB6B] animate-fade-in-up">
             ✓ {message}
           </div>
         )}
         {error && (
-          <div className="mt-4 rounded-lg border border-red-500/30 bg-red-500/5 px-4 py-3 text-xs font-semibold text-red-400 animate-fade-in-up">
+          <div className="mt-4 rounded-lg border border-[#B26A5B]/30 bg-[#B26A5B]/5 px-4 py-3 text-xs font-semibold text-[#C27A6B] animate-fade-in-up">
             ⚠️ {error}
           </div>
         )}
@@ -286,7 +327,7 @@ export function SettingsPage() {
             <div className="rounded-xl border border-[#27272a] bg-[#18181b] p-6 shadow-xl">
               <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                 <div>
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-sky-400">
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-[#7F97A9]">
                     {t(language, "settings.accountSync.eyebrow")}
                   </p>
                   <h2 className="mt-2 text-2xl font-bold tracking-tight text-zinc-100">
@@ -308,7 +349,7 @@ export function SettingsPage() {
                   >
                     {accountSyncState.status}
                   </span>
-                  <span className="rounded-full border border-amber-500/25 bg-amber-500/10 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-amber-400">
+                  <span className="rounded-full border border-[#C8A96A]/25 bg-[#C8A96A]/10 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-[#D4B87A]">
                     {accountSyncState.mode}
                   </span>
                 </div>
@@ -358,12 +399,182 @@ export function SettingsPage() {
             </div>
 
             <SyncStatusPanel />
+            <NotesSyncPreviewPanel />
+
+            {/* Workspace Profile & Presets */}
+            <div className="rounded-xl border border-[#27272a] bg-[#18181b] p-6 shadow-xl animate-fade-in-up">
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-[#C8A96A]">
+                  {t(language, "settings.presets.current")}
+                </p>
+                <h2 className="mt-2 text-2xl font-bold tracking-tight text-zinc-100">
+                  {t(language, "settings.presets.title")}
+                </h2>
+                <p className="mt-1.5 max-w-2xl text-xs leading-relaxed text-zinc-400">
+                  {t(language, "settings.presets.desc")}
+                </p>
+              </div>
+
+              <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+                <div className="flex flex-wrap items-center gap-3">
+                  <span className="text-xs font-semibold text-zinc-400">
+                    {t(language, "settings.presets.current")}:
+                  </span>
+                  <span className="rounded-full border border-[#C8A96A]/25 bg-[#C8A96A]/10 px-3.5 py-1 text-xs font-bold uppercase tracking-wider text-[#C8A96A]">
+                    {settings.workspacePreset
+                      ? t(language, `onboarding.preset.${settings.workspacePreset}.name`, settings.workspacePreset)
+                      : t(language, "onboarding.preset.custom.name", "Custom")}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleRerunOnboarding}
+                  className="rounded-lg border border-[#27272a] bg-[#121214] hover:bg-[#18181b] hover:border-zinc-700 text-zinc-300 hover:text-white px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider transition flex items-center gap-1.5"
+                >
+                  🔄 {t(language, "settings.presets.rerunOnboarding")}
+                </button>
+              </div>
+
+              {/* Preset Cards Grid */}
+              <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {WORKSPACE_PRESETS.map((preset) => {
+                  const isActive = settings.workspacePreset === preset.id || 
+                    (!settings.workspacePreset && preset.id === "custom");
+
+                  return (
+                    <button
+                      key={preset.id}
+                      type="button"
+                      onClick={() => handleSelectPreset(preset.id)}
+                      className={`relative flex flex-col items-start text-left rounded-xl border p-5 transition text-zinc-100 ${
+                        isActive
+                          ? "border-[#C8A96A] bg-[#C8A96A]/5 shadow-[0_0_15px_rgba(200,169,106,0.15)] cursor-default-subtle"
+                          : "border-[#27272a] bg-[#121214] hover:bg-[#121214]/80 hover:border-zinc-700"
+                      }`}
+                    >
+                      <div className="flex items-center gap-3 mb-2.5">
+                        <span className="text-2xl leading-none">{preset.icon}</span>
+                        <p className="text-sm font-bold tracking-tight font-sans">
+                          {t(language, preset.nameKey)}
+                        </p>
+                      </div>
+
+                      <p className="text-xs leading-relaxed text-zinc-400 mb-4 flex-1">
+                        {t(language, preset.descKey)}
+                      </p>
+
+                      {/* Summary of modules / chips */}
+                      {preset.id !== "custom" && (
+                        <div className="mt-auto w-full pt-3 border-t border-[#27272a]/60">
+                          <p className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest mb-1.5">
+                            {t(language, "settings.presets.enabledModules")}
+                          </p>
+                          <div className="flex flex-wrap gap-1.5">
+                            {preset.enabledModules.map((mod) => (
+                              <span
+                                key={mod}
+                                className="rounded bg-zinc-900 border border-[#27272a] px-1.5 py-0.5 text-[9px] font-bold text-zinc-450 capitalize"
+                              >
+                                {t(language, `modules.${mod}.label`, mod)}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      
+                      {isActive && (
+                        <span className="absolute top-3 right-3 flex h-2 w-2 rounded-full bg-[#C8A96A]" />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Data safety warning copy */}
+              <div className="mt-6 rounded-lg border border-[#C8A96A]/25 bg-[#C8A96A]/5 p-4 flex items-start gap-3">
+                <span className="text-base leading-none mt-0.5">⚠️</span>
+                <p className="text-xs leading-relaxed text-[#C8A96A]/90 font-medium">
+                  {t(language, "settings.presets.warning")}
+                </p>
+              </div>
+            </div>
+
+            {/* Module Preferences */}
+            <div className="rounded-xl border border-[#27272a] bg-[#18181b] p-6 shadow-xl">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-[#C8A96A]">
+                    {t(language, "modules.preferences.eyebrow")}
+                  </p>
+                  <h2 className="mt-2 text-2xl font-bold tracking-tight text-zinc-100">
+                    {t(language, "modules.preferences.title")}
+                  </h2>
+                  <p className="mt-1.5 max-w-2xl text-xs leading-relaxed text-zinc-400">
+                    {t(language, "modules.preferences.description")}
+                  </p>
+                </div>
+                <span className="rounded-full border border-[#8A9A5B]/25 bg-[#8A9A5B]/10 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-[#9AAB6B]">
+                  {t(language, "modules.preferences.hiddenOnly")}
+                </span>
+              </div>
+
+              <p className="mt-4 rounded-lg border border-[#27272a] bg-[#121214] px-4 py-3 text-xs leading-relaxed text-zinc-400">
+                {t(language, "modules.preferences.dataSafe")}
+              </p>
+
+              <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                {MODULE_PREFERENCES.map((module) => {
+                  const enabled = isModuleEnabled(settings, module.id);
+
+                  return (
+                    <div
+                      key={module.id}
+                      className="flex items-center justify-between gap-4 rounded-lg border border-[#27272a] bg-[#121214] p-4"
+                    >
+                      <div>
+                        <p className="text-sm font-bold text-zinc-100">
+                          {t(language, module.labelKey)}
+                        </p>
+                        <p className="mt-1 text-xs leading-relaxed text-zinc-500">
+                          {t(language, module.descriptionKey)}
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        role="switch"
+                        aria-checked={enabled}
+                        aria-label={t(language, module.labelKey)}
+                        onClick={() => setModuleEnabled(module.id, !enabled)}
+                        className={`relative h-7 w-12 shrink-0 rounded-full border transition ${
+                          enabled
+                            ? "border-[#C8A96A]/40 bg-[#C8A96A]/25"
+                            : "border-zinc-700 bg-zinc-900"
+                        }`}
+                      >
+                        <span
+                          className={`absolute top-1 h-5 w-5 rounded-full transition ${
+                            enabled
+                              ? "left-6 bg-[#D4B87A]"
+                              : "left-1 bg-zinc-500"
+                          }`}
+                        />
+                        <span className="sr-only">
+                          {enabled
+                            ? t(language, "modules.preferences.enabled")
+                            : t(language, "modules.preferences.disabled")}
+                        </span>
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
 
             <MigrationDecisionPanel />
             
             {/* System Configuration */}
             <div className="rounded-xl border border-[#27272a] bg-[#18181b] p-6 shadow-xl">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-amber-500">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-[#C8A96A]">
                 {t(language, "settings.core.eyebrow")}
               </p>
               <h2 className="mt-2 text-2xl font-bold tracking-tight text-zinc-100">
@@ -379,7 +590,7 @@ export function SettingsPage() {
                   <select
                     value={settings.language}
                     onChange={(e) => setLanguage(e.target.value as Language)}
-                    className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2.5 text-zinc-100 font-bold focus:outline-none focus:border-amber-500/50"
+                    className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2.5 text-zinc-100 font-bold focus:outline-none focus:border-[#C8A96A]/50"
                   >
                     <option value="en">{t(language, "settings.core.languageEnglish")}</option>
                     <option value="es">{t(language, "settings.core.languageSpanish")}</option>
@@ -391,7 +602,7 @@ export function SettingsPage() {
                   <select
                     value={settings.dayMode}
                     onChange={(e) => setDayMode(e.target.value as DayMode)}
-                    className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2.5 text-zinc-100 font-bold focus:outline-none focus:border-amber-500/50"
+                    className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2.5 text-zinc-100 font-bold focus:outline-none focus:border-[#C8A96A]/50"
                   >
                     <option value="Normal Day">{t(language, "enum.dayMode.Normal Day")}</option>
                     <option value="University Day">{t(language, "enum.dayMode.University Day")}</option>
@@ -406,7 +617,7 @@ export function SettingsPage() {
                   <select
                     value={settings.baseCurrency}
                     onChange={(e) => setBaseCurrency(e.target.value as Currency)}
-                    className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2.5 text-zinc-100 font-bold focus:outline-none focus:border-amber-500/50"
+                    className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2.5 text-zinc-100 font-bold focus:outline-none focus:border-[#C8A96A]/50"
                   >
                     <option value="PYG">PYG (₲)</option>
                     <option value="USD">USD ($)</option>
@@ -422,13 +633,13 @@ export function SettingsPage() {
                         type="number"
                         value={settings.usdToPygRate}
                         onChange={(e) => setExchangeRate(Number(e.target.value) || 6150)}
-                        className="rounded-lg border border-[#27272a] bg-[#0d0d0e] px-3 py-2 text-zinc-100 font-bold w-48 focus:outline-none focus:border-amber-500/50"
+                        className="rounded-lg border border-[#27272a] bg-[#0d0d0e] px-3 py-2 text-zinc-100 font-bold w-48 focus:outline-none focus:border-[#C8A96A]/50"
                       />
                     </label>
                     <div className="text-[10px] text-zinc-500 space-y-1">
                       <p>
                         <span className="font-bold text-zinc-400">{t(language, "settings.core.source")}</span>{" "}
-                        <span className="rounded bg-amber-500/10 border border-amber-500/35 px-1.5 py-0.5 text-[9px] text-amber-500 font-bold uppercase tracking-wider">
+                        <span className="rounded bg-[#C8A96A]/10 border border-[#C8A96A]/35 px-1.5 py-0.5 text-[9px] text-[#C8A96A] font-bold uppercase tracking-wider">
                           {settings.exchangeRateSource ?? t(language, "settings.core.manual")}
                         </span>
                       </p>
@@ -453,7 +664,7 @@ export function SettingsPage() {
                     max="7"
                     value={settings.gymWeeklyTarget}
                     onChange={(e) => setGymWeeklyTarget(Number(e.target.value) || 4)}
-                    className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2 text-zinc-100 font-bold focus:outline-none focus:border-amber-500/50"
+                    className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2 text-zinc-100 font-bold focus:outline-none focus:border-[#C8A96A]/50"
                   />
                 </label>
               </div>
@@ -461,7 +672,7 @@ export function SettingsPage() {
 
             {/* Privacy warnings & Database Backups */}
             <div className="rounded-xl border border-[#27272a] bg-[#18181b] p-6 shadow-xl">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-500">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-[#8A9A5B]">
                 {t(language, "settings.data.eyebrow")}
               </p>
               <h2 className="mt-2 text-2xl font-bold tracking-tight text-zinc-100">
@@ -475,7 +686,7 @@ export function SettingsPage() {
                 <button
                   type="button"
                   onClick={exportData}
-                  className="rounded-lg bg-amber-500 text-zinc-950 px-4 py-3 hover:bg-amber-400 transition"
+                  className="rounded-lg bg-[#C8A96A] text-zinc-950 px-4 py-3 hover:bg-[#D4B87A] transition"
                 >
                   {t(language, "settings.data.exportJson")}
                 </button>
@@ -497,8 +708,8 @@ export function SettingsPage() {
             </div>
 
             {/* Polished Testing & Sample Data section */}
-            <div className="rounded-xl border border-amber-500/25 bg-[#18181b] p-6 shadow-xl">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-amber-500">
+            <div className="rounded-xl border border-[#C8A96A]/25 bg-[#18181b] p-6 shadow-xl">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-[#C8A96A]">
                 {t(language, "settings.testing.eyebrow")}
               </p>
               <h2 className="mt-2 text-2xl font-bold tracking-tight text-zinc-100">
@@ -512,7 +723,7 @@ export function SettingsPage() {
                 <button
                   type="button"
                   onClick={handleLoadSampleDataOverwrite}
-                  className="rounded-lg bg-amber-500 text-zinc-950 px-3 py-3 hover:bg-amber-400 transition text-center"
+                  className="rounded-lg bg-[#C8A96A] text-zinc-950 px-3 py-3 hover:bg-[#D4B87A] transition text-center"
                   title={t(language, "settings.sample.replaceTitle")}
                 >
                   {t(language, "settings.testing.replace")}
@@ -520,7 +731,7 @@ export function SettingsPage() {
                 <button
                   type="button"
                   onClick={handleLoadSampleDataMerge}
-                  className="rounded-lg border border-amber-500/25 bg-amber-500/5 px-3 py-3 text-amber-500 hover:bg-amber-500/10 transition text-center font-bold"
+                  className="rounded-lg border border-[#C8A96A]/25 bg-[#C8A96A]/5 px-3 py-3 text-[#C8A96A] hover:bg-[#C8A96A]/10 transition text-center font-bold"
                   title={t(language, "settings.sample.mergeTitle")}
                 >
                   {t(language, "settings.testing.merge")}
@@ -528,7 +739,7 @@ export function SettingsPage() {
                 <button
                   type="button"
                   onClick={handleResetWorkspace}
-                  className="rounded-lg border border-red-500/25 bg-red-500/10 px-3 py-3 text-red-400 hover:bg-red-500/20 transition text-center"
+                  className="rounded-lg border border-[#B26A5B]/25 bg-[#B26A5B]/10 px-3 py-3 text-[#C27A6B] hover:bg-[#B26A5B]/20 transition text-center"
                   title={t(language, "settings.sample.resetTitle")}
                 >
                   {t(language, "settings.testing.reset")}
@@ -538,7 +749,7 @@ export function SettingsPage() {
 
             {/* Markdown & Obsidian Exporter */}
             <div className="rounded-xl border border-[#27272a] bg-[#18181b] p-6 shadow-xl">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-indigo-400">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-[#6F8799]">
                 {t(language, "settings.markdown.eyebrow")}
               </p>
               <h2 className="mt-2 text-2xl font-bold tracking-tight text-zinc-100">
@@ -630,7 +841,7 @@ export function SettingsPage() {
             
             {/* Live QA Checklist Box */}
             <div className="rounded-xl border border-[#27272a] bg-[#18181b] p-6 shadow-xl">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-amber-500">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-[#C8A96A]">
                 {t(language, "settings.qa.eyebrow")}
               </p>
               <h2 className="mt-2 text-2xl font-bold tracking-tight text-zinc-100">
@@ -659,7 +870,7 @@ export function SettingsPage() {
                       <span className="text-[10px] text-zinc-500 font-mono">{check.desc}</span>
                       <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold border uppercase tracking-wider ${
                         check.ok 
-                          ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/25 animate-pulse-subtle" 
+                          ? "bg-[#8A9A5B]/10 text-[#9AAB6B] border-[#8A9A5B]/25-subtle" 
                           : "bg-zinc-800 text-zinc-500 border-[#27272a]"
                       }`}>
                         {check.ok ? `✓ ${t(language, "settings.qa.mapped")}` : `○ ${t(language, "settings.qa.empty")}`}
@@ -683,7 +894,7 @@ export function SettingsPage() {
                 {ATLAS_STORAGE_KEY_VALUES.map((key) => (
                   <code
                     key={key}
-                    className="rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2.5 text-xs text-amber-500/90 font-mono flex items-center justify-between"
+                    className="rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2.5 text-xs text-[#C8A96A]/90 font-mono flex items-center justify-between"
                   >
                     <span>{key}</span>
                     <span className="text-[8px] rounded bg-zinc-800 border border-[#27272a] px-1.5 py-0.5 text-zinc-500 font-bold uppercase tracking-wider">{t(language, "settings.scope.vault")}</span>
@@ -694,7 +905,7 @@ export function SettingsPage() {
 
             {/* Obsidian Vault Context */}
             <div className="rounded-xl border border-[#27272a]/60 bg-gradient-to-br from-[#18181b] to-[#141416] p-6 shadow-xl">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-amber-500">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-[#C8A96A]">
                 {t(language, "settings.obsidian.eyebrow")}
               </p>
               <h2 className="mt-2 text-xl font-bold text-zinc-100">{t(language, "settings.obsidian.title")}</h2>

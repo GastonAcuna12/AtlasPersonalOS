@@ -16,8 +16,11 @@ const MIGRATION_PROMPT_DISMISSED_EVENT = "atlas:migrationPromptDismissed";
 
 const DOMAIN_AREA_KEYS: Record<AtlasStorageDomain, string> = {
   transactions: "migration.area.finances",
+  plannedExpenses: "migration.area.finances",
   savings: "migration.area.goals",
   financeSettings: "migration.area.finances",
+  financeBudgets: "migration.area.finances",
+  financeAccounts: "migration.area.finances",
   gymLogs: "migration.area.gym",
   tasks: "migration.area.tasks",
   dailyPlans: "migration.area.today",
@@ -33,6 +36,7 @@ const DOMAIN_AREA_KEYS: Record<AtlasStorageDomain, string> = {
   xp: "migration.area.xp",
   xpEvents: "migration.area.xp",
   appSettings: "migration.area.settings",
+  focusTask: "migration.area.today",
 };
 
 function canUseLocalStorage() {
@@ -196,10 +200,10 @@ export function MigrationDecisionPanel() {
   }
 
   return (
-    <section className="rounded-xl border border-amber-500/25 bg-[#18181b] p-6 shadow-xl">
+    <section className="rounded-xl border border-[#C8A96A]/25 bg-[#18181b] p-6 shadow-xl">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <p className="text-[10px] font-bold uppercase tracking-widest text-amber-500">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-[#C8A96A]">
             {t(language, "migration.eyebrow")}
           </p>
           <h2 className="mt-2 text-2xl font-bold tracking-tight text-zinc-100">
@@ -209,7 +213,7 @@ export function MigrationDecisionPanel() {
             {t(language, "migration.foundDescription")}
           </p>
         </div>
-        <span className="w-fit rounded-full border border-amber-500/25 bg-amber-500/10 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-amber-400">
+        <span className="w-fit rounded-full border border-[#C8A96A]/25 bg-[#C8A96A]/10 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-[#D4B87A]">
           {t(language, "migration.placeholder")}
         </span>
       </div>
@@ -254,7 +258,7 @@ export function MigrationDecisionPanel() {
                     {t(language, "common.comingSoon")}
                   </span>
                 ) : (
-                  <span className="w-fit rounded-full border border-emerald-500/25 bg-emerald-500/10 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-emerald-400">
+                  <span className="w-fit rounded-full border border-[#8A9A5B]/25 bg-[#8A9A5B]/10 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-[#9AAB6B]">
                     {t(language, "common.localOnly")}
                   </span>
                 )}

@@ -249,10 +249,10 @@ export function CloudQAChecklist() {
   }
 
   return (
-    <section className="rounded-xl border border-sky-500/20 bg-[#18181b] p-6 shadow-xl">
+    <section className="rounded-xl border border-[#6F8799]/20 bg-[#18181b] p-6 shadow-xl">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <p className="text-[10px] font-bold uppercase tracking-widest text-sky-400">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-[#7F97A9]">
             {t(language, "cloudQa.eyebrow")}
           </p>
           <h2 className="mt-2 text-2xl font-bold tracking-tight text-zinc-100">
@@ -271,7 +271,7 @@ export function CloudQAChecklist() {
         {CLOUD_QA_WARNINGS.map((warning) => (
           <div
             key={warning}
-            className="rounded-lg border border-amber-500/15 bg-amber-500/5 px-3 py-2 text-[10px] font-semibold uppercase tracking-wider text-amber-300"
+            className="rounded-lg border border-[#C8A96A]/15 bg-[#C8A96A]/5 px-3 py-2 text-[10px] font-semibold uppercase tracking-wider text-[#D4B87A]"
           >
             {t(language, warning)}
           </div>
@@ -295,7 +295,7 @@ export function CloudQAChecklist() {
                       <h3 className="text-sm font-bold text-zinc-100">
                         {t(language, module.nameKey)}
                       </h3>
-                      <span className="rounded-full border border-sky-500/25 bg-sky-500/10 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-sky-300">
+                      <span className="rounded-full border border-[#6F8799]/25 bg-[#6F8799]/10 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-sky-300">
                         {completed}/{CLOUD_QA_STEPS.length}
                       </span>
                     </div>
@@ -336,10 +336,10 @@ export function CloudQAChecklist() {
                         onChange={(event) =>
                           updateStep(module.id, index, event.target.checked)
                         }
-                        className="mt-0.5 h-4 w-4 rounded border-[#3f3f46] bg-[#121214] accent-sky-500 disabled:opacity-40"
+                        className="mt-0.5 h-4 w-4 rounded border-[#3f3f46] bg-[#121214] accent-[#6F8799] disabled:opacity-40"
                       />
                       <span>
-                        <span className="mr-1 font-mono text-[10px] text-zinc-500">
+                        <span className="mr-1 font-mono text-[10px] text-zinc-550">
                           {index + 1}.
                         </span>
                         {t(language, step)}

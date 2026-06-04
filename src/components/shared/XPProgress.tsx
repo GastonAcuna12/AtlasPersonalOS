@@ -51,7 +51,7 @@ export function XPProgress({
     <div className="rounded-xl border border-[#27272a] bg-[#18181b] p-6 shadow-xl animate-fade-in-up">
       <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
         <div className="flex-1 min-w-0">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-500">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#C8A96A]">
             {t(language, "xp.systemProgression")}
           </p>
           <div className="mt-2.5 flex flex-wrap items-baseline gap-x-3 gap-y-1">
@@ -60,7 +60,7 @@ export function XPProgress({
             </h2>
             <span className="text-lg font-medium text-zinc-400">&mdash; {title}</span>
             {isMaxLevel && (
-              <span className="ml-2 rounded-full bg-amber-500/10 border border-amber-500/30 px-2.5 py-0.5 text-xs font-bold text-amber-400 animate-pulse">
+              <span className="ml-2 rounded-full bg-[#C8A96A]/10 border border-[#C8A96A]/30 px-2.5 py-0.5 text-xs font-bold text-[#C8A96A]">
                 {t(language, "xp.maxRank")}
               </span>
             )}
@@ -75,7 +75,7 @@ export function XPProgress({
           <div className="h-8 w-px bg-[#27272a]" />
           <div className="text-right">
             <p className="text-[10px] text-zinc-500 font-medium uppercase">{t(language, "xp.activeDaysTarget")}</p>
-            <p className="text-xs font-bold text-amber-500 mt-1">{t(language, "xp.daysPerWeek")}</p>
+            <p className="text-xs font-bold text-[#C8A96A] mt-1">{t(language, "xp.daysPerWeek")}</p>
           </div>
         </div>
       </div>
@@ -90,7 +90,7 @@ export function XPProgress({
               <span className="font-bold text-zinc-100">{remainingXP.toLocaleString()} XP</span> {t(language, "xp.toLevel")} {level + 1}
             </p>
           ) : (
-            <p className="text-amber-500 font-semibold">{t(language, "xp.ultimateRank")}</p>
+            <p className="text-[#C8A96A] font-semibold">{t(language, "xp.ultimateRank")}</p>
           )}
           {!isMaxLevel && (
             <p>
@@ -111,7 +111,7 @@ export function XPProgress({
             aria-valuetext={`${progressPercentage}% ${t(language, "xp.progressAriaText")}`}
           >
             <div
-              className="h-full rounded-full bg-gradient-to-r from-amber-600 via-amber-400 to-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)] transition-all duration-500"
+              className="h-full rounded-full bg-gradient-to-r from-[#A9846A] to-[#C8A96A] shadow-[0_0_8px_rgba(200,169,106,0.3)] transition-all duration-500"
               style={{ width: `${progressPercentage}%` }}
             />
           </div>
@@ -132,7 +132,7 @@ export function XPProgress({
             <button
               type="button"
               onClick={() => setShowActivity(!showActivity)}
-              className="text-xs text-amber-500 hover:text-amber-400 transition font-semibold"
+              className="text-xs text-[#C8A96A] hover:text-[#D4B87A] transition font-semibold"
             >
               {showActivity ? t(language, "xp.hideLog") : t(language, "xp.showLog")}
             </button>
@@ -154,7 +154,7 @@ export function XPProgress({
                 className="flex items-center justify-between gap-4 rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2 text-xs"
               >
                 <span className="text-zinc-300 font-medium">{rule.label}</span>
-                <span className="font-bold text-amber-500 shrink-0">+{rule.xp} XP</span>
+                <span className="font-bold text-[#C8A96A] shrink-0">+{rule.xp} XP</span>
               </div>
             ))}
           </div>
@@ -169,14 +169,14 @@ export function XPProgress({
                   className="flex items-center justify-between gap-4 rounded-lg bg-[#121214] border border-[#27272a]/60 px-4 py-2.5 text-xs transition hover:border-zinc-700"
                 >
                   <span className="text-zinc-300 truncate font-medium">{activity.label}</span>
-                  <span className="font-bold text-amber-500 shrink-0">
+                  <span className="font-bold text-[#C8A96A] shrink-0">
                     +{activity.amount} XP
                   </span>
                 </div>
               ))}
             </div>
           ) : (
-            <p className="mt-3 text-xs leading-6 text-zinc-550 italic">
+            <p className="mt-3 text-xs leading-6 text-zinc-500 italic">
               {t(language, "xp.noActivity")}
             </p>
           )

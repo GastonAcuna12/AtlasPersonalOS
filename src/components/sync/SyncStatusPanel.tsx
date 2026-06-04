@@ -3,11 +3,13 @@
 import { useMemo, useSyncExternalStore } from "react";
 import { useAtlasAuth } from "@/lib/auth";
 import { t } from "@/lib/i18n";
+import { isModuleEnabled } from "@/lib/modules";
 import { SYNC_MODULE_REGISTRY } from "@/lib/sync/registry";
 import { useMigrationPreview } from "@/lib/sync/preview";
 import { getDefaultSyncState, useSyncState } from "@/lib/sync/state";
 import { useAtlasSettings } from "@/lib/settings";
 import type { MigrationPreview } from "@/lib/sync/preview";
+import type { AtlasModule } from "@/types/atlas";
 import type {
   ModuleSyncStatus,
   WorkspaceSyncMode,
@@ -26,19 +28,19 @@ function getEffectiveWorkspaceMode(
 
 function statusClass(status: ModuleSyncStatus) {
   if (status === "synced") {
-    return "border-emerald-500/25 bg-emerald-500/10 text-emerald-400";
+    return "border-[#8A9A5B]/25 bg-[#8A9A5B]/10 text-[#9AAB6B]";
   }
 
   if (status === "error" || status === "conflict") {
-    return "border-red-500/25 bg-red-500/10 text-red-300";
+    return "border-[#B26A5B]/25 bg-[#B26A5B]/10 text-[#E8E4DD]";
   }
 
   if (status === "syncing" || status === "migration_required") {
-    return "border-amber-500/25 bg-amber-500/10 text-amber-400";
+    return "border-[#C8A96A]/25 bg-[#C8A96A]/10 text-[#D4B87A]";
   }
 
   if (status === "cloud_available") {
-    return "border-sky-500/25 bg-sky-500/10 text-sky-300";
+    return "border-[#6F8799]/25 bg-[#6F8799]/10 text-sky-300";
   }
 
   return "border-[#27272a] bg-[#121214] text-zinc-400";
@@ -127,10 +129,10 @@ export function SyncStatusPanel() {
   })();
 
   return (
-    <section className="rounded-xl border border-sky-500/20 bg-[#18181b] p-6 shadow-xl">
+    <section className="rounded-xl border border-[#6F8799]/20 bg-[#18181b] p-6 shadow-xl">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <p className="text-[10px] font-bold uppercase tracking-widest text-sky-400">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-[#7F97A9]">
             {t(language, "sync.eyebrow")}
           </p>
           <h2 className="mt-2 text-2xl font-bold tracking-tight text-zinc-100">
@@ -140,7 +142,7 @@ export function SyncStatusPanel() {
             {t(language, "sync.description")}
           </p>
         </div>
-        <span className="w-fit rounded-full border border-amber-500/25 bg-amber-500/10 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-amber-400">
+        <span className="w-fit rounded-full border border-[#C8A96A]/25 bg-[#C8A96A]/10 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-[#D4B87A]">
           {t(language, "sync.realSyncDisabled")}
         </span>
       </div>
@@ -201,6 +203,9 @@ export function SyncStatusPanel() {
           {SYNC_MODULE_REGISTRY.map((entry) => {
             const moduleState = displaySyncState.modules[entry.module];
             const status = moduleState?.status ?? "local_only";
+            const displayStatus: ModuleSyncStatus = isModuleEnabled(settings, entry.module as AtlasModule)
+              ? status
+              : "disabled";
             const preview = previewByModule.get(entry.module);
 
             return (
@@ -240,9 +245,9 @@ export function SyncStatusPanel() {
                 </div>
                 <div className="flex items-center sm:justify-end">
                   <span
-                    className={`rounded-full border px-3 py-1 text-[10px] font-bold uppercase tracking-wider ${statusClass(status)}`}
+                    className={`rounded-full border px-3 py-1 text-[10px] font-bold uppercase tracking-wider ${statusClass(displayStatus)}`}
                   >
-                    {t(language, `sync.moduleStatus.${status}`, status)}
+                    {t(language, `sync.moduleStatus.${displayStatus}`, displayStatus)}
                   </span>
                 </div>
               </div>

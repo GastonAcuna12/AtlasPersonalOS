@@ -5,7 +5,7 @@ import { FormEvent, useState } from "react";
 import { useAtlasAuth, useLocalAtlasDataSummary } from "@/lib/auth";
 import { t } from "@/lib/i18n";
 import { useAtlasSettings } from "@/lib/settings";
-import { MigrationDecisionPanel } from "@/components/MigrationDecisionPanel";
+import { MigrationDecisionPanel } from "@/components/sync/MigrationDecisionPanel";
 
 type AuthMode = "sign_in" | "sign_up";
 
@@ -76,7 +76,7 @@ export function AccountPage() {
       <div className="mx-auto flex min-h-screen w-full max-w-5xl flex-col px-4 py-8 sm:px-6 lg:px-8 animate-fade-in-up">
         <header className="flex flex-col gap-4 border-b border-[#27272a] pb-6 md:flex-row md:items-center md:justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-500">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#C8A96A]">
               {t(language, "account.eyebrow")}
             </p>
             <h1 className="mt-2 text-4xl font-bold tracking-tight text-zinc-100 sm:text-5xl">
@@ -99,7 +99,7 @@ export function AccountPage() {
             <div className="rounded-xl border border-[#27272a] bg-[#18181b] p-6 shadow-xl">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-sky-400">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-[#6F8799]">
                   {t(language, "account.auth.eyebrow")}
                 </p>
                 <h2 className="mt-2 text-2xl font-bold tracking-tight text-zinc-100">
@@ -109,7 +109,7 @@ export function AccountPage() {
               <span
                 className={`w-fit rounded-full border px-3 py-1 text-[10px] font-bold uppercase tracking-wider ${
                   isSupabaseReady
-                    ? "border-sky-500/30 bg-sky-500/10 text-sky-300"
+                    ? "border-[#6F8799]/30 bg-[#6F8799]/10 text-[#7F97A9]"
                     : "border-zinc-700 bg-zinc-800/70 text-zinc-300"
                 }`}
               >
@@ -130,8 +130,8 @@ export function AccountPage() {
               </div>
             ) : isSignedIn ? (
               <div className="mt-6 grid gap-4">
-                <div className="rounded-lg border border-emerald-500/25 bg-emerald-500/10 p-5">
-                  <p className="text-sm font-semibold text-emerald-300">
+                <div className="rounded-lg border border-[#8A9A5B]/25 bg-[#8A9A5B]/10 p-5">
+                  <p className="text-sm font-semibold text-[#9AAB6B]">
                     {t(language, "account.auth.sessionDetected")}
                   </p>
                   <p className="mt-2 text-xs leading-6 text-zinc-400">
@@ -167,7 +167,7 @@ export function AccountPage() {
                       }}
                       className={`rounded-md px-4 py-2 text-xs font-bold uppercase tracking-wider transition ${
                         mode === item
-                          ? "bg-amber-500 text-zinc-950"
+                          ? "bg-[#C8A96A] text-zinc-950"
                           : "text-zinc-400 hover:text-zinc-100"
                       }`}
                     >
@@ -185,7 +185,7 @@ export function AccountPage() {
                     value={email}
                     autoComplete="email"
                     onChange={(event) => setEmail(event.target.value)}
-                    className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-3 text-sm font-medium text-zinc-100 outline-none transition focus:border-amber-500/60"
+                    className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-3 text-sm font-medium text-zinc-100 outline-none transition focus:border-[#C8A96A]/60"
                   />
                 </label>
 
@@ -198,14 +198,14 @@ export function AccountPage() {
                       mode === "sign_in" ? "current-password" : "new-password"
                     }
                     onChange={(event) => setPassword(event.target.value)}
-                    className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-3 text-sm font-medium text-zinc-100 outline-none transition focus:border-amber-500/60"
+                    className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-3 text-sm font-medium text-zinc-100 outline-none transition focus:border-[#C8A96A]/60"
                   />
                 </label>
 
                 <button
                   type="submit"
                   disabled={isSubmitting || auth.status === "loading"}
-                  className="mt-2 rounded-lg bg-amber-500 px-4 py-3 text-xs font-bold uppercase tracking-wider text-zinc-950 transition hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="mt-2 rounded-lg bg-[#C8A96A] px-4 py-3 text-xs font-bold uppercase tracking-wider text-zinc-950 transition hover:bg-[#D4B87A] disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {isSubmitting
                     ? t(language, "account.auth.working")
@@ -217,12 +217,12 @@ export function AccountPage() {
             )}
 
             {message ? (
-              <p className="mt-5 rounded-lg border border-emerald-500/30 bg-emerald-500/5 px-4 py-3 text-xs font-semibold text-emerald-400">
+              <p className="mt-5 rounded-lg border border-[#8A9A5B]/30 bg-[#8A9A5B]/5 px-4 py-3 text-xs font-semibold text-[#8A9A5B]">
                 {message}
               </p>
             ) : null}
             {error ? (
-              <p className="mt-5 rounded-lg border border-red-500/30 bg-red-500/5 px-4 py-3 text-xs font-semibold text-red-300">
+              <p className="mt-5 rounded-lg border border-[#B26A5B]/30 bg-[#B26A5B]/5 px-4 py-3 text-xs font-semibold text-[#C27A6B]">
                 {error}
               </p>
             ) : null}
@@ -233,7 +233,7 @@ export function AccountPage() {
 
           <aside className="grid gap-6 content-start">
             <div className="rounded-xl border border-[#27272a] bg-[#18181b] p-6 shadow-xl">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-amber-500">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-[#C8A96A]">
                 {t(language, "account.localRules.eyebrow")}
               </p>
               <div className="mt-4 grid gap-3 text-xs leading-6 text-zinc-400">

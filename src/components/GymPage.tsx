@@ -1,7 +1,8 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 "use client";
 
 import Link from "next/link";
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import {
   buildGymInsights,
   calculateGymOverview,
@@ -14,7 +15,7 @@ import {
   useWorkoutLogs,
 } from "@/lib/gym";
 import { useXP } from "@/lib/xp";
-import { StreakBadge } from "@/components/StreakBadge";
+import { StreakBadge } from "@/components/shared/StreakBadge";
 import { useAtlasSettings } from "@/lib/settings";
 import { t } from "@/lib/i18n";
 
@@ -28,6 +29,14 @@ const initialDraft: WorkoutDraft = {
 };
 
 export function GymPage() {
+  const [hasMounted, setHasMounted] = useState(false);
+  const [currentCalendarDate, setCurrentCalendarDate] = useState(() => new Date(2026, 5, 2));
+
+  useEffect(() => {
+    setHasMounted(true);
+    setCurrentCalendarDate(new Date());
+  }, []);
+
   const xp = useXP();
   const { workouts, addWorkout, deleteWorkout } = useWorkoutLogs();
   const { settings } = useAtlasSettings();
@@ -37,15 +46,19 @@ export function GymPage() {
   const [showDetailedForm, setShowDetailedForm] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
 
+  const currentMonthStr = useMemo(() => {
+    if (!hasMounted) return "2026-06";
+    return new Date().toISOString().slice(0, 7);
+  }, [hasMounted]);
+
   const overview = useMemo(
-    () => calculateGymOverview(workouts, new Date().toISOString().slice(0, 7)),
-    [workouts]
+    () => calculateGymOverview(workouts, currentMonthStr),
+    [workouts, currentMonthStr]
   );
   const weekly = useMemo(() => calculateWeeklyConsistency(workouts), [workouts]);
   const insights = useMemo(() => buildGymInsights(workouts), [workouts]);
 
   // Calendar State
-  const [currentCalendarDate, setCurrentCalendarDate] = useState(new Date());
   const calendarYear = currentCalendarDate.getFullYear();
   const calendarMonthIndex = currentCalendarDate.getMonth();
 
@@ -157,7 +170,7 @@ export function GymPage() {
       {/* Header */}
       <header className="flex flex-col gap-4 border-b border-[#27272a] pb-6 md:flex-row md:items-center md:justify-between">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-500">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#C8A96A]">
             {t(language, "gym.eyebrow", "Performance Engine")}
           </p>
           <h1 className="mt-2 text-4xl font-bold tracking-tight text-zinc-100 sm:text-5xl">
@@ -177,7 +190,7 @@ export function GymPage() {
 
       {/* Success Notification Banner */}
       {successMessage && (
-        <div className="mt-6 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-sm font-semibold flex items-center gap-2 animate-pulse">
+        <div className="mt-6 p-4 rounded-xl bg-[#8A9A5B]/10 border border-[#8A9A5B]/30 text-[#9AAB6B] text-sm font-semibold flex items-center gap-2">
           <span>✓</span> {successMessage}
         </div>
       )}
@@ -202,7 +215,7 @@ export function GymPage() {
                     className={`rounded-lg border py-3 text-xs font-bold uppercase tracking-wider transition-all duration-200 ${
                       isRest
                         ? "border-[#27272a] bg-[#121214] text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200"
-                        : "border-amber-500/20 bg-amber-500/5 text-amber-500 hover:bg-amber-500/10 hover:border-amber-500/30 hover:shadow-md"
+                        : "border-[#C8A96A]/20 bg-[#C8A96A]/5 text-[#C8A96A] hover:bg-[#C8A96A]/10 hover:border-[#C8A96A]/30 hover:shadow-md"
                     }`}
                   >
                     {t(language, `gym.workoutType.${type}`, type)}
@@ -216,7 +229,7 @@ export function GymPage() {
               <button
                 type="button"
                 onClick={() => setShowDetailedForm(!showDetailedForm)}
-                className="text-xs text-amber-500 font-bold hover:underline"
+                className="text-xs text-[#C8A96A] font-bold hover:underline"
               >
                 {showDetailedForm ? t(language, "gym.hideDetailed", "Hide Detailed Form") : t(language, "gym.openDetailed", "Open Detailed Form")} &rarr;
               </button>
@@ -232,7 +245,7 @@ export function GymPage() {
                       type="date"
                       value={draft.date}
                       onChange={(event) => updateDraft("date", event.target.value)}
-                      className="rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2.5 text-zinc-100 text-sm focus:border-amber-500 focus:outline-none"
+                      className="rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2.5 text-zinc-100 text-sm focus:border-[#C8A96A] focus:outline-none"
                     />
                   </label>
                   <label className="grid gap-2 text-xs font-semibold text-zinc-400 uppercase tracking-wider">
@@ -242,7 +255,7 @@ export function GymPage() {
                       onChange={(event) =>
                         updateDraft("workoutType", event.target.value as WorkoutType)
                       }
-                      className="rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2.5 text-zinc-100 text-sm focus:border-amber-500 focus:outline-none"
+                      className="rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2.5 text-zinc-100 text-sm focus:border-[#C8A96A] focus:outline-none"
                     >
                       {WORKOUT_TYPES.map((type) => (
                         <option key={type} value={type}>
@@ -260,7 +273,7 @@ export function GymPage() {
                       onChange={(event) =>
                         updateDraft("duration", Number(event.target.value))
                       }
-                      className="rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2.5 text-zinc-100 text-sm focus:border-amber-500 focus:outline-none"
+                      className="rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2.5 text-zinc-100 text-sm focus:border-[#C8A96A] focus:outline-none"
                     />
                   </label>
                 </div>
@@ -269,7 +282,7 @@ export function GymPage() {
                   <label className="grid gap-2 text-xs font-semibold text-zinc-400 uppercase tracking-wider bg-[#121214] p-4 rounded-lg border border-[#27272a]">
                     <div className="flex justify-between">
                       <span>{t(language, "gym.energyBefore", "Energy Before")}</span>
-                      <span className="text-amber-500 font-bold">{draft.energy}/10</span>
+                      <span className="text-[#C8A96A] font-bold">{draft.energy}/10</span>
                     </div>
                     <input
                       type="range"
@@ -279,13 +292,13 @@ export function GymPage() {
                       onChange={(event) =>
                         updateDraft("energy", Number(event.target.value))
                       }
-                      className="accent-amber-500 mt-2 cursor-pointer"
+                      className="accent-[#C8A96A] mt-2 cursor-pointer"
                     />
                   </label>
                   <label className="grid gap-2 text-xs font-semibold text-zinc-400 uppercase tracking-wider bg-[#121214] p-4 rounded-lg border border-[#27272a]">
                     <div className="flex justify-between">
                       <span>{t(language, "gym.intensityLevel", "Intensity Level")}</span>
-                      <span className="text-amber-500 font-bold">{draft.intensity}/10</span>
+                      <span className="text-[#C8A96A] font-bold">{draft.intensity}/10</span>
                     </div>
                     <input
                       type="range"
@@ -295,7 +308,7 @@ export function GymPage() {
                       onChange={(event) =>
                         updateDraft("intensity", Number(event.target.value))
                       }
-                      className="accent-amber-500 mt-2 cursor-pointer"
+                      className="accent-[#C8A96A] mt-2 cursor-pointer"
                     />
                   </label>
                 </div>
@@ -307,19 +320,19 @@ export function GymPage() {
                     value={draft.notes}
                     onChange={(event) => updateDraft("notes", event.target.value)}
                     placeholder={t(language, "gym.notesPlaceholder", "E.g., Bench Press: 4x8 80kg, Squats: 3x10 100kg...")}
-                    className="resize-none rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2.5 text-zinc-100 text-sm focus:border-amber-500 focus:outline-none placeholder:text-zinc-600"
+                    className="resize-none rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2.5 text-zinc-100 text-sm focus:border-[#C8A96A] focus:outline-none placeholder:text-zinc-600"
                   />
                 </label>
 
                 {error && (
-                  <p className="rounded-lg bg-red-500/10 border border-red-500/20 px-3 py-2 text-xs text-red-400">
+                  <p className="rounded-lg bg-[#B26A5B]/10 border border-[#B26A5B]/20 px-3 py-2 text-xs text-[#C27A6B]">
                     {error}
                   </p>
                 )}
 
                 <button
                   type="submit"
-                  className="rounded-lg bg-amber-500 hover:bg-amber-400 text-zinc-950 px-4 py-3 text-xs font-bold uppercase tracking-wider transition-all duration-200"
+                  className="rounded-lg bg-[#C8A96A] hover:bg-[#D4B87A] text-zinc-950 px-4 py-3 text-xs font-bold uppercase tracking-wider transition-all duration-200"
                 >
                   {t(language, "gym.logSession", "Log Workout Session")}
                 </button>
@@ -380,7 +393,7 @@ export function GymPage() {
 
                 let cellBg = "bg-[#121214] border border-[#27272a]/70 text-zinc-400";
                 if (hasActive) {
-                  cellBg = "bg-amber-500/20 border border-amber-500/40 text-amber-400 shadow-sm shadow-amber-950/20";
+                  cellBg = "bg-[#C8A96A]/20 border border-[#C8A96A]/40 text-[#D4B87A] shadow-sm shadow-[#2C2518]/20";
                 } else if (hasRest) {
                   cellBg = "bg-zinc-800/60 border border-zinc-700/60 text-zinc-500";
                 }
@@ -391,7 +404,7 @@ export function GymPage() {
                   <div
                     key={`day-${dayNum}`}
                     className={`aspect-square rounded-lg flex flex-col items-center justify-center relative p-1 transition-all duration-200 hover:border-zinc-500 cursor-pointer ${cellBg} ${
-                      isToday ? "ring-2 ring-amber-500 ring-offset-2 ring-offset-[#18181b]" : ""
+                      isToday ? "ring-2 ring-[#C8A96A] ring-offset-2 ring-offset-[#18181b]" : ""
                     }`}
                   >
                     <span className="text-[11px]">{dayNum}</span>
@@ -425,7 +438,7 @@ export function GymPage() {
                   key={day.date}
                   className={`rounded-lg border py-2 text-center transition-all ${
                     day.completed
-                      ? "border-amber-500/30 bg-amber-500/10 text-amber-400"
+                      ? "border-[#C8A96A]/30 bg-[#C8A96A]/10 text-[#D4B87A]"
                       : "border-[#27272a] bg-[#121214] text-zinc-600"
                   }`}
                 >
@@ -496,7 +509,7 @@ export function GymPage() {
                 >
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
-                      <span className={`h-2.5 w-2.5 rounded-full shrink-0 ${isRest ? "bg-zinc-600" : "bg-amber-500"}`}></span>
+                      <span className={`h-2.5 w-2.5 rounded-full shrink-0 ${isRest ? "bg-zinc-600" : "bg-[#C8A96A]"}`}></span>
                       <p className="font-bold text-zinc-100 text-sm">
                         {t(language, `gym.workoutType.${workout.workoutType}`, workout.workoutType)} {isRest ? `(${t(language, "gym.restDay", "Rest Day")})` : `(${workout.duration} ${t(language, "common.minutes")})`}
                       </p>
@@ -513,7 +526,7 @@ export function GymPage() {
                   <button
                     type="button"
                     onClick={() => deleteWorkout(workout.id)}
-                    className="rounded-lg border border-[#27272a] bg-[#18181b] px-3.5 py-2 text-xs font-bold uppercase tracking-wider text-red-400 transition hover:bg-red-500/10 hover:border-red-500/20"
+                    className="rounded-lg border border-[#27272a] bg-[#18181b] px-3.5 py-2 text-xs font-bold uppercase tracking-wider text-[#C27A6B] transition hover:bg-[#B26A5B]/10 hover:border-[#B26A5B]/20"
                   >
                     {t(language, "gym.deleteLog", "Delete Log")}
                   </button>
