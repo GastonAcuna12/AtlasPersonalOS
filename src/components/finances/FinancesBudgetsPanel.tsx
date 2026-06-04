@@ -110,7 +110,7 @@ export function FinancesBudgetsPanel({
               setShowBudgetForm(true);
             }
           }}
-          className="rounded-lg border border-amber-500/25 bg-amber-500/10 px-4 py-3 text-xs font-bold uppercase tracking-wider text-amber-300 transition hover:bg-amber-500/15 w-full shadow-md text-center"
+          className="rounded-lg border border-[#C8A96A]/25 bg-[#C8A96A]/10 px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#D4B87A] transition hover:bg-[#C8A96A]/15 w-full shadow-md text-center"
         >
           {showBudgetForm ? t(language, "goals.closeForm", "Close Form") : t(language, "finances.budgets.create", "+ Create Budget")}
         </button>
@@ -139,7 +139,7 @@ export function FinancesBudgetsPanel({
                 value={budgetDraft.name}
                 onChange={(e) => setBudgetDraft({ ...budgetDraft, name: e.target.value })}
                 placeholder="e.g. Food budget"
-                className="rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2.5 text-zinc-100 text-sm focus:border-amber-500 focus:outline-none"
+                className="rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2.5 text-zinc-100 text-sm focus:border-[#C8A96A] focus:outline-none"
                 required
               />
             </label>
@@ -153,7 +153,7 @@ export function FinancesBudgetsPanel({
                   step="0.01"
                   value={budgetDraft.amount || ""}
                   onChange={(e) => setBudgetDraft({ ...budgetDraft, amount: Number(e.target.value) })}
-                  className="rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2.5 text-zinc-100 text-sm font-semibold focus:border-amber-500 focus:outline-none"
+                  className="rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2.5 text-zinc-100 text-sm font-semibold focus:border-[#C8A96A] focus:outline-none"
                   required
                 />
               </label>
@@ -163,7 +163,7 @@ export function FinancesBudgetsPanel({
                 <select
                   value={budgetDraft.currency}
                   onChange={(e) => setBudgetDraft({ ...budgetDraft, currency: e.target.value as Currency })}
-                  className="rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2.5 text-zinc-100 text-sm focus:border-amber-500 focus:outline-none cursor-pointer w-full block transition-colors duration-200 hover:border-zinc-750"
+                  className="rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2.5 text-zinc-100 text-sm focus:border-[#C8A96A] focus:outline-none cursor-pointer w-full block transition-colors duration-200 hover:border-zinc-750"
                 >
                   <option value="PYG">PYG</option>
                   <option value="USD">USD</option>
@@ -176,7 +176,7 @@ export function FinancesBudgetsPanel({
               <select
                 value={budgetDraft.category}
                 onChange={(e) => setBudgetDraft({ ...budgetDraft, category: e.target.value })}
-                className="rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2.5 text-zinc-200 text-sm focus:border-amber-500 focus:outline-none cursor-pointer w-full block transition-colors duration-200 hover:border-zinc-750"
+                className="rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2.5 text-zinc-200 text-sm focus:border-[#C8A96A] focus:outline-none cursor-pointer w-full block transition-colors duration-200 hover:border-zinc-750"
                 required
               >
                 {categories.map((cat) => (
@@ -192,7 +192,7 @@ export function FinancesBudgetsPanel({
                 type="checkbox"
                 checked={budgetDraft.isActive}
                 onChange={(e) => setBudgetDraft({ ...budgetDraft, isActive: e.target.checked })}
-                className="accent-amber-500 h-4 w-4 rounded border-[#27272a] bg-[#121214]"
+                className="accent-[#C8A96A] h-4 w-4 rounded border-[#27272a] bg-[#121214]"
               />
               {t(language, "finances.budgets.active", "Active")}
             </label>
@@ -203,15 +203,15 @@ export function FinancesBudgetsPanel({
                 value={budgetDraft.notes}
                 onChange={(e) => setBudgetDraft({ ...budgetDraft, notes: e.target.value })}
                 rows={2}
-                className="resize-none rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2.5 text-zinc-100 text-sm focus:border-amber-500 focus:outline-none"
+                className="resize-none rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2.5 text-zinc-100 text-sm focus:border-[#C8A96A] focus:outline-none"
               />
             </label>
 
-            {budgetError && <p className="text-red-400 text-xs font-semibold">{budgetError}</p>}
+            {budgetError && <p className="text-[#C27A6B] text-xs font-semibold">{budgetError}</p>}
 
             <button
               type="submit"
-              className="rounded-lg bg-amber-500 hover:bg-amber-400 text-zinc-950 px-4 py-3 text-xs font-bold uppercase tracking-wider transition w-full"
+              className="rounded-lg bg-[#C8A96A] hover:bg-[#D4B87A] text-zinc-950 px-4 py-3 text-xs font-bold uppercase tracking-wider transition w-full"
             >
               {editingBudgetId
                 ? t(language, "finances.budgets.update", "Update Budget")
@@ -226,7 +226,7 @@ export function FinancesBudgetsPanel({
         <section className="rounded-xl border border-[#27272a] bg-[#18181b] p-6 shadow-xl">
           <div className="flex flex-col gap-2 border-b border-[#27272a] pb-3 mb-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-amber-500">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-[#C8A96A]">
                 {t(language, "finances.budgets.eyebrow", "Expense Budgets")}
               </p>
               <h3 className="mt-1 text-xl font-bold text-zinc-100">
@@ -261,9 +261,9 @@ export function FinancesBudgetsPanel({
                       !budget.isActive
                         ? "opacity-50 border-[#27272a]"
                         : isOver
-                        ? "border-red-500/25"
+                        ? "border-[#B26A5B]/25"
                         : isNear
-                        ? "border-amber-500/25"
+                        ? "border-[#C8A96A]/25"
                         : "border-[#27272a]"
                     }`}
                   >
@@ -278,10 +278,10 @@ export function FinancesBudgetsPanel({
                             !budget.isActive
                               ? "bg-zinc-800 text-zinc-500 border-[#27272a]"
                               : isOver
-                              ? "bg-red-500/10 text-red-400 border-red-500/20"
+                              ? "bg-[#B26A5B]/10 text-[#C27A6B] border-[#B26A5B]/20"
                               : isNear
-                              ? "bg-amber-500/10 text-amber-400 border-amber-500/20"
-                              : "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                              ? "bg-[#C8A96A]/10 text-[#D4B87A] border-[#C8A96A]/20"
+                              : "bg-[#8A9A5B]/10 text-[#9AAB6B] border-[#8A9A5B]/20"
                           }`}
                         >
                           {statusLabel}
@@ -301,7 +301,7 @@ export function FinancesBudgetsPanel({
                           <div className="w-full bg-zinc-800 rounded-full h-1.5 overflow-hidden">
                             <div
                               className={`h-1.5 rounded-full transition-all duration-300 ${
-                                isOver ? "bg-red-500" : isNear ? "bg-amber-500" : "bg-emerald-500"
+                                isOver ? "bg-[#B26A5B]" : isNear ? "bg-[#C8A96A]" : "bg-[#8A9A5B]"
                               }`}
                               style={{ width: `${Math.min(100, usage.percentUsed)}%` }}
                             />
@@ -350,7 +350,7 @@ export function FinancesBudgetsPanel({
                               deleteFinanceBudget(budget.id);
                             }
                           }}
-                          className="rounded-lg border border-[#27272a] bg-[#18181b] px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-red-400 transition hover:bg-red-500/10 hover:border-red-500/20"
+                          className="rounded-lg border border-[#27272a] bg-[#18181b] px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-[#C27A6B] transition hover:bg-[#B26A5B]/10 hover:border-[#B26A5B]/20"
                         >
                           {t(language, "common.delete")}
                         </button>

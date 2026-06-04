@@ -24,11 +24,11 @@ export function FinanceStatCard({
   const getBorderColorClass = () => {
     switch (warningType) {
       case "danger":
-        return "border-red-500/30 bg-red-500/5 text-red-400";
+        return "border-[#B26A5B]/30 bg-[#B26A5B]/5 text-[#C27A6B]";
       case "warning":
-        return "border-amber-500/30 bg-amber-500/5 text-amber-400";
+        return "border-[#C8A96A]/30 bg-[#C8A96A]/5 text-[#D4B87A]";
       case "low":
-        return "border-blue-500/30 bg-blue-500/5 text-blue-400";
+        return "border-[#6F8799]/30 bg-[#6F8799]/5 text-[#7F97A9]";
       default:
         return "border-[#27272a] bg-[#18181b]";
     }
@@ -54,10 +54,10 @@ export function FinanceStatCard({
           <p
             className={`mt-1 text-[9px] font-bold uppercase tracking-wider leading-tight flex items-center gap-0.5 ${
               warningType === "danger"
-                ? "text-red-450 animate-pulse"
+                ? "text-[#B26A5B]"
                 : warningType === "warning"
-                ? "text-amber-500"
-                : "text-blue-400"
+                ? "text-[#C8A96A]"
+                : "text-[#6F8799]"
             }`}
           >
             <span>⚠️</span> {warningMessage}

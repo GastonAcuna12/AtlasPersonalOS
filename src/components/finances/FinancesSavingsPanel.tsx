@@ -38,7 +38,7 @@ export function FinancesSavingsPanel({ language, baseCurrency, savings }: Financ
       <section className="rounded-xl border border-[#27272a] bg-[#18181b] p-5 shadow-xl flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         {/* Left Side: Icon, Title, and Excluded Label */}
         <div className="flex items-center gap-3">
-          <div className="h-10 w-10 shrink-0 rounded-full bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-xl">
+          <div className="h-10 w-10 shrink-0 rounded-full bg-[#C8A96A]/10 border border-[#C8A96A]/20 flex items-center justify-center text-xl">
             🏦
           </div>
           <div>
@@ -83,7 +83,7 @@ export function FinancesSavingsPanel({ language, baseCurrency, savings }: Financ
         <section className="rounded-xl border border-[#27272a] bg-[#18181b] p-6 shadow-xl w-full text-left">
           <div className="flex items-center justify-between border-b border-[#27272a] pb-3 mb-5">
             <div>
-              <p className="text-xs font-bold text-amber-500 uppercase tracking-widest">
+              <p className="text-xs font-bold text-[#C8A96A] uppercase tracking-widest">
                 🎯 {t(language, "finances.planning.paceTitle", "Savings Pace")}
               </p>
               <h3 className="text-lg font-bold text-zinc-100 mt-1">
@@ -140,15 +140,15 @@ export function FinancesSavingsPanel({ language, baseCurrency, savings }: Financ
                       {/* Status Badges */}
                       <div className="flex gap-2 shrink-0">
                         {plan.isReached ? (
-                          <span className="rounded bg-emerald-500/10 border border-emerald-500/25 px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-emerald-400">
+                          <span className="rounded bg-[#8A9A5B]/10 border border-[#8A9A5B]/25 px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-[#9AAB6B]">
                             {t(language, "goals.planning.reached", "Goal reached")}
                           </span>
                         ) : plan.isPastDeadline ? (
-                          <span className="rounded bg-rose-500/10 border border-rose-500/25 px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-rose-400 animate-pulse">
+                          <span className="rounded bg-[#B26A5B]/10 border border-[#B26A5B]/25 px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-[#C27A6B]">
                             {t(language, "goals.planning.behindTarget", "Behind target")}
                           </span>
                         ) : (
-                          <span className="rounded bg-amber-500/10 border border-amber-500/25 px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-amber-500">
+                          <span className="rounded bg-[#C8A96A]/10 border border-[#C8A96A]/25 px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-[#C8A96A]">
                             {t(language, "goals.planning.onTrack", "On track")}
                           </span>
                         )}
@@ -159,7 +159,7 @@ export function FinancesSavingsPanel({ language, baseCurrency, savings }: Financ
                     <div className="mb-4">
                       <div className="h-1.5 rounded-full bg-zinc-850 overflow-hidden border border-[#27272a]">
                         <div
-                          className="h-full rounded-full bg-gradient-to-r from-amber-600 to-amber-400 shadow-[0_0_8px_rgba(245,158,11,0.3)] transition-all duration-300"
+                          className="h-full rounded-full bg-gradient-to-r from-[#9C7A5F] to-[#D4B87A] shadow-[0_0_8px_rgba(245,158,11,0.3)] transition-all duration-300"
                           style={{ width: `${progressPercent}%` }}
                         />
                       </div>
@@ -171,7 +171,7 @@ export function FinancesSavingsPanel({ language, baseCurrency, savings }: Financ
                           {t(language, "finances.savings.target", "Target")}:{" "}
                           <span className="text-zinc-400">{formatMoney(goal.targetValue, plan.currency)}</span>
                         </span>
-                        <span className="font-bold text-amber-500">{progressPercent}%</span>
+                        <span className="font-bold text-[#C8A96A]">{progressPercent}%</span>
                       </div>
                     </div>
 
@@ -210,13 +210,13 @@ export function FinancesSavingsPanel({ language, baseCurrency, savings }: Financ
                           <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">
                             {t(language, "goals.planning.perMonth", "Needed per month")}
                           </p>
-                          <p className="mt-1 font-bold text-amber-500 font-black">
+                          <p className="mt-1 font-bold text-[#C8A96A] font-black">
                             {formatMoney(plan.perMonth, plan.currency)}
                           </p>
                         </div>
                       </div>
                     ) : (
-                      <div className="text-xs font-bold text-emerald-400 bg-emerald-500/5 border border-emerald-500/10 p-2.5 rounded mt-2">
+                      <div className="text-xs font-bold text-[#9AAB6B] bg-[#8A9A5B]/5 border border-[#8A9A5B]/10 p-2.5 rounded mt-2">
                         🎉 {t(language, "goals.planning.reached", "Goal reached")}
                       </div>
                     )}
@@ -235,7 +235,7 @@ export function FinancesSavingsPanel({ language, baseCurrency, savings }: Financ
               </p>
               <Link
                 href="/goals"
-                className="rounded-lg bg-amber-500 hover:bg-amber-400 text-zinc-950 px-4 py-2 text-xs font-bold uppercase tracking-wider transition shadow-sm cursor-pointer"
+                className="rounded-lg bg-[#C8A96A] hover:bg-[#D4B87A] text-zinc-950 px-4 py-2 text-xs font-bold uppercase tracking-wider transition shadow-sm cursor-pointer"
               >
                 {language === "es" ? "Ir a Objetivos" : "Go to Goals"}
               </Link>

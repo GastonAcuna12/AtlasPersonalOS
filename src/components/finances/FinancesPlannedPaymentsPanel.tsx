@@ -1,9 +1,15 @@
 "use client";
 
-import React, { useState, FormEvent } from "react";
+import React, { useState, FormEvent, useMemo } from "react";
 import { t } from "@/lib/i18n";
 import { useXP } from "@/lib/xp";
-import { formatMoney, PAYMENT_METHODS, type PlannedExpenseOccurrence } from "@/lib/finances";
+import {
+  formatMoney,
+  PAYMENT_METHODS,
+  type PlannedExpenseOccurrence,
+  useFinanceAccounts,
+} from "@/lib/finances";
+import { useAtlasSettings } from "@/lib/settings";
 import type { Currency, PaymentMethod, PlannedExpenseDraft, PlannedExpense, PlannedExpenseRecurrence, Transaction } from "@/types/atlas";
 
 interface FinancesPlannedPaymentsPanelProps {
@@ -18,7 +24,7 @@ interface FinancesPlannedPaymentsPanelProps {
   getPlannedTimingLabel: (plannedExpense: PlannedExpenseOccurrence) => string;
 }
 
-function createInitialPlannedDraft(): PlannedExpenseDraft {
+function createInitialPlannedDraft(accountId?: string): PlannedExpenseDraft {
   return {
     title: "",
     amount: 0,
@@ -29,20 +35,24 @@ function createInitialPlannedDraft(): PlannedExpenseDraft {
     dayOfMonth: undefined,
     paymentMethod: "Debit",
     notes: "",
+    cashflowType: "expense",
+    accountId,
   };
 }
 
-function plannedExpenseStatusClass(status: string) {
-  if (status === "paid") {
-    return "border-emerald-500/25 bg-emerald-500/10 text-emerald-400";
+function plannedExpenseStatusClass(status: string, isIncome = false) {
+  if (isIncome) {
+    return status === "paid"
+      ? "border-[#6F8799]/25 bg-[#6F8799]/10 text-[#7F97A9]"
+      : "border-[#8A9A5B]/25 bg-[#8A9A5B]/10 text-[#9AAB6B]";
   }
   if (status === "skipped") {
     return "border-zinc-600 bg-zinc-800/60 text-zinc-400";
   }
-  if (status === "cancelled") {
-    return "border-red-500/25 bg-red-500/10 text-red-300";
+  if (status === "overdue") {
+    return "border-[#B26A5B]/25 bg-[#B26A5B]/10 text-[#C27A6B]";
   }
-  return "border-amber-500/25 bg-amber-500/10 text-amber-400";
+  return "border-[#C8A96A]/25 bg-[#C8A96A]/10 text-[#D4B87A]";
 }
 
 export function FinancesPlannedPaymentsPanel({
@@ -57,7 +67,24 @@ export function FinancesPlannedPaymentsPanel({
   getPlannedTimingLabel,
 }: FinancesPlannedPaymentsPanelProps) {
   const xp = useXP();
-  const [plannedDraft, setPlannedDraft] = useState<PlannedExpenseDraft>(createInitialPlannedDraft);
+  const { accounts } = useFinanceAccounts();
+  const { settings } = useAtlasSettings();
+
+  const activeAccounts = useMemo(() => accounts.filter((acc) => acc.isActive), [accounts]);
+  const defaultAccount = useMemo(() => {
+    if (!settings.defaultFinanceAccountId) return undefined;
+    return activeAccounts.find((acc) => acc.id === settings.defaultFinanceAccountId);
+  }, [activeAccounts, settings.defaultFinanceAccountId]);
+
+  function getInitialAccountId() {
+    if (activeAccounts.length === 1) return activeAccounts[0].id;
+    if (activeAccounts.length > 1 && defaultAccount) return defaultAccount.id;
+    return undefined;
+  }
+
+  const [plannedDraft, setPlannedDraft] = useState<PlannedExpenseDraft>(() =>
+    createInitialPlannedDraft(getInitialAccountId())
+  );
   const [showPlannedForm, setShowPlannedForm] = useState(false);
   const [editingPlannedId, setEditingPlannedId] = useState<string | null>(null);
   const [plannedError, setPlannedError] = useState("");
@@ -94,6 +121,9 @@ export function FinancesPlannedPaymentsPanel({
     if (!plannedExpense.dueDate) {
       return t(language, "finances.errorDate", "Choose a transaction date.");
     }
+    if (activeAccounts.length > 0 && !plannedExpense.accountId) {
+      return t(language, "finances.accounts.errorSelectRequired", "Please select an account.");
+    }
     if (
       plannedExpense.recurrence === "monthly" &&
       (!plannedExpense.dayOfMonth || plannedExpense.dayOfMonth < 1 || plannedExpense.dayOfMonth > 31)
@@ -104,7 +134,7 @@ export function FinancesPlannedPaymentsPanel({
   }
 
   function resetPlannedForm() {
-    setPlannedDraft(createInitialPlannedDraft());
+    setPlannedDraft(createInitialPlannedDraft(getInitialAccountId()));
     setEditingPlannedId(null);
     setPlannedError("");
     setShowPlannedForm(false);
@@ -150,6 +180,8 @@ export function FinancesPlannedPaymentsPanel({
       dayOfMonth: plannedExpense.dayOfMonth,
       paymentMethod: plannedExpense.paymentMethod,
       notes: plannedExpense.notes,
+      cashflowType: plannedExpense.cashflowType ?? "expense",
+      accountId: plannedExpense.accountId,
     });
     setEditingPlannedId(plannedExpense.sourceExpenseId);
     setShowPlannedForm(true);
@@ -157,7 +189,7 @@ export function FinancesPlannedPaymentsPanel({
   }
 
   function handleMarkPlannedPaidInternal(plannedExpense: PlannedExpenseOccurrence) {
-    const confirmed = window.confirm(`${t(language, "finances.planned.confirmPaid")} ${plannedExpense.title}?`);
+    const confirmed = window.confirm(`${t(language, "finances.planned.confirmPaid", "Mark paid")} ${plannedExpense.title}?`);
 
     if (!confirmed) {
       return;
@@ -169,6 +201,23 @@ export function FinancesPlannedPaymentsPanel({
       xp.awardXP("finance-transaction", {
         amount: 10,
         label: t(language, "finances.planned.paidXp"),
+      });
+    }
+  }
+
+  function handleMarkPlannedReceivedInternal(plannedExpense: PlannedExpenseOccurrence) {
+    const confirmed = window.confirm(`${t(language, "finances.planned.confirmReceived", "Mark this expected income as received?")} ${plannedExpense.title}?`);
+
+    if (!confirmed) {
+      return;
+    }
+
+    const transaction = markPlannedExpensePaid(plannedExpense.sourceExpenseId, plannedExpense.occurrenceDueDate);
+
+    if (transaction) {
+      xp.awardXP("finance-transaction", {
+        amount: 10,
+        label: t(language, "finances.planned.receivedXp", "Received expected income"),
       });
     }
   }
@@ -201,7 +250,7 @@ export function FinancesPlannedPaymentsPanel({
               setShowPlannedForm(true);
             }
           }}
-          className="rounded-lg bg-amber-500 hover:bg-amber-400 text-zinc-950 px-4 py-3 text-xs font-bold uppercase tracking-wider transition w-full shadow-md text-center"
+          className="rounded-lg bg-[#C8A96A] hover:bg-[#D4B87A] text-zinc-950 px-4 py-3 text-xs font-bold uppercase tracking-wider transition w-full shadow-md text-center"
         >
           {showPlannedForm ? t(language, "goals.closeForm", "Close Form") : t(language, "finances.addTransaction", "+ Add Planned")}
         </button>
@@ -213,9 +262,39 @@ export function FinancesPlannedPaymentsPanel({
           >
             <p className="text-xs font-bold text-zinc-400 uppercase tracking-widest border-b border-[#27272a] pb-2 mb-1">
               {editingPlannedId
-                ? t(language, "finances.planned.update", "Update Planned")
-                : t(language, "finances.newTransaction", "New Planned")}
+                ? (plannedDraft.cashflowType === "income"
+                  ? t(language, "finances.planned.updateIncome", "Update Income")
+                  : t(language, "finances.planned.update", "Update Planned"))
+                : (plannedDraft.cashflowType === "income"
+                  ? t(language, "finances.planned.newIncome", "New Income")
+                  : t(language, "finances.newTransaction", "New Planned"))}
             </p>
+
+            {/* Type Selector */}
+            <div className="grid grid-cols-2 gap-3.5">
+              <button
+                type="button"
+                onClick={() => updatePlannedDraft("cashflowType", "expense")}
+                className={`rounded-lg py-2 text-xs font-bold uppercase tracking-wider transition border cursor-pointer ${
+                  plannedDraft.cashflowType !== "income"
+                    ? "bg-[#C8A96A] text-zinc-950 border-[#C8A96A]"
+                    : "bg-[#121214] text-zinc-400 border-[#27272a] hover:bg-zinc-800"
+                }`}
+              >
+                {t(language, "finances.planned.type.expense", "Expense")}
+              </button>
+              <button
+                type="button"
+                onClick={() => updatePlannedDraft("cashflowType", "income")}
+                className={`rounded-lg py-2 text-xs font-bold uppercase tracking-wider transition border cursor-pointer ${
+                  plannedDraft.cashflowType === "income"
+                    ? "bg-[#6F8799] text-zinc-950 border-[#6F8799]"
+                    : "bg-[#121214] text-zinc-400 border-[#27272a] hover:bg-zinc-800"
+                }`}
+              >
+                {t(language, "finances.planned.type.income", "Income")}
+              </button>
+            </div>
 
             <label className="grid gap-2 text-xs font-semibold text-zinc-400 uppercase tracking-wider">
               {t(language, "common.title")} *
@@ -223,8 +302,8 @@ export function FinancesPlannedPaymentsPanel({
                 type="text"
                 value={plannedDraft.title}
                 onChange={(event) => updatePlannedDraft("title", event.target.value)}
-                placeholder="e.g. Rent, internet bill"
-                className="rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2.5 text-zinc-100 text-sm focus:border-amber-500 focus:outline-none"
+                placeholder={plannedDraft.cashflowType === "income" ? "e.g. Salary, monthly retainer" : "e.g. Rent, internet bill"}
+                className="rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2.5 text-zinc-100 text-sm focus:border-[#C8A96A] focus:outline-none"
                 required
               />
             </label>
@@ -238,7 +317,7 @@ export function FinancesPlannedPaymentsPanel({
                   step="0.01"
                   value={plannedDraft.amount || ""}
                   onChange={(event) => updatePlannedDraft("amount", Number(event.target.value))}
-                  className="rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2.5 text-zinc-100 text-sm font-semibold focus:border-amber-500 focus:outline-none"
+                  className="rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2.5 text-zinc-100 text-sm font-semibold focus:border-[#C8A96A] focus:outline-none"
                   required
                 />
               </label>
@@ -248,7 +327,7 @@ export function FinancesPlannedPaymentsPanel({
                 <select
                   value={plannedDraft.currency}
                   onChange={(event) => updatePlannedDraft("currency", event.target.value as Currency)}
-                  className="rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2.5 text-zinc-100 text-sm focus:border-amber-500 focus:outline-none"
+                  className="rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2.5 text-zinc-100 text-sm focus:border-[#C8A96A] focus:outline-none"
                 >
                   <option value="PYG">PYG</option>
                   <option value="USD">USD</option>
@@ -256,12 +335,74 @@ export function FinancesPlannedPaymentsPanel({
               </label>
             </div>
 
+            {/* Account Selector */}
+            {activeAccounts.length > 0 && (
+              <div className="grid gap-2 animate-fade-in-up">
+                <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider flex items-center justify-between">
+                  <span>
+                    {plannedDraft.cashflowType === "income"
+                      ? t(language, "finances.planned.targetAccount", "Target account")
+                      : t(language, "finances.planned.sourceAccount", "Source account")}{" "}
+                    *
+                  </span>
+                  {activeAccounts.length === 1 && (
+                    <span className="text-[10px] text-zinc-550 lowercase italic">
+                      ({t(language, "finances.accounts.autoSelected", "auto-selected")})
+                    </span>
+                  )}
+                </label>
+                
+                {activeAccounts.length === 1 ? (
+                  <div className="rounded-lg border border-[#27272a] bg-[#121214]/60 px-3.5 py-2.5 text-zinc-350 text-sm font-medium">
+                    {activeAccounts[0].name} ({activeAccounts[0].currency})
+                  </div>
+                ) : (
+                  <select
+                    value={plannedDraft.accountId || ""}
+                    onChange={(event) => updatePlannedDraft("accountId", event.target.value || undefined)}
+                    className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2 text-zinc-100 text-sm focus:border-[#C8A96A] focus:outline-none"
+                    required
+                  >
+                    <option value="" disabled>
+                      -- {t(language, "finances.accounts.select", "Select account")} --
+                    </option>
+                    {activeAccounts.map((acc) => (
+                      <option key={acc.id} value={acc.id}>
+                        {acc.name} ({t(language, `finances.accounts.type.${acc.type}`, acc.type)}) [{acc.currency}] {acc.institution ? `· ${acc.institution}` : ""}
+                      </option>
+                    ))}
+                  </select>
+                )}
+
+                {/* Currency mismatch warning */}
+                {(() => {
+                  if (!plannedDraft.accountId) return null;
+                  const selectedAcc = activeAccounts.find((a) => a.id === plannedDraft.accountId);
+                  if (selectedAcc && selectedAcc.currency !== plannedDraft.currency) {
+                    return (
+                      <p className="text-[10px] font-semibold text-[#C8A96A] bg-[#C8A96A]/5 border border-[#C8A96A]/10 p-2 rounded leading-normal mt-0.5 animate-fade-in-up">
+                        ⚠️ {t(language, "finances.accounts.currencyMismatch", "Transaction currency differs from account currency.")}
+                      </p>
+                    );
+                  }
+                  return null;
+                })()}
+              </div>
+            )}
+
+            {activeAccounts.length === 0 && (
+              <p className="text-[10px] font-medium text-zinc-550 italic leading-normal">
+                ℹ️ {t(language, "finances.accounts.saveWithoutAccount", "This transaction will be saved without an account.")}{" "}
+                {t(language, "finances.accounts.createPrompt", "Create an account to organize transactions.")}
+              </p>
+            )}
+
             <label className="grid gap-2 text-xs font-semibold text-zinc-400 uppercase tracking-wider">
               {t(language, "finances.categoryRequired", "Category *")}
               <select
                 value={plannedDraft.category}
                 onChange={(event) => updatePlannedDraft("category", event.target.value)}
-                className="rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2.5 text-zinc-200 text-sm focus:border-amber-500 focus:outline-none cursor-pointer w-full block transition-colors duration-200 hover:border-zinc-750"
+                className="rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2.5 text-zinc-200 text-sm focus:border-[#C8A96A] focus:outline-none cursor-pointer w-full block transition-colors duration-200 hover:border-zinc-750"
                 required
               >
                 <option value="" disabled>
@@ -277,12 +418,14 @@ export function FinancesPlannedPaymentsPanel({
 
             <div className="grid grid-cols-2 gap-3.5">
               <label className="grid gap-2 text-xs font-semibold text-zinc-400 uppercase tracking-wider">
-                {t(language, "finances.planned.dueDate")}
+                {plannedDraft.cashflowType === "income"
+                  ? t(language, "finances.planned.expectedDate", "Expected date")
+                  : t(language, "finances.planned.dueDate", "Due date")}
                 <input
                   type="date"
                   value={plannedDraft.dueDate}
                   onChange={(event) => updatePlannedDraft("dueDate", event.target.value)}
-                  className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2 text-zinc-100 text-sm focus:border-amber-500 focus:outline-none"
+                  className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2 text-zinc-100 text-sm focus:border-[#C8A96A] focus:outline-none"
                 />
               </label>
 
@@ -293,7 +436,7 @@ export function FinancesPlannedPaymentsPanel({
                   onChange={(event) =>
                     updatePlannedDraft("recurrence", event.target.value as PlannedExpenseRecurrence)
                   }
-                  className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2 text-zinc-100 text-sm focus:border-amber-500 focus:outline-none"
+                  className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2 text-zinc-100 text-sm focus:border-[#C8A96A] focus:outline-none"
                 >
                   <option value="none">{t(language, "finances.planned.oneTime")}</option>
                   <option value="monthly">{t(language, "finances.planned.monthly")}</option>
@@ -310,26 +453,28 @@ export function FinancesPlannedPaymentsPanel({
                   max="31"
                   value={plannedDraft.dayOfMonth || ""}
                   onChange={(event) => updatePlannedDraft("dayOfMonth", Number(event.target.value))}
-                  className="rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2.5 text-zinc-100 text-sm focus:border-amber-500 focus:outline-none"
+                  className="rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2.5 text-zinc-100 text-sm focus:border-[#C8A96A] focus:outline-none"
                 />
               </label>
             )}
 
-            <label className="grid gap-2 text-xs font-semibold text-zinc-400 uppercase tracking-wider">
-              {t(language, "finances.method", "Method")}
-              <select
-                value={plannedDraft.paymentMethod || ""}
-                onChange={(event) => updatePlannedDraft("paymentMethod", (event.target.value as PaymentMethod) || undefined)}
-                className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2 text-zinc-100 text-sm focus:border-amber-500 focus:outline-none"
-              >
-                <option value="">{t(language, "finances.planned.methodOptional")}</option>
-                {PAYMENT_METHODS.map((method) => (
-                  <option key={method} value={method}>
-                    {method}
-                  </option>
-                ))}
-              </select>
-            </label>
+            {plannedDraft.cashflowType !== "income" && (
+              <label className="grid gap-2 text-xs font-semibold text-zinc-400 uppercase tracking-wider">
+                {t(language, "finances.method", "Method")}
+                <select
+                  value={plannedDraft.paymentMethod || ""}
+                  onChange={(event) => updatePlannedDraft("paymentMethod", (event.target.value as PaymentMethod) || undefined)}
+                  className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2 text-zinc-100 text-sm focus:border-[#C8A96A] focus:outline-none"
+                >
+                  <option value="">{t(language, "finances.planned.methodOptional")}</option>
+                  {PAYMENT_METHODS.map((method) => (
+                    <option key={method} value={method}>
+                      {method}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            )}
 
             <label className="grid gap-2 text-xs font-semibold text-zinc-400 uppercase tracking-wider">
               {t(language, "common.notes")}
@@ -337,17 +482,23 @@ export function FinancesPlannedPaymentsPanel({
                 value={plannedDraft.notes || ""}
                 onChange={(event) => updatePlannedDraft("notes", event.target.value)}
                 rows={2}
-                className="resize-none rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2.5 text-zinc-200 text-sm focus:border-amber-500 focus:outline-none"
+                className="resize-none rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2.5 text-zinc-200 text-sm focus:border-[#C8A96A] focus:outline-none"
               />
             </label>
 
-            {plannedError && <p className="text-red-400 text-xs font-semibold">{plannedError}</p>}
+            {plannedError && <p className="text-[#C27A6B] text-xs font-semibold">{plannedError}</p>}
 
             <button
               type="submit"
-              className="rounded-lg bg-amber-500 hover:bg-amber-400 text-zinc-950 px-4 py-3 text-xs font-bold uppercase tracking-wider transition w-full"
+              className={`rounded-lg px-4 py-3 text-xs font-bold uppercase tracking-wider transition w-full shadow-md text-center ${
+                plannedDraft.cashflowType === "income"
+                  ? "bg-[#6F8799] hover:bg-[#7F97A9] text-zinc-950"
+                  : "bg-[#C8A96A] hover:bg-[#D4B87A] text-zinc-950"
+              }`}
             >
-              {editingPlannedId ? t(language, "finances.planned.update") : t(language, "finances.planned.save")}
+              {editingPlannedId
+                ? (plannedDraft.cashflowType === "income" ? t(language, "finances.planned.updateIncome", "Update Income") : t(language, "finances.planned.update"))
+                : (plannedDraft.cashflowType === "income" ? t(language, "finances.planned.saveIncome", "Save Income") : t(language, "finances.planned.save"))}
             </button>
           </form>
         )}
@@ -358,7 +509,7 @@ export function FinancesPlannedPaymentsPanel({
         <section className="rounded-xl border border-[#27272a] bg-[#18181b] p-6 shadow-xl">
           <div className="flex flex-col gap-2 border-b border-[#27272a] pb-3 mb-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-amber-500">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-[#C8A96A]">
                 {t(language, "finances.planned.eyebrow")}
               </p>
               <h3 className="mt-1 text-xl font-bold text-zinc-100">
@@ -372,86 +523,120 @@ export function FinancesPlannedPaymentsPanel({
 
           <div className="grid gap-3.5">
             {visiblePlannedExpenses.length > 0 ? (
-              visiblePlannedExpenses.map((plannedExpense) => (
-                <article
-                  key={`${plannedExpense.sourceExpenseId}-${plannedExpense.occurrenceMonth}`}
-                  className={`grid gap-4 rounded-lg border bg-[#121214]/60 p-4 md:grid-cols-[1fr_auto] items-center transition ${
-                    plannedExpense.isOverdue
-                      ? "border-red-500/25"
-                      : plannedExpense.isDueSoon
-                      ? "border-amber-500/25"
-                      : "border-[#27272a]"
-                  }`}
-                >
-                  <div>
-                    <div className="flex flex-wrap items-center gap-2">
-                      <p className="font-bold text-zinc-100 text-sm leading-snug">{plannedExpense.title}</p>
-                      <span className="rounded bg-zinc-900 border border-[#27272a] px-2 py-0.5 text-[10px] font-bold text-zinc-400 uppercase tracking-wider">
-                        {plannedExpense.category}
-                      </span>
-                      <span
-                        className={`rounded border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${plannedExpenseStatusClass(
-                          plannedExpense.effectiveStatus
-                        )}`}
-                      >
-                        {t(
-                          language,
-                          `finances.planned.status.${plannedExpense.effectiveStatus}`,
-                          plannedExpense.effectiveStatus
-                        )}
-                      </span>
-                      {plannedExpense.recurrence === "monthly" && (
-                        <span className="rounded border border-cyan-500/25 bg-cyan-500/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-cyan-300">
-                          {t(language, "finances.planned.monthly")}
+              visiblePlannedExpenses.map((plannedExpense) => {
+                const isIncome = plannedExpense.cashflowType === "income";
+                return (
+                  <article
+                    key={`${plannedExpense.sourceExpenseId}-${plannedExpense.occurrenceMonth}`}
+                    className={`grid gap-4 rounded-lg border bg-[#121214]/60 p-4 md:grid-cols-[1fr_auto] items-center transition ${
+                      plannedExpense.isOverdue && !isIncome
+                        ? "border-[#B26A5B]/25"
+                        : plannedExpense.isDueSoon && !isIncome
+                        ? "border-[#C8A96A]/25"
+                        : isIncome && plannedExpense.effectiveStatus === "pending"
+                        ? "border-[#6F8799]/15"
+                        : "border-[#27272a]"
+                    }`}
+                  >
+                    <div>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <p className="font-bold text-zinc-100 text-sm leading-snug">{plannedExpense.title}</p>
+                        <span className="rounded bg-zinc-900 border border-[#27272a] px-2 py-0.5 text-[10px] font-bold text-zinc-400 uppercase tracking-wider">
+                          {plannedExpense.category}
                         </span>
+                        <span
+                          className={`rounded border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${plannedExpenseStatusClass(
+                            plannedExpense.effectiveStatus,
+                            isIncome
+                          )}`}
+                        >
+                          {plannedExpense.effectiveStatus === "paid" && isIncome
+                            ? t(language, "finances.planned.status.received", "Received")
+                            : t(
+                                language,
+                                `finances.planned.status.${plannedExpense.effectiveStatus}`,
+                                plannedExpense.effectiveStatus
+                              )}
+                        </span>
+                        {plannedExpense.accountId && (() => {
+                          const acc = accounts.find((a) => a.id === plannedExpense.accountId);
+                          if (acc) {
+                            return (
+                              <span className="rounded bg-[#1b1b1e] border border-[#27272a] px-2 py-0.5 text-[10px] font-medium text-zinc-400 uppercase tracking-wider">
+                                🏦 {acc.name}
+                              </span>
+                            );
+                          }
+                          return null;
+                        })()}
+                        {plannedExpense.recurrence === "monthly" && (
+                          <span className="rounded border border-[#6F8799]/25 bg-[#6F8799]/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[#A8A29E]">
+                            {t(language, "finances.planned.monthly")}
+                          </span>
+                        )}
+                      </div>
+                      <p className="mt-1 text-xs text-zinc-500">
+                        {plannedExpense.occurrenceDueDate} &middot; {getPlannedTimingLabel(plannedExpense)}
+                        {plannedExpense.paymentMethod && !isIncome ? ` · ${plannedExpense.paymentMethod}` : ""}
+                      </p>
+                      {plannedExpense.notes && (
+                        <p className="mt-2 text-[11px] text-zinc-400 italic line-clamp-2">{plannedExpense.notes}</p>
                       )}
                     </div>
-                    <p className="mt-1 text-xs text-zinc-500">
-                      {plannedExpense.occurrenceDueDate} &middot; {getPlannedTimingLabel(plannedExpense)}
-                      {plannedExpense.paymentMethod ? ` · ${plannedExpense.paymentMethod}` : ""}
-                    </p>
-                    {plannedExpense.notes && (
-                      <p className="mt-2 text-[11px] text-zinc-400 italic line-clamp-2">{plannedExpense.notes}</p>
-                    )}
-                  </div>
 
-                  <div className="flex flex-col gap-2 md:items-end">
-                    <p className="font-bold text-sm tracking-tight text-zinc-100">
-                      {formatMoney(plannedExpense.amount, plannedExpense.currency)}
-                    </p>
-                    <div className="flex flex-wrap gap-2 md:justify-end">
-                      <button
-                        type="button"
-                        onClick={() => handleMarkPlannedPaidInternal(plannedExpense)}
-                        className="rounded-lg border border-emerald-500/25 bg-emerald-500/10 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-emerald-400 transition hover:bg-emerald-500/15"
-                      >
-                        {t(language, "finances.planned.markPaid")}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleSkipPlannedInternal(plannedExpense)}
-                        className="rounded-lg border border-[#27272a] bg-[#18181b] px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-zinc-400 transition hover:bg-zinc-800"
-                      >
-                        {t(language, "finances.planned.skip")}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => editPlannedExpense(plannedExpense)}
-                        className="rounded-lg border border-[#27272a] bg-[#18181b] px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-zinc-300 transition hover:bg-zinc-800"
-                      >
-                        {t(language, "common.edit", "Edit")}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleDeletePlannedInternal(plannedExpense)}
-                        className="rounded-lg border border-[#27272a] bg-[#18181b] px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-red-400 transition hover:bg-red-500/10 hover:border-red-500/20"
-                      >
-                        {t(language, "common.delete")}
-                      </button>
+                    <div className="flex flex-col gap-2 md:items-end">
+                      <p className={`font-bold text-sm tracking-tight ${isIncome ? "text-[#7F97A9]" : "text-zinc-100"}`}>
+                        {isIncome ? "+" : ""}
+                        {formatMoney(plannedExpense.amount, plannedExpense.currency)}
+                      </p>
+                      <div className="flex flex-wrap gap-2 md:justify-end">
+                        {plannedExpense.effectiveStatus === "pending" && (
+                          isIncome ? (
+                            <button
+                              type="button"
+                              onClick={() => handleMarkPlannedReceivedInternal(plannedExpense)}
+                              className="rounded-lg border border-[#6F8799]/25 bg-[#6F8799]/10 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-[#7F97A9] transition hover:bg-[#6F8799]/15 cursor-pointer"
+                            >
+                              {t(language, "finances.planned.markReceived", "Mark received")}
+                            </button>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => handleMarkPlannedPaidInternal(plannedExpense)}
+                              className="rounded-lg border border-[#8A9A5B]/25 bg-[#8A9A5B]/10 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-[#9AAB6B] transition hover:bg-[#8A9A5B]/15 cursor-pointer"
+                            >
+                              {t(language, "finances.planned.markPaid", "Mark paid")}
+                            </button>
+                          )
+                        )}
+                        {plannedExpense.effectiveStatus === "pending" && (
+                          <button
+                            type="button"
+                            onClick={() => handleSkipPlannedInternal(plannedExpense)}
+                            className="rounded-lg border border-[#27272a] bg-[#18181b] px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-zinc-400 transition hover:bg-zinc-800 cursor-pointer"
+                          >
+                            {t(language, "finances.planned.skip")}
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => editPlannedExpense(plannedExpense)}
+                          className="rounded-lg border border-[#27272a] bg-[#18181b] px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-zinc-300 transition hover:bg-zinc-800 cursor-pointer"
+                        >
+                          {t(language, "common.edit", "Edit")}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDeletePlannedInternal(plannedExpense)}
+                          className="rounded-lg border border-[#27272a] bg-[#18181b] px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-[#C27A6B] transition hover:bg-[#B26A5B]/10 hover:border-[#B26A5B]/20 cursor-pointer"
+                        >
+                          {t(language, "common.delete")}
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                </article>
-              ))
+                  </article>
+                );
+              })
             ) : (
               <p className="rounded-lg border border-[#27272a] bg-[#121214] px-4 py-6 text-xs text-zinc-500 italic text-center">
                 {t(language, "finances.planned.empty")}

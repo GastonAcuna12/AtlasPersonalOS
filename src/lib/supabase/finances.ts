@@ -2,6 +2,7 @@
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
+import { readSyncState } from "@/lib/sync/state";
 import type {
   Currency,
   PaymentMethod,
@@ -340,6 +341,15 @@ export async function listCloudTransactions(): Promise<
 export async function createCloudTransaction(
   transaction: Transaction | TransactionDraft,
 ): Promise<CloudFinanceResult<Transaction | null>> {
+  const syncState = readSyncState();
+  if (syncState.modules.finances.status !== "synced") {
+    return {
+      ok: false,
+      data: null,
+      error: "Cloud finance operations are disabled because finance sync is not enabled.",
+    };
+  }
+
   const context = await getCloudFinanceContext();
 
   if (!context.ok) {
@@ -392,6 +402,15 @@ export async function updateCloudTransaction(
   id: string,
   updates: Partial<TransactionDraft>,
 ): Promise<CloudFinanceResult<Transaction | null>> {
+  const syncState = readSyncState();
+  if (syncState.modules.finances.status !== "synced") {
+    return {
+      ok: false,
+      data: null,
+      error: "Cloud finance operations are disabled because finance sync is not enabled.",
+    };
+  }
+
   const context = await getCloudFinanceContext();
 
   if (!context.ok) {
@@ -475,6 +494,15 @@ export async function updateCloudTransaction(
 export async function deleteCloudTransaction(
   id: string,
 ): Promise<CloudFinanceResult<null>> {
+  const syncState = readSyncState();
+  if (syncState.modules.finances.status !== "synced") {
+    return {
+      ok: false,
+      data: null,
+      error: "Cloud finance operations are disabled because finance sync is not enabled.",
+    };
+  }
+
   const context = await getCloudFinanceContext();
 
   if (!context.ok) {

@@ -6,6 +6,7 @@ import { useXP } from "@/lib/xp";
 import { formatMoney, PAYMENT_METHODS, useFinanceAccounts } from "@/lib/finances";
 import { useAtlasSettings } from "@/lib/settings";
 import type { Currency, PaymentMethod, TransactionDraft, Transaction, TransactionType } from "@/types/atlas";
+import { generateFinanceCsv, downloadCSV } from "@/lib/exports/financeCsv";
 
 interface FinancesTransactionsPanelProps {
   language: "en" | "es";
@@ -76,6 +77,7 @@ const quickExamples: TransactionDraft[] = [
 
 export function FinancesTransactionsPanel({
   language,
+  transactions,
   filteredTransactions,
   categories,
   addTransaction,
@@ -192,6 +194,36 @@ export function FinancesTransactionsPanel({
     saveTransaction(draft);
   }
 
+  function handleExportCurrentView() {
+    if (filteredTransactions.length === 0) {
+      alert(t(language, "finances.transactions.exportNoData", "No transactions to export"));
+      return;
+    }
+    try {
+      const csv = generateFinanceCsv(filteredTransactions, accounts, language);
+      const date = new Date().toISOString().slice(0, 10);
+      downloadCSV(csv, `atlas-finances-transactions-filtered-${date}.csv`);
+    } catch (e) {
+      console.error(e);
+      alert(t(language, "finances.transactions.exportFailed", "Export failed"));
+    }
+  }
+
+  function handleExportAll() {
+    if (transactions.length === 0) {
+      alert(t(language, "finances.transactions.exportNoData", "No transactions to export"));
+      return;
+    }
+    try {
+      const csv = generateFinanceCsv(transactions, accounts, language);
+      const date = new Date().toISOString().slice(0, 10);
+      downloadCSV(csv, `atlas-finances-transactions-${date}.csv`);
+    } catch (e) {
+      console.error(e);
+      alert(t(language, "finances.transactions.exportFailed", "Export failed"));
+    }
+  }
+
   return (
     <div className="grid gap-6 lg:grid-cols-[360px_1fr] items-start animate-fade-in-up">
       {/* Left Column: Form Toggle and Collapsible Form */}
@@ -206,7 +238,7 @@ export function FinancesTransactionsPanel({
             }
             setShowAddForm(!showAddForm);
           }}
-          className="rounded-lg bg-amber-500 hover:bg-amber-400 text-zinc-950 px-4 py-3 text-xs font-bold uppercase tracking-wider transition w-full shadow-md text-center"
+          className="rounded-lg bg-[#C8A96A] hover:bg-[#D4B87A] text-zinc-950 px-4 py-3 text-xs font-bold uppercase tracking-wider transition w-full shadow-md text-center"
         >
           {showAddForm ? t(language, "goals.closeForm", "Close Form") : t(language, "finances.addTransaction", "+ Add Transaction")}
         </button>
@@ -226,7 +258,7 @@ export function FinancesTransactionsPanel({
                 <select
                   value={draft.type}
                   onChange={(event) => updateDraft("type", event.target.value as TransactionType)}
-                  className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2 text-zinc-100 text-sm focus:border-amber-500 focus:outline-none"
+                  className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2 text-zinc-100 text-sm focus:border-[#C8A96A] focus:outline-none"
                 >
                   <option value="expense">{t(language, "common.expense")}</option>
                   <option value="income">{t(language, "common.income")}</option>
@@ -238,7 +270,7 @@ export function FinancesTransactionsPanel({
                 <select
                   value={draft.currency}
                   onChange={(event) => updateDraft("currency", event.target.value as Currency)}
-                  className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2 text-zinc-100 text-sm focus:border-amber-500 focus:outline-none"
+                  className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2 text-zinc-100 text-sm focus:border-[#C8A96A] focus:outline-none"
                 >
                   <option value="PYG">PYG</option>
                   <option value="USD">USD</option>
@@ -253,7 +285,7 @@ export function FinancesTransactionsPanel({
                   <span>{t(language, "finances.accounts.single", "Account")} *</span>
                   {activeAccounts.length === 1 && (
                     <span className="text-[10px] text-zinc-550 lowercase italic">
-                      ({t(language, "finances.accounts.setDefault", "auto-selected")})
+                      ({t(language, "finances.accounts.autoSelected", "auto-selected")})
                     </span>
                   )}
                 </label>
@@ -266,7 +298,7 @@ export function FinancesTransactionsPanel({
                   <select
                     value={draft.accountId || ""}
                     onChange={(event) => updateDraft("accountId", event.target.value || undefined)}
-                    className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2 text-zinc-100 text-sm focus:border-amber-500 focus:outline-none"
+                    className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2 text-zinc-100 text-sm focus:border-[#C8A96A] focus:outline-none"
                     required
                   >
                     <option value="" disabled>
@@ -286,7 +318,7 @@ export function FinancesTransactionsPanel({
                   const selectedAcc = activeAccounts.find((a) => a.id === draft.accountId);
                   if (selectedAcc && selectedAcc.currency !== draft.currency) {
                     return (
-                      <p className="text-[10px] font-semibold text-amber-500 bg-amber-500/5 border border-amber-500/10 p-2 rounded leading-normal mt-0.5 animate-fade-in-up">
+                      <p className="text-[10px] font-semibold text-[#C8A96A] bg-[#C8A96A]/5 border-[#C8A96A]/10 p-2 rounded leading-normal mt-0.5 animate-fade-in-up">
                         ⚠️ {t(language, "finances.accounts.currencyMismatch", "Transaction currency differs from account currency.")}
                       </p>
                     );
@@ -311,7 +343,7 @@ export function FinancesTransactionsPanel({
                 step="0.01"
                 value={draft.amount || ""}
                 onChange={(event) => updateDraft("amount", Number(event.target.value))}
-                className="rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2.5 text-zinc-100 text-sm font-semibold focus:border-amber-500 focus:outline-none"
+                className="rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2.5 text-zinc-100 text-sm font-semibold focus:border-[#C8A96A] focus:outline-none"
                 required
               />
             </label>
@@ -324,7 +356,7 @@ export function FinancesTransactionsPanel({
                 value={draft.category}
                 onChange={(event) => updateDraft("category", event.target.value)}
                 placeholder={t(language, "finances.selectCategory", "Select category")}
-                className="rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2.5 text-zinc-200 text-sm focus:border-amber-500 focus:outline-none cursor-pointer w-full block transition-colors duration-200 hover:border-zinc-750"
+                className="rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2.5 text-zinc-200 text-sm focus:border-[#C8A96A] focus:outline-none cursor-pointer w-full block transition-colors duration-200 hover:border-zinc-750"
                 required
               />
               <datalist id="categories-list">
@@ -340,7 +372,7 @@ export function FinancesTransactionsPanel({
                 type="text"
                 value={draft.description}
                 onChange={(event) => updateDraft("description", event.target.value)}
-                className="rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2.5 text-zinc-200 text-sm focus:border-amber-500 focus:outline-none"
+                className="rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2.5 text-zinc-200 text-sm focus:border-[#C8A96A] focus:outline-none"
                 required
               />
             </label>
@@ -351,7 +383,7 @@ export function FinancesTransactionsPanel({
                 type="date"
                 value={draft.date}
                 onChange={(event) => updateDraft("date", event.target.value)}
-                className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2 text-zinc-100 text-sm focus:border-amber-500 focus:outline-none"
+                className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2 text-zinc-100 text-sm focus:border-[#C8A96A] focus:outline-none"
               />
             </label>
 
@@ -360,7 +392,7 @@ export function FinancesTransactionsPanel({
               <select
                 value={draft.paymentMethod}
                 onChange={(event) => updateDraft("paymentMethod", event.target.value as PaymentMethod)}
-                className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2 text-zinc-100 text-sm focus:border-amber-500 focus:outline-none"
+                className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2 text-zinc-100 text-sm focus:border-[#C8A96A] focus:outline-none"
               >
                 {PAYMENT_METHODS.map((method) => (
                   <option key={method} value={method}>
@@ -377,15 +409,15 @@ export function FinancesTransactionsPanel({
                 placeholder="e.g. rent, groceries"
                 value={draft.tag || ""}
                 onChange={(event) => updateDraft("tag", event.target.value)}
-                className="rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2.5 text-zinc-200 text-sm focus:border-amber-500 focus:outline-none"
+                className="rounded-lg border border-[#27272a] bg-[#121214] px-3.5 py-2.5 text-zinc-200 text-sm focus:border-[#C8A96A] focus:outline-none"
               />
             </label>
 
-            {error && <p className="text-red-400 text-xs font-semibold">{error}</p>}
+            {error && <p className="text-[#C27A6B] text-xs font-semibold">{error}</p>}
 
             <button
               type="submit"
-              className="rounded-lg bg-amber-500 hover:bg-amber-400 text-zinc-950 px-4 py-3 text-xs font-bold uppercase tracking-wider transition w-full"
+              className="rounded-lg bg-[#C8A96A] hover:bg-[#D4B87A] text-zinc-950 px-4 py-3 text-xs font-bold uppercase tracking-wider transition w-full"
             >
               {t(language, "finances.saveTransaction", "Save Transaction")}
             </button>
@@ -396,7 +428,7 @@ export function FinancesTransactionsPanel({
               </p>
               <div className="flex flex-col gap-2">
                 {activeAccounts.length > 1 && !defaultAccount && !draft.accountId && (
-                  <p className="text-[10px] text-amber-500 font-semibold mb-2.5 italic">
+                  <p className="text-[10px] text-[#C8A96A] font-semibold mb-2.5 italic">
                     ⚠️ {t(language, "finances.accounts.errorSelectRequired", "Select an account to enable quick examples.")}
                   </p>
                 )}
@@ -418,7 +450,7 @@ export function FinancesTransactionsPanel({
                           {ex.category} &middot; {ex.paymentMethod}
                         </p>
                       </div>
-                      <span className={`text-xs font-bold ${ex.type === "income" ? "text-emerald-450" : "text-zinc-400"}`}>
+                      <span className={`text-xs font-bold ${ex.type === "income" ? "text-[#8A9A5B]" : "text-zinc-400"}`}>
                         {ex.type === "income" ? "+" : "-"}
                         {formatMoney(ex.amount, ex.currency)}
                       </span>
@@ -494,6 +526,29 @@ export function FinancesTransactionsPanel({
               </select>
             </label>
           </div>
+
+          {/* Local-only CSV Export */}
+          <div className="border-t border-[#27272a] mt-6 pt-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex flex-wrap gap-2.5">
+              <button
+                type="button"
+                onClick={handleExportCurrentView}
+                className="rounded-lg border border-[#27272a] bg-[#121214] hover:bg-[#18181b] hover:border-zinc-700 text-zinc-200 px-4 py-2.5 text-xs font-bold uppercase tracking-wider transition flex items-center gap-2"
+              >
+                📥 {t(language, "finances.transactions.exportCurrent", "Export current view")}
+              </button>
+              <button
+                type="button"
+                onClick={handleExportAll}
+                className="rounded-lg border border-[#27272a] bg-[#121214] hover:bg-[#18181b] hover:border-zinc-700 text-zinc-300 px-4 py-2.5 text-xs font-bold uppercase tracking-wider transition flex items-center gap-2"
+              >
+                🗂️ {t(language, "finances.transactions.exportAll", "Export all transactions")}
+              </button>
+            </div>
+            <p className="text-[10px] text-zinc-500 font-semibold leading-relaxed">
+              🔒 {t(language, "finances.transactions.exportPrivacyNote", "CSV exports are generated locally in your browser.")}
+            </p>
+          </div>
         </section>
 
         {/* Transactions list history */}
@@ -515,7 +570,7 @@ export function FinancesTransactionsPanel({
                         {transaction.category}
                       </span>
                       {transaction.tag && (
-                        <span className="text-[10px] text-amber-500 font-bold uppercase tracking-wider">
+                        <span className="text-[10px] text-[#C8A96A] font-bold uppercase tracking-wider">
                           #{transaction.tag}
                         </span>
                       )}
@@ -532,7 +587,7 @@ export function FinancesTransactionsPanel({
                         const acc = accounts.find((a) => a.id === transaction.accountId);
                         if (!acc) {
                           return (
-                            <span className="rounded bg-zinc-900/60 border border-red-500/25 px-1.5 py-0.5 text-[9px] font-bold text-red-400 uppercase tracking-wider">
+                            <span className="rounded bg-zinc-900/60 border border-[#B26A5B]/25 px-1.5 py-0.5 text-[9px] font-bold text-[#C27A6B] uppercase tracking-wider">
                               {t(language, "finances.accounts.unlinked", "Unlinked")}
                             </span>
                           );
@@ -554,7 +609,7 @@ export function FinancesTransactionsPanel({
                   <div className="flex items-center gap-4 md:justify-end">
                     <p
                       className={`font-bold text-sm tracking-tight ${
-                        transaction.type === "income" ? "text-emerald-450" : "text-zinc-200"
+                        transaction.type === "income" ? "text-[#8A9A5B]" : "text-zinc-200"
                       }`}
                     >
                       {transaction.type === "income" ? "+" : "-"}
@@ -563,7 +618,7 @@ export function FinancesTransactionsPanel({
                     <button
                       type="button"
                       onClick={() => deleteTransaction(transaction.id)}
-                      className="rounded-lg border border-[#27272a] bg-[#18181b] px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider text-red-400 transition hover:bg-red-500/10 hover:border-red-500/20"
+                      className="rounded-lg border border-[#27272a] bg-[#18181b] px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider text-[#C27A6B] transition hover:bg-[#B26A5B]/10 hover:border-[#B26A5B]/20"
                     >
                       {t(language, "common.delete")}
                     </button>

@@ -206,7 +206,7 @@ export function FinancesCloudPanel({
       <section className="mt-6 rounded-xl border border-[#27272a] bg-[#18181b] p-5">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-widest text-sky-400">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-[#7F97A9]">
               {t(language, "cloud.finances.title")}
             </p>
             <p className="mt-2 text-sm font-semibold text-zinc-100">
@@ -228,10 +228,10 @@ export function FinancesCloudPanel({
   }
 
   return (
-    <section className="mt-6 rounded-xl border border-sky-500/25 bg-[#18181b] p-6 shadow-xl">
+    <section className="mt-6 rounded-xl border border-[#6F8799]/25 bg-[#18181b] p-6 shadow-xl">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div>
-          <p className="text-[10px] font-bold uppercase tracking-widest text-sky-400">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-[#7F97A9]">
             {t(language, "cloud.finances.title")}
           </p>
           <h2 className="mt-2 text-2xl font-bold tracking-tight text-zinc-100">
@@ -243,7 +243,7 @@ export function FinancesCloudPanel({
             {t(language, "cloud.finances.noMixedSummary")}
           </p>
         </div>
-        <span className="w-fit rounded-full border border-emerald-500/25 bg-emerald-500/10 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-emerald-400">
+        <span className="w-fit rounded-full border border-[#8A9A5B]/25 bg-[#8A9A5B]/10 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-[#9AAB6B]">
           {t(language, "settings.accountSync.signedIn")}
         </span>
       </div>
@@ -264,7 +264,7 @@ export function FinancesCloudPanel({
             type="button"
             onClick={() => handleCreateTestCloudTransaction("income")}
             disabled={activeAction !== null}
-            className="rounded-lg border border-emerald-500/25 bg-emerald-500/10 px-4 py-3 text-xs font-bold uppercase tracking-wider text-emerald-300 transition hover:bg-emerald-500/20 disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded-lg border border-[#8A9A5B]/25 bg-[#8A9A5B]/10 px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#A8B582] transition hover:bg-[#8A9A5B]/20 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {activeAction === "create-income"
               ? t(language, "common.creating")
@@ -274,7 +274,7 @@ export function FinancesCloudPanel({
             type="button"
             onClick={() => handleCreateTestCloudTransaction("expense")}
             disabled={activeAction !== null}
-            className="rounded-lg border border-red-500/25 bg-red-500/10 px-4 py-3 text-xs font-bold uppercase tracking-wider text-red-300 transition hover:bg-red-500/20 disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded-lg border border-[#B26A5B]/25 bg-[#B26A5B]/10 px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#E8E4DD] transition hover:bg-[#B26A5B]/20 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {activeAction === "create-expense"
               ? t(language, "common.creating")
@@ -301,7 +301,7 @@ export function FinancesCloudPanel({
             value={selectedTransactionValue}
             onChange={(event) => setSelectedTransactionId(event.target.value)}
             disabled={localTransactions.length === 0 || activeAction !== null}
-            className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2.5 text-zinc-100 focus:outline-none focus:border-sky-500/50 disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2.5 text-zinc-100 focus:outline-none focus:border-[#6F8799]/50 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {localTransactions.length === 0 ? (
               <option value="">
@@ -321,7 +321,7 @@ export function FinancesCloudPanel({
           type="button"
           onClick={handleUploadSelectedTransaction}
           disabled={!selectedTransaction || activeAction !== null}
-          className="self-end rounded-lg border border-amber-500/25 bg-amber-500/10 px-4 py-3 text-xs font-bold uppercase tracking-wider text-amber-400 transition hover:bg-amber-500/20 disabled:cursor-not-allowed disabled:opacity-50"
+          className="self-end rounded-lg border border-[#C8A96A]/25 bg-[#C8A96A]/10 px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#D4B87A] transition hover:bg-[#C8A96A]/20 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {activeAction === "upload"
             ? t(language, "common.uploading")
@@ -330,13 +330,13 @@ export function FinancesCloudPanel({
       </div>
 
       {message ? (
-        <p className="mt-4 rounded-lg border border-emerald-500/30 bg-emerald-500/5 px-4 py-3 text-xs font-semibold text-emerald-400">
+        <p className="mt-4 rounded-lg border border-[#8A9A5B]/30 bg-[#8A9A5B]/5 px-4 py-3 text-xs font-semibold text-[#9AAB6B]">
           {message}
         </p>
       ) : null}
 
       {error ? (
-        <p className="mt-4 rounded-lg border border-red-500/30 bg-red-500/5 px-4 py-3 text-xs font-semibold text-red-300">
+        <p className="mt-4 rounded-lg border border-[#B26A5B]/30 bg-[#B26A5B]/5 px-4 py-3 text-xs font-semibold text-[#E8E4DD]">
           {error}
         </p>
       ) : null}
@@ -361,9 +361,9 @@ export function FinancesCloudPanel({
             {(["PYG", "USD"] as Currency[]).flatMap((currency) => [
               <div
                 key={`${currency}-income`}
-                className="rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-3"
+                className="rounded-lg border border-[#8A9A5B]/20 bg-[#8A9A5B]/5 p-3"
               >
-                <p className="text-[9px] font-bold uppercase tracking-wider text-emerald-400">
+                <p className="text-[9px] font-bold uppercase tracking-wider text-[#9AAB6B]">
                   {t(language, "cloud.finances.incomeOriginal")} {currency}
                 </p>
                 <p className="mt-1 text-sm font-bold text-zinc-100">
@@ -372,9 +372,9 @@ export function FinancesCloudPanel({
               </div>,
               <div
                 key={`${currency}-expense`}
-                className="rounded-lg border border-red-500/20 bg-red-500/5 p-3"
+                className="rounded-lg border border-[#B26A5B]/20 bg-[#B26A5B]/5 p-3"
               >
-                <p className="text-[9px] font-bold uppercase tracking-wider text-red-300">
+                <p className="text-[9px] font-bold uppercase tracking-wider text-[#E8E4DD]">
                   {t(language, "cloud.finances.expenseOriginal")} {currency}
                 </p>
                 <p className="mt-1 text-sm font-bold text-zinc-100">
@@ -397,8 +397,8 @@ export function FinancesCloudPanel({
                         <span
                           className={`rounded-full border px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider ${
                             transaction.type === "income"
-                              ? "border-emerald-500/25 bg-emerald-500/10 text-emerald-400"
-                              : "border-red-500/25 bg-red-500/10 text-red-300"
+                              ? "border-[#8A9A5B]/25 bg-[#8A9A5B]/10 text-[#9AAB6B]"
+                              : "border-[#B26A5B]/25 bg-[#B26A5B]/10 text-[#E8E4DD]"
                           }`}
                         >
                           {transaction.type === "income"
@@ -420,7 +420,7 @@ export function FinancesCloudPanel({
                     <p
                       className={`text-sm font-black ${
                         transaction.type === "income"
-                          ? "text-emerald-400"
+                          ? "text-[#9AAB6B]"
                           : "text-zinc-100"
                       }`}
                     >
