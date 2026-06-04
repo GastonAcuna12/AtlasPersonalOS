@@ -3,7 +3,7 @@
 import { AcademicsCloudPanel } from "@/components/AcademicsCloudPanel";
 import { FinancesCloudPanel } from "@/components/FinancesCloudPanel";
 import { GoalsCloudPanel } from "@/components/GoalsCloudPanel";
-import { GymCloudPanel } from "@/components/GymCloudPanel";
+import { GymCloudPanel } from "@/features/gym/components/GymCloudPanel";
 import { NotesCloudPanel } from "@/components/NotesCloudPanel";
 import { TasksCloudPanel } from "@/components/TasksCloudPanel";
 import { WorkCloudPanel } from "@/components/WorkCloudPanel";
