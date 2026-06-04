@@ -1,7 +1,7 @@
 "use client";
 
 import { AcademicsCloudPanel } from "@/features/academics/components/AcademicsCloudPanel";
-import { FinancesCloudPanel } from "@/components/FinancesCloudPanel";
+import { FinancesCloudPanel } from "@/features/finances/components/FinancesCloudPanel";
 import { GoalsCloudPanel } from "@/features/goals/components/GoalsCloudPanel";
 import { GymCloudPanel } from "@/features/gym/components/GymCloudPanel";
 import { NotesCloudPanel } from "@/features/notes/components/NotesCloudPanel";

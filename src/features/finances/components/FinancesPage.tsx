@@ -21,12 +21,12 @@ import { t } from "@/lib/i18n";
 
 import type { Currency, TransactionType } from "@/types/atlas";
 
-import { FinancesOverviewPanel } from "./finances/FinancesOverviewPanel";
-import { FinancesAccountsPanel } from "./finances/FinancesAccountsPanel";
-import { FinancesTransactionsPanel } from "./finances/FinancesTransactionsPanel";
-import { FinancesPlannedPaymentsPanel } from "./finances/FinancesPlannedPaymentsPanel";
-import { FinancesBudgetsPanel } from "./finances/FinancesBudgetsPanel";
-import { FinancesSavingsPanel } from "./finances/FinancesSavingsPanel";
+import { FinancesOverviewPanel } from "./FinancesOverviewPanel";
+import { FinancesAccountsPanel } from "./FinancesAccountsPanel";
+import { FinancesTransactionsPanel } from "./FinancesTransactionsPanel";
+import { FinancesPlannedPaymentsPanel } from "./FinancesPlannedPaymentsPanel";
+import { FinancesBudgetsPanel } from "./FinancesBudgetsPanel";
+import { FinancesSavingsPanel } from "./FinancesSavingsPanel";
 
 export function FinancesPage() {
   const [hasMounted, setHasMounted] = useState(false);
