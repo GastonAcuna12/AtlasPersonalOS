@@ -10,6 +10,7 @@ import { useNotes, type NoteDraft } from "@/lib/notes";
 import { useXP } from "@/lib/xp";
 import { useAtlasSettings } from "@/lib/settings";
 import { t } from "@/lib/i18n";
+import { isNotesCloudSynced } from "@/lib/sync/notesWriteThrough";
 
 const initialDraft: NoteDraft = {
   title: "",
@@ -22,6 +23,7 @@ export function NotesPage() {
   const { notes, addNote, deleteNote } = useNotes();
   const { settings } = useAtlasSettings();
   const language = settings.language;
+  const isSyncedEnabled = isNotesCloudSynced();
   const xp = useXP();
   const [draft, setDraft] = useState(initialDraft);
   const [tagText, setTagText] = useState("");
@@ -86,7 +88,7 @@ export function NotesPage() {
         <header className="flex flex-col gap-4 border-b border-[#27272a] pb-6 md:flex-row md:items-center md:justify-between">
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-500">
+              <span className="text-xs font-semibold uppercase tracking-[0.2em] text-[#C8A96A]">
                 {t(language, "notes.eyebrow")}
               </span>
               <span className="rounded-full bg-[#18181b] border border-[#27272a] px-2 py-0.5 text-[10px] font-bold text-zinc-400">
@@ -103,8 +105,8 @@ export function NotesPage() {
               onClick={() => setShowCreateForm(!showCreateForm)}
               className={`rounded-lg px-4 py-2.5 transition active:scale-95 ${
                 showCreateForm
-                  ? "bg-red-500/10 border border-red-500/25 text-red-400 hover:bg-red-500/20"
-                  : "bg-amber-500 text-zinc-950 hover:bg-amber-400"
+                  ? "bg-[#B26A5B]/10 border border-[#B26A5B]/25 text-[#C27A6B] hover:bg-[#B26A5B]/20"
+                  : "bg-[#C8A96A] text-zinc-950 hover:bg-[#D4B87A]"
               }`}
             >
               {showCreateForm ? `✕ ${t(language, "common.cancel")}` : t(language, "notes.add")}
@@ -128,7 +130,7 @@ export function NotesPage() {
 
         {/* Global Notifications */}
         {message && (
-          <div className="mt-4 rounded-lg border border-emerald-500/30 bg-emerald-500/5 px-4 py-3 text-xs font-semibold text-emerald-400">
+          <div className="mt-4 rounded-lg border border-[#8A9A5B]/30 bg-[#8A9A5B]/5 px-4 py-3 text-xs font-semibold text-[#9AAB6B]">
             ✓ {message}
           </div>
         )}
@@ -149,7 +151,7 @@ export function NotesPage() {
                     onChange={(event) =>
                       setDraft((current) => ({ ...current, title: event.target.value }))
                     }
-                    className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2 text-zinc-100 focus:outline-none focus:border-amber-500/50"
+                    className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2 text-zinc-100 focus:outline-none focus:border-[#C8A96A]/50"
                     required
                   />
                 </label>
@@ -161,7 +163,7 @@ export function NotesPage() {
                     onChange={(event) =>
                       setDraft((current) => ({ ...current, area: event.target.value }))
                     }
-                    className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2 text-zinc-100 focus:outline-none focus:border-amber-500/50"
+                    className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2 text-zinc-100 focus:outline-none focus:border-[#C8A96A]/50"
                   />
                 </label>
               </div>
@@ -172,7 +174,7 @@ export function NotesPage() {
                   placeholder={t(language, "notes.tagsPlaceholder")}
                   value={tagText}
                   onChange={(event) => setTagText(event.target.value)}
-                  className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2 text-zinc-100 focus:outline-none focus:border-amber-500/50"
+                  className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2 text-zinc-100 focus:outline-none focus:border-[#C8A96A]/50"
                 />
               </label>
 
@@ -188,19 +190,19 @@ export function NotesPage() {
                       content: event.target.value,
                     }))
                   }
-                  className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2 text-zinc-100 focus:outline-none focus:border-amber-500/50 resize-y"
+                  className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2 text-zinc-100 focus:outline-none focus:border-[#C8A96A]/50 resize-y"
                   required
                 />
               </label>
 
               {error && (
-                <p className="text-xs font-bold text-red-400 mt-1">⚠️ {error}</p>
+                <p className="text-xs font-bold text-[#C27A6B] mt-1">⚠️ {error}</p>
               )}
 
               <div className="flex gap-2 text-xs font-bold uppercase tracking-wider mt-2">
                 <button
                   type="submit"
-                  className="rounded-lg bg-amber-500 text-zinc-950 px-5 py-3 hover:bg-amber-400 transition"
+                  className="rounded-lg bg-[#C8A96A] text-zinc-950 px-5 py-3 hover:bg-[#D4B87A] transition"
                 >
                   {t(language, "notes.save")}
                 </button>
@@ -230,7 +232,7 @@ export function NotesPage() {
                 placeholder={t(language, "notes.searchPlaceholder")}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full rounded-lg border border-[#27272a] bg-[#121214] pl-10 pr-4 py-2.5 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-amber-500/50"
+                className="w-full rounded-lg border border-[#27272a] bg-[#121214] pl-10 pr-4 py-2.5 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-[#C8A96A]/50"
               />
               <span className="absolute left-3.5 top-3 text-zinc-500">
                 🔍
@@ -256,15 +258,39 @@ export function NotesPage() {
                   <div>
                     {/* Top Row info */}
                     <div className="flex items-center justify-between gap-2">
-                      <span className="rounded bg-zinc-800 border border-[#27272a] px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-amber-500">
+                      <span className="rounded bg-zinc-800 border border-[#27272a] px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-[#C8A96A]">
                         {note.area || t(language, "common.personal")}
                       </span>
-                      <span className="text-[10px] text-zinc-500 font-medium">
-                        {note.updatedAt.slice(0, 10)}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        {isSyncedEnabled && (
+                          <span
+                            title={
+                              note.syncState === "synced"
+                                ? t(language, "settings.notesSync.indicatorSynced")
+                                : note.syncState === "dirty"
+                                ? t(language, "settings.notesSync.indicatorPending")
+                                : note.syncState === "conflict"
+                                ? t(language, "settings.notesSync.indicatorError")
+                                : t(language, "settings.notesSync.indicatorLocalOnly")
+                            }
+                            className={`h-2 w-2 rounded-full ${
+                              note.syncState === "synced"
+                                ? "bg-[#8A9A5B]"
+                                : note.syncState === "dirty"
+                                ? "bg-[#C8A96A]"
+                                : note.syncState === "conflict"
+                                ? "bg-[#B26A5B]"
+                                : "bg-zinc-500"
+                            }`}
+                          />
+                        )}
+                        <span className="text-[10px] text-zinc-500 font-medium">
+                          {note.updatedAt.slice(0, 10)}
+                        </span>
+                      </div>
                     </div>
 
-                    <h2 className="mt-3 text-lg font-bold text-zinc-100 group-hover:text-amber-400 transition break-words">
+                    <h2 className="mt-3 text-lg font-bold text-zinc-100 group-hover:text-[#D4B87A] transition break-words">
                       {note.title}
                     </h2>
 
@@ -301,7 +327,7 @@ export function NotesPage() {
                         const confirmed = window.confirm(`${t(language, "notes.deleteConfirm")} "${note.title}"?`);
                         if (confirmed) deleteNote(note.id);
                       }}
-                      className="rounded-lg border border-red-500/25 bg-red-500/10 px-3.5 py-2 text-red-400 transition hover:bg-red-500/20 ml-auto"
+                      className="rounded-lg border border-[#B26A5B]/25 bg-[#B26A5B]/10 px-3.5 py-2 text-[#C27A6B] transition hover:bg-[#B26A5B]/20 ml-auto"
                     >
                       {t(language, "common.delete")}
                     </button>

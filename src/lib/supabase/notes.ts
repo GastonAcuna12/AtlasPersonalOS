@@ -17,6 +17,9 @@ export type CloudNoteRow = {
   created_at: string;
   updated_at: string;
   deleted_at: string | null;
+  local_id?: string | null;
+  synced_at?: string | null;
+  conflict_state?: string | null;
 };
 
 export type CloudNoteInsert = {
@@ -100,6 +103,12 @@ function normalizeCloudNoteRow(value: unknown): CloudNoteRow | null {
     updated_at: updatedAt,
     deleted_at:
       typeof value.deleted_at === "string" ? value.deleted_at : null,
+    local_id:
+      typeof value.local_id === "string" ? value.local_id : null,
+    synced_at:
+      typeof value.synced_at === "string" ? value.synced_at : null,
+    conflict_state:
+      typeof value.conflict_state === "string" ? value.conflict_state : null,
   };
 }
 
@@ -147,6 +156,8 @@ export function mapCloudNoteToAtlasNote(row: CloudNoteRow): Note {
     content: row.content,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
+    deletedAt: row.deleted_at,
+    localId: row.local_id ?? undefined,
   };
 }
 
@@ -346,5 +357,63 @@ export async function deleteCloudNote(
     ok: true,
     data: null,
     message: "Deleted cloud note. Local notes were not changed.",
+  };
+}
+
+export async function uploadLocalNotesToCloud(
+  notes: Note[],
+): Promise<CloudNotesResult<{ uploadedCount: number; updatedCount: number }>> {
+  const context = await getCloudNotesContext();
+
+  if (!context.ok) {
+    return {
+      ok: false,
+      data: { uploadedCount: 0, updatedCount: 0 },
+      error: context.error,
+    };
+  }
+
+  const now = new Date().toISOString();
+
+  const rows = notes.map((note) => ({
+    user_id: context.userId,
+    local_id: note.id,
+    title: note.title.trim() || "Untitled note",
+    content: note.content.trim(),
+    area: note.area.trim() || null,
+    tags: note.tags.map((t) => t.trim()).filter(Boolean),
+    created_at: note.createdAt,
+    updated_at: note.updatedAt,
+    synced_at: now,
+    deleted_at: note.deletedAt || null,
+  }));
+
+  if (rows.length === 0) {
+    return {
+      ok: true,
+      data: { uploadedCount: 0, updatedCount: 0 },
+      message: "No notes to upload.",
+    };
+  }
+
+  const { data, error } = await context.client
+    .from("notes")
+    .upsert(rows, { onConflict: "user_id,local_id" })
+    .select("id, local_id");
+
+  if (error) {
+    return {
+      ok: false,
+      data: { uploadedCount: 0, updatedCount: 0 },
+      error: error.message,
+    };
+  }
+
+  const upsertedCount = Array.isArray(data) ? data.length : rows.length;
+
+  return {
+    ok: true,
+    data: { uploadedCount: upsertedCount, updatedCount: 0 },
+    message: `Successfully uploaded ${upsertedCount} notes to Supabase.`,
   };
 }
