@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useAtlasSettings } from "@/lib/settings";
-import { WorkspaceOnboarding } from "@/components/WorkspaceOnboarding";
+import { WorkspaceOnboarding } from "@/features/onboarding/components/WorkspaceOnboarding";
 
 export function WorkspaceOnboardingIntercept({ children }: { children: React.ReactNode }) {
   const { settings } = useAtlasSettings();

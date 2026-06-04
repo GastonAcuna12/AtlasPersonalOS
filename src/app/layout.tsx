@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { QuickCaptureModal } from "@/components/QuickCaptureModal";
 import { SidebarNav } from "@/components/layout/SidebarNav";
-import { WorkspaceOnboardingIntercept } from "@/components/WorkspaceOnboardingIntercept";
+import { WorkspaceOnboardingIntercept } from "@/features/onboarding/components/WorkspaceOnboardingIntercept";
 import { AtlasAuthProvider } from "@/lib/auth/provider";
 import "./globals.css";
 
