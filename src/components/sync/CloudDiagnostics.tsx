@@ -6,7 +6,7 @@ import { GoalsCloudPanel } from "@/components/GoalsCloudPanel";
 import { GymCloudPanel } from "@/features/gym/components/GymCloudPanel";
 import { NotesCloudPanel } from "@/components/NotesCloudPanel";
 import { TasksCloudPanel } from "@/components/TasksCloudPanel";
-import { WorkCloudPanel } from "@/components/WorkCloudPanel";
+import { WorkCloudPanel } from "@/features/work/components/WorkCloudPanel";
 import { t } from "@/lib/i18n";
 import { useAtlasSettings } from "@/lib/settings";
 import type {
