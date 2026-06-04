@@ -19,6 +19,8 @@ import type {
   TaskSection,
   TaskType,
   DayMode,
+  TaskRecurrence,
+  RecurrenceFrequency,
 } from "@/types/atlas";
 
 export type {
@@ -32,6 +34,8 @@ export type {
   TaskSection,
   TaskStatus,
   TaskType,
+  TaskRecurrence,
+  RecurrenceFrequency,
 } from "@/types/atlas";
 
 export const TASK_AREAS: TaskArea[] = [
@@ -112,6 +116,8 @@ export function normalizeTask(value: Partial<AtlasTask>): AtlasTask {
     scheduledTime: value.scheduledTime ?? "",
     completionNotes: value.completionNotes ?? "",
     subtasks,
+    recurrence: normalizeTaskRecurrence(value.recurrence),
+    seriesId: typeof value.seriesId === "string" && value.seriesId.trim().length > 0 ? value.seriesId.trim() : undefined,
   };
 }
 
@@ -553,4 +559,128 @@ export function useDailyPlan() {
     isCompletedToday,
     completeDailyPlanning,
   };
+}
+
+// ==========================================
+// Recurring Tasks Foundation Helpers
+// ==========================================
+
+function parseDateUTC(dateStr: string): Date {
+  const [year, month, day] = dateStr.split("-").map(Number);
+  return new Date(Date.UTC(year, month - 1, day));
+}
+
+function formatDateUTC(date: Date): string {
+  return date.toISOString().slice(0, 10);
+}
+
+function getUTCMonday(date: Date): Date {
+  const d = new Date(date.getTime());
+  const day = d.getUTCDay();
+  const diff = day === 0 ? -6 : 1 - day;
+  d.setUTCDate(d.getUTCDate() + diff);
+  d.setUTCHours(0, 0, 0, 0);
+  return d;
+}
+
+export function normalizeTaskRecurrence(rec: unknown): TaskRecurrence | undefined {
+  if (!rec || typeof rec !== "object" || Array.isArray(rec)) {
+    return undefined;
+  }
+
+  const typedRec = rec as Record<string, unknown>;
+  const frequency = typedRec.frequency;
+  if (frequency !== "daily" && frequency !== "weekly" && frequency !== "monthly") {
+    return undefined;
+  }
+
+  let interval = typeof typedRec.interval === "number" ? Math.floor(typedRec.interval) : 1;
+  if (interval < 1) {
+    interval = 1;
+  }
+
+  let daysOfWeek: number[] | undefined = undefined;
+  if (Array.isArray(typedRec.daysOfWeek)) {
+    const validDays = typedRec.daysOfWeek
+      .map(d => typeof d === "number" ? Math.floor(d) : parseInt(String(d), 10))
+      .filter(d => !isNaN(d) && d >= 0 && d <= 6);
+    
+    const uniqueDays = Array.from(new Set(validDays)).sort();
+    if (uniqueDays.length > 0) {
+      daysOfWeek = uniqueDays;
+    }
+  }
+
+  let endDate: string | undefined = undefined;
+  if (typeof typedRec.endDate === "string") {
+    const isYmd = /^\d{4}-\d{2}-\d{2}$/.test(typedRec.endDate);
+    if (isYmd) {
+      endDate = typedRec.endDate;
+    }
+  }
+
+  return {
+    frequency: frequency as RecurrenceFrequency,
+    interval,
+    ...(daysOfWeek ? { daysOfWeek } : {}),
+    ...(endDate ? { endDate } : {}),
+  };
+}
+
+export function calculateNextOccurrenceDate(currentDateStr: string, recurrence: TaskRecurrence): string | null {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(currentDateStr)) {
+    return null;
+  }
+
+  const current = parseDateUTC(currentDateStr);
+  const frequency = recurrence.frequency;
+  const interval = recurrence.interval ?? 1;
+
+  if (frequency === "daily") {
+    current.setUTCDate(current.getUTCDate() + interval);
+  } else if (frequency === "weekly") {
+    if (recurrence.daysOfWeek && recurrence.daysOfWeek.length > 0) {
+      const days = recurrence.daysOfWeek;
+      const startMonday = getUTCMonday(parseDateUTC(currentDateStr));
+      let found = false;
+      const iterationCap = 366 * 2; // Up to 2 years safety limit
+      
+      for (let i = 1; i <= iterationCap; i++) {
+        current.setUTCDate(current.getUTCDate() + 1);
+        const dayOfWeek = current.getUTCDay();
+        if (days.includes(dayOfWeek)) {
+          const currentMonday = getUTCMonday(current);
+          const elapsedMs = currentMonday.getTime() - startMonday.getTime();
+          const elapsedWeeks = Math.round(elapsedMs / (7 * 24 * 60 * 60 * 1000));
+          
+          if (elapsedWeeks >= 0 && elapsedWeeks % interval === 0) {
+            found = true;
+            break;
+          }
+        }
+      }
+      
+      if (!found) {
+        return null;
+      }
+    } else {
+      current.setUTCDate(current.getUTCDate() + 7 * interval);
+    }
+  } else if (frequency === "monthly") {
+    const targetDay = current.getUTCDate();
+    current.setUTCMonth(current.getUTCMonth() + interval);
+    if (current.getUTCDate() !== targetDay) {
+      current.setUTCDate(0); // Rollback to last day of target month
+    }
+  } else {
+    return null;
+  }
+
+  const nextDateStr = formatDateUTC(current);
+
+  if (recurrence.endDate && nextDateStr > recurrence.endDate) {
+    return null;
+  }
+
+  return nextDateStr;
 }

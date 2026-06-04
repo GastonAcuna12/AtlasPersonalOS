@@ -168,6 +168,15 @@ export type AtlasSubtask = {
   completedAt?: string;
 };
 
+export type RecurrenceFrequency = "daily" | "weekly" | "monthly";
+
+export type TaskRecurrence = {
+  frequency: RecurrenceFrequency;
+  interval?: number;
+  daysOfWeek?: number[];
+  endDate?: string;
+};
+
 export type AtlasTask = {
   id: string;
   title: string;
@@ -189,6 +198,8 @@ export type AtlasTask = {
   scheduledTime?: string;
   completionNotes?: string;
   subtasks?: AtlasSubtask[];
+  recurrence?: TaskRecurrence;
+  seriesId?: string;
 };
 
 export type TaskDraft = Omit<
