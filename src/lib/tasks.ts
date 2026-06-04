@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import { t } from "@/lib/i18n";
 import {
   ATLAS_STORAGE_KEYS,
   readFromStorage,
@@ -683,4 +684,61 @@ export function calculateNextOccurrenceDate(currentDateStr: string, recurrence: 
   }
 
   return nextDateStr;
+}
+
+export function getRecurrenceLabel(
+  rec: TaskRecurrence | undefined,
+  language: string
+): string {
+  if (!rec || !rec.frequency) {
+    return "";
+  }
+
+  const freq = rec.frequency;
+  const interval = rec.interval ?? 1;
+  const isEs = language.toLowerCase().startsWith("es");
+
+  if (freq === "daily") {
+    if (interval === 1) {
+      return t(language, "task.recurrence.repeatsDaily", "Repeats daily");
+    }
+    const repeatsEvery = t(language, "task.recurrence.interval", "Repeat every");
+    const unit = t(language, "task.recurrence.days", "days");
+    return isEs
+      ? `Se repite cada ${interval} días`
+      : `${repeatsEvery} ${interval} ${unit}`;
+  }
+
+  if (freq === "weekly") {
+    let dayStr = "";
+    if (rec.daysOfWeek && rec.daysOfWeek.length > 0) {
+      const dayNamesEn = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+      const dayNamesEs = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
+      const names = rec.daysOfWeek.map((d) => (isEs ? dayNamesEs[d] : dayNamesEn[d]));
+      dayStr = isEs ? ` los ${names.join(", ")}` : ` on ${names.join(", ")}`;
+    }
+
+    if (interval === 1) {
+      const label = t(language, "task.recurrence.repeatsWeekly", "Repeats weekly");
+      return `${label}${dayStr}`;
+    }
+    const repeatsEvery = t(language, "task.recurrence.interval", "Repeat every");
+    const unit = t(language, "task.recurrence.weeks", "weeks");
+    return isEs
+      ? `Se repite cada ${interval} semanas${dayStr}`
+      : `${repeatsEvery} ${interval} ${unit}${dayStr}`;
+  }
+
+  if (freq === "monthly") {
+    if (interval === 1) {
+      return t(language, "task.recurrence.repeatsMonthly", "Repeats monthly");
+    }
+    const repeatsEvery = t(language, "task.recurrence.interval", "Repeat every");
+    const unit = t(language, "task.recurrence.months", "months");
+    return isEs
+      ? `Se repite cada ${interval} meses`
+      : `${repeatsEvery} ${interval} ${unit}`;
+  }
+
+  return "";
 }

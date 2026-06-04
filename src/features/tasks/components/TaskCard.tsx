@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { FormEvent, KeyboardEvent } from "react";
+import { getRecurrenceLabel } from "@/lib/tasks";
 import type { AtlasTask } from "@/lib/tasks";
 import { t } from "@/lib/i18n";
 import { useAtlasSettings } from "@/lib/settings";
@@ -115,6 +116,24 @@ export function TaskCard({
           {task.scheduledTime ? (
             <span className="rounded bg-[#6F8799]/10 border border-[#6F8799]/20 px-2 py-0.5 text-[#7F97A9] font-mono">
               🕒 {task.scheduledTime}
+            </span>
+          ) : null}
+          {task.recurrence ? (
+            <span className="flex items-center gap-1 rounded bg-[#6F8799]/10 border border-[#6F8799]/20 px-2 py-0.5 text-[#7F97A9]">
+              <span>🔁 {getRecurrenceLabel(task.recurrence, language)}</span>
+              {onUpdate ? (
+                <button
+                  type="button"
+                  title={t(language, "task.recurrence.remove", "Remove recurrence")}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onUpdate(task.id, { recurrence: undefined });
+                  }}
+                  className="ml-1 hover:text-[#B26A5B] transition text-xs font-bold leading-none select-none active:scale-75"
+                >
+                  &times;
+                </button>
+              ) : null}
             </span>
           ) : null}
         </div>

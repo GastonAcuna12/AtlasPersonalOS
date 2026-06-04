@@ -12,6 +12,8 @@ import {
   type TaskEnergy,
   type TaskPriority,
   type TaskType,
+  type RecurrenceFrequency,
+  type TaskRecurrence,
 } from "@/lib/tasks";
 import { t } from "@/lib/i18n";
 import { useAtlasSettings } from "@/lib/settings";
@@ -52,6 +54,9 @@ export function TaskQuickAddForm({
     createInitialDraft(defaultArea, defaultTaskType),
   );
   const [error, setError] = useState("");
+  const [recurrenceFreq, setRecurrenceFreq] = useState<"none" | RecurrenceFrequency>("none");
+  const [recurrenceInterval, setRecurrenceInterval] = useState<number>(1);
+  const [recurrenceDays, setRecurrenceDays] = useState<number[]>([]);
 
   function updateDraft<Value extends keyof TaskDraft>(
     key: Value,
@@ -76,12 +81,22 @@ export function TaskQuickAddForm({
       return;
     }
 
+    const recurrence: TaskRecurrence | undefined = recurrenceFreq !== "none" ? {
+      frequency: recurrenceFreq,
+      interval: recurrenceInterval > 0 ? Math.floor(recurrenceInterval) : 1,
+      ...(recurrenceFreq === "weekly" && recurrenceDays.length > 0 ? { daysOfWeek: recurrenceDays } : {})
+    } : undefined;
+
     onAddTask({
       ...draft,
       title: draft.title.trim(),
       description: draft.description.trim(),
+      recurrence,
     });
     setDraft(createInitialDraft(defaultArea, defaultTaskType));
+    setRecurrenceFreq("none");
+    setRecurrenceInterval(1);
+    setRecurrenceDays([]);
     setError("");
   }
 
@@ -229,6 +244,93 @@ export function TaskQuickAddForm({
             className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2.5 text-xs text-zinc-300 focus:outline-none focus:border-[#C8A96A]/50 font-semibold"
           />
         </label>
+      </div>
+
+      {/* Recurrence Section */}
+      <div className="border-t border-[#27272a]/50 pt-4 mt-4 grid gap-4">
+        <div className="grid gap-1.5 text-xs font-semibold text-zinc-400">
+          <span>{t(language, "task.recurrence.title", "Recurrence")}</span>
+          <select
+            value={recurrenceFreq}
+            onChange={(event) => {
+              setRecurrenceFreq(event.target.value as "none" | RecurrenceFrequency);
+              setRecurrenceInterval(1);
+              setRecurrenceDays([]);
+            }}
+            className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2 text-xs text-zinc-300 focus:outline-none focus:border-[#C8A96A]/50 cursor-pointer"
+          >
+            <option value="none">{t(language, "task.recurrence.none", "None")}</option>
+            <option value="daily">{t(language, "task.recurrence.daily", "Daily")}</option>
+            <option value="weekly">{t(language, "task.recurrence.weekly", "Weekly")}</option>
+            <option value="monthly">{t(language, "task.recurrence.monthly", "Monthly")}</option>
+          </select>
+        </div>
+
+        {recurrenceFreq !== "none" && (
+          <div className="grid gap-4 bg-[#121214]/40 border border-[#27272a]/60 rounded-xl p-3.5">
+            <label className="grid gap-1.5 text-xs font-semibold text-zinc-400">
+              {t(language, "task.recurrence.interval", "Repeat every")}
+              <div className="flex items-center gap-2">
+                <input
+                  type="number"
+                  min="1"
+                  value={recurrenceInterval}
+                  onChange={(event) => {
+                    const val = parseInt(event.target.value, 10);
+                    setRecurrenceInterval(isNaN(val) ? 1 : val);
+                  }}
+                  className="w-16 rounded-lg border border-[#27272a] bg-[#121214] px-3 py-1.5 text-xs text-zinc-350 focus:outline-none focus:border-[#C8A96A]/50 font-semibold"
+                />
+                <span className="text-xs text-zinc-400">
+                  {recurrenceFreq === "daily" && t(language, "task.recurrence.days", "days")}
+                  {recurrenceFreq === "weekly" && t(language, "task.recurrence.weeks", "weeks")}
+                  {recurrenceFreq === "monthly" && t(language, "task.recurrence.months", "months")}
+                </span>
+              </div>
+            </label>
+
+            {recurrenceFreq === "weekly" && (
+              <div className="grid gap-2">
+                <span className="text-xs font-semibold text-zinc-400">
+                  {t(language, "task.recurrence.daysOfWeek", "Days of week")}
+                </span>
+                <div className="flex flex-wrap gap-1.5 pt-0.5">
+                  {[
+                    { value: 1, labelEn: "M", labelEs: "L" },
+                    { value: 2, labelEn: "T", labelEs: "M" },
+                    { value: 3, labelEn: "W", labelEs: "M" },
+                    { value: 4, labelEn: "T", labelEs: "J" },
+                    { value: 5, labelEn: "F", labelEs: "V" },
+                    { value: 6, labelEn: "S", labelEs: "S" },
+                    { value: 0, labelEn: "S", labelEs: "D" },
+                  ].map((day) => {
+                    const isSelected = recurrenceDays.includes(day.value);
+                    return (
+                      <button
+                        key={day.value}
+                        type="button"
+                        onClick={() => {
+                          if (isSelected) {
+                            setRecurrenceDays(recurrenceDays.filter((d) => d !== day.value));
+                          } else {
+                            setRecurrenceDays([...recurrenceDays, day.value].sort());
+                          }
+                        }}
+                        className={`h-7 w-7 rounded-full text-[10px] font-bold transition flex items-center justify-center border ${
+                          isSelected
+                            ? "bg-[#C8A96A] text-zinc-950 border-[#C8A96A]"
+                            : "bg-[#121214] text-zinc-400 border-[#27272a] hover:border-zinc-550"
+                        } active:scale-95`}
+                      >
+                        {language === "es" ? day.labelEs : day.labelEn}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {error && (
