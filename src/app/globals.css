@@ -1,12 +1,89 @@
 @import "tailwindcss";
 
+/*
+ * ═══════════════════════════════════════════════════════
+ *  ATLAS PREMIUM DESATURATED THEME — Token Reference
+ * ═══════════════════════════════════════════════════════
+ *
+ *  Palette hex values for use in Tailwind arbitrary classes:
+ *
+ *  ACCENT (champagne)
+ *    primary:       #C8A96A   hover: #D4B87A   muted: #A9846A
+ *
+ *  SUCCESS (sage/olive)
+ *    bg/border:     #8A9A5B   text:  #9AAB6B
+ *
+ *  WARNING (warm amber)
+ *    primary:       #C8956A
+ *
+ *  DANGER (rust)
+ *    bg/border:     #B26A5B   text:  #C27A6B
+ *
+ *  INFO (dusty blue)
+ *    bg/border:     #6F8799   text:  #7F97A9
+ *
+ *  CALENDAR TRACKS (future phases)
+ *    deadlines:     #C8A96A   finances:    #6F9990
+ *    consistency:   #8A9A5B   reflections: #8B7A99
+ *
+ *  FINANCE (future phases)
+ *    income:        #8A9A5B   expense:     #B26A5B
+ *
+ *  TASK PRIORITY
+ *    low:    zinc-800/zinc-400 (unchanged)
+ *    medium: #C8A96A
+ *    high:   #C89060
+ *    critical: #B26A5B / #C27A6B
+ *
+ * ═══════════════════════════════════════════════════════
+ */
+
 :root {
-  --background: #0d0d0e;
-  --foreground: #f4f4f5;
-  --sidebar-background: #121214;
-  --card-background: #18181b;
-  --border-color: #27272a;
-  --accent: #f59e0b;
+  /* Base surfaces */
+  --atlas-bg: #0B0B0D;
+  --atlas-sidebar: #111113;
+  --atlas-surface: #17171A;
+  --atlas-surface-nested: #131315;
+  --atlas-border: #252528;
+  --atlas-border-subtle: #1E1E21;
+
+  /* Text hierarchy */
+  --atlas-text: #E8E4DD;
+  --atlas-text-secondary: #A8A29E;
+  --atlas-text-muted: #78716C;
+  --atlas-text-disabled: #57534E;
+
+  /* Accent — champagne */
+  --atlas-accent: #C8A96A;
+  --atlas-accent-hover: #D4B87A;
+  --atlas-accent-muted: #A9846A;
+
+  /* Semantic */
+  --atlas-success: #8A9A5B;
+  --atlas-success-text: #9AAB6B;
+  --atlas-warning: #C8956A;
+  --atlas-danger: #B26A5B;
+  --atlas-danger-text: #C27A6B;
+  --atlas-info: #6F8799;
+  --atlas-info-text: #7F97A9;
+
+  /* Calendar category tracks (Phase D) */
+  --atlas-track-deadlines: #C8A96A;
+  --atlas-track-finances: #6F9990;
+  --atlas-track-consistency: #8A9A5B;
+  --atlas-track-reflections: #8B7A99;
+
+  /* Finance (Phase C) */
+  --atlas-income: #8A9A5B;
+  --atlas-expense: #B26A5B;
+
+  /* Legacy aliases — consumed by @theme inline */
+  --background: var(--atlas-bg);
+  --foreground: var(--atlas-text);
+  --sidebar-background: var(--atlas-sidebar);
+  --card-background: var(--atlas-surface);
+  --border-color: var(--atlas-border);
+  --accent: var(--atlas-accent);
 }
 
 @theme inline {
@@ -17,33 +94,33 @@
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--atlas-bg);
+  color: var(--atlas-text);
 }
 
 /* Premium atlas classes */
 .atlas-glass {
-  background: rgba(24, 24, 27, 0.7);
+  background: rgba(23, 23, 26, 0.7);
   backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .atlas-card {
-  background: #18181b;
-  border: 1px solid #27272a;
+  background: var(--atlas-surface);
+  border: 1px solid var(--atlas-border);
   border-radius: 0.75rem;
   box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .atlas-card:hover {
-  border-color: rgba(245, 158, 11, 0.3);
-  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.3), 0 4px 6px -4px rgb(0 0 0 / 0.3);
+  border-color: rgba(200, 169, 106, 0.2);
+  box-shadow: 0 8px 12px -3px rgb(0 0 0 / 0.25), 0 4px 6px -4px rgb(0 0 0 / 0.2);
 }
 
 .atlas-surface {
-  background: #121214;
-  border: 1px solid #27272a;
+  background: var(--atlas-sidebar);
+  border: 1px solid var(--atlas-border);
 }
 
 @keyframes fadeInUp {
@@ -62,20 +139,20 @@ body {
   animation-delay: var(--delay, 0ms);
 }
 
-/* Streak fire animation keyframes */
+/* Streak fire animation — reduced glow intensity */
 @keyframes flamePulse {
   0%, 100% {
     transform: scale(1);
-    filter: drop-shadow(0 0 2px rgba(245, 158, 11, 0.5));
+    filter: drop-shadow(0 0 1px rgba(200, 169, 106, 0.3));
   }
   50% {
-    transform: scale(1.15);
-    filter: drop-shadow(0 0 8px rgba(249, 115, 22, 0.8));
+    transform: scale(1.1);
+    filter: drop-shadow(0 0 4px rgba(200, 169, 106, 0.5));
   }
 }
 
 .animate-flame {
-  animation: flamePulse 2s infinite ease-in-out;
+  animation: flamePulse 2.5s infinite ease-in-out;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -87,4 +164,13 @@ body {
   .animate-flame {
     animation: none !important;
   }
+}
+
+/* Scrollbar utility to hide visual scrollbars but preserve scrolling */
+.scrollbar-none {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, and Opera */
 }

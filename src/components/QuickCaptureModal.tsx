@@ -13,16 +13,31 @@ import { useNotes } from "@/lib/notes";
 import { useGoals } from "@/lib/goals";
 import { useClients, useWorkItems, WORK_ITEM_TYPES, WORK_ITEM_STATUSES, DIFFICULTIES, PRIORITIES, getStatusLabel } from "@/lib/work";
 import { useAcademicSubjects, ACADEMIC_TYPES, mapAcademicTaskToTask } from "@/lib/academics";
+import { t } from "@/lib/i18n";
+import { isModuleEnabled } from "@/lib/modules";
+import { useAtlasSettings } from "@/lib/settings";
 import { useXP } from "@/lib/xp";
-import type { Currency, TransactionType, WorkoutType, TaskArea, TaskType, TaskPriority, TaskEnergy, WorkItemType, WorkItemStatus, Difficulty, PaymentMethod, AcademicTaskType } from "@/types/atlas";
+import type { AtlasModule, Currency, TransactionType, WorkoutType, TaskArea, TaskType, TaskPriority, TaskEnergy, WorkItemType, WorkItemStatus, Difficulty, PaymentMethod, AcademicTaskType } from "@/types/atlas";
 
 type CaptureTab = "finance" | "gym" | "task" | "note" | "goal" | "work" | "academic";
+
+const CAPTURE_TAB_MODULES: Record<CaptureTab, AtlasModule> = {
+  task: "today",
+  finance: "finances",
+  gym: "gym",
+  note: "notes",
+  goal: "goals",
+  work: "work",
+  academic: "academics",
+};
 
 export function QuickCaptureModal() {
   const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<CaptureTab>("task");
   const [successMessage, setSuccessMessage] = useState("");
 
+  const { settings } = useAtlasSettings();
+  const language = settings.language;
   const xp = useXP();
   const { addTransaction } = useTransactions();
   const { addWorkout } = useWorkoutLogs();
@@ -32,6 +47,35 @@ export function QuickCaptureModal() {
   const { clients, activeClients } = useClients();
   const { addWorkItem } = useWorkItems();
   const { activeSubjects } = useAcademicSubjects();
+
+  const captureTabs: { id: CaptureTab; label: string }[] = useMemo(
+    () => [
+      { id: "task", label: `📋 ${t(language, "quick.tab.task")}` },
+      { id: "finance", label: `💰 ${t(language, "quick.tab.finance")}` },
+      { id: "gym", label: `🏋️ ${t(language, "quick.tab.gym")}` },
+      { id: "note", label: `📝 ${t(language, "quick.tab.note")}` },
+      { id: "goal", label: `🎯 ${t(language, "quick.tab.goal")}` },
+      { id: "work", label: `💼 ${t(language, "quick.tab.work")}` },
+      { id: "academic", label: `🎓 ${t(language, "quick.tab.academic")}` },
+    ],
+    [language],
+  );
+
+  const availableCaptureTabs = useMemo(
+    () =>
+      captureTabs.filter((tab) =>
+        isModuleEnabled(settings, CAPTURE_TAB_MODULES[tab.id]),
+      ),
+    [captureTabs, settings],
+  );
+
+  const activeTabAvailable = availableCaptureTabs.some((tab) => tab.id === activeTab);
+  const visibleActiveTab = activeTabAvailable
+    ? activeTab
+    : availableCaptureTabs[0]?.id;
+
+  const workStatusLabel = (status: WorkItemStatus) =>
+    t(language, `work.status.${status}`, getStatusLabel(status));
 
   // Keyboard accessibility: Escape to close modal
   useEffect(() => {
@@ -67,15 +111,15 @@ export function QuickCaptureModal() {
     e.preventDefault();
     const amt = Number(finAmount);
     if (!amt || amt <= 0) {
-      alert("Please enter an amount greater than 0.");
+      alert(t(language, "quick.validation.amount"));
       return;
     }
     if (!finCategory) {
-      alert("Please select a category.");
+      alert(t(language, "quick.validation.category"));
       return;
     }
     if (!finDescription.trim()) {
-      alert("Please add a description.");
+      alert(t(language, "quick.validation.description"));
       return;
     }
 
@@ -94,7 +138,7 @@ export function QuickCaptureModal() {
       label: `Logged ${finType}: ${finDescription}`,
     });
 
-    setSuccessMessage("Finance transaction saved successfully! +10 XP");
+    setSuccessMessage(t(language, "quick.success.finance"));
     
     // Reset inputs
     setFinAmount("");
@@ -113,7 +157,7 @@ export function QuickCaptureModal() {
     e.preventDefault();
     const duration = Number(gymDuration);
     if (!duration || duration <= 0) {
-      alert("Please enter a duration in minutes.");
+      alert(t(language, "quick.validation.duration"));
       return;
     }
 
@@ -134,7 +178,7 @@ export function QuickCaptureModal() {
       label: xpReward.label,
     });
 
-    setSuccessMessage(`Workout logged successfully! +${xpReward.amount} XP`);
+    setSuccessMessage(`${t(language, "quick.success.gym")} +${xpReward.amount} XP`);
     
     // Reset inputs
     setGymDuration("");
@@ -155,7 +199,7 @@ export function QuickCaptureModal() {
   function handleSaveTask(e: FormEvent) {
     e.preventDefault();
     if (!taskTitle.trim()) {
-      alert("Please enter a task title.");
+      alert(t(language, "quick.validation.taskTitle"));
       return;
     }
 
@@ -172,7 +216,7 @@ export function QuickCaptureModal() {
       energyRequired: taskEnergy,
     });
 
-    setSuccessMessage("Task created successfully!");
+    setSuccessMessage(t(language, "quick.success.task"));
     
     // Reset inputs
     setTaskTitle("");
@@ -188,7 +232,7 @@ export function QuickCaptureModal() {
   function handleSaveNote(e: FormEvent) {
     e.preventDefault();
     if (!noteTitle.trim()) {
-      alert("Please enter a note title.");
+      alert(t(language, "quick.validation.noteTitle"));
       return;
     }
 
@@ -206,7 +250,7 @@ export function QuickCaptureModal() {
       label: `Captured note: ${noteTitle}`,
     });
 
-    setSuccessMessage("Note saved successfully! +10 XP");
+    setSuccessMessage(t(language, "quick.success.note"));
     
     // Reset inputs
     setNoteTitle("");
@@ -228,7 +272,7 @@ export function QuickCaptureModal() {
   function handleSaveGoal(e: FormEvent) {
     e.preventDefault();
     if (!goalTitle.trim()) {
-      alert("Please enter a goal title.");
+      alert(t(language, "quick.validation.goalTitle"));
       return;
     }
 
@@ -250,7 +294,7 @@ export function QuickCaptureModal() {
       label: `Created goal: ${goalTitle}`,
     });
 
-    setSuccessMessage("Goal created successfully! +25 XP");
+    setSuccessMessage(t(language, "quick.success.goal"));
     
     // Reset inputs
     setGoalTitle("");
@@ -282,11 +326,11 @@ export function QuickCaptureModal() {
   function handleSaveWorkItem(e: FormEvent) {
     e.preventDefault();
     if (!workClient) {
-      alert("Please select a client.");
+      alert(t(language, "quick.validation.client"));
       return;
     }
     if (!workTitle.trim()) {
-      alert("Please enter an item title.");
+      alert(t(language, "quick.validation.itemTitle"));
       return;
     }
 
@@ -311,7 +355,7 @@ export function QuickCaptureModal() {
       label: `Created work deliverable: ${workTitle}`,
     });
 
-    setSuccessMessage("Work deliverable created successfully! +10 XP");
+    setSuccessMessage(t(language, "quick.success.work"));
     
     // Reset inputs
     setWorkTitle("");
@@ -334,11 +378,11 @@ export function QuickCaptureModal() {
   function handleSaveAcademic(e: FormEvent) {
     e.preventDefault();
     if (!acadSubject) {
-      alert("Please select an academic course/subject.");
+      alert(t(language, "quick.validation.academicSubject"));
       return;
     }
     if (!acadTitle.trim()) {
-      alert("Please enter a task title.");
+      alert(t(language, "quick.validation.taskTitle"));
       return;
     }
 
@@ -356,7 +400,7 @@ export function QuickCaptureModal() {
 
     addTask(taskDraft);
 
-    setSuccessMessage("Academic task created successfully!");
+    setSuccessMessage(t(language, "quick.success.academic"));
     
     // Reset inputs
     setAcadTitle("");
@@ -368,19 +412,19 @@ export function QuickCaptureModal() {
       {/* 1. Persistent Subtle Floating Action Button (FAB) */}
       <button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 z-50 flex items-center justify-center gap-2 rounded-full border border-amber-500/20 bg-amber-500 px-5 py-3 text-sm font-bold uppercase tracking-wider text-zinc-950 shadow-lg shadow-amber-500/10 hover:bg-amber-400 hover:border-amber-500/30 active:scale-95 transition-all duration-300 cursor-pointer"
-        title="Open Quick Capture panel"
-        aria-label="Global Quick Capture"
+        className="fixed bottom-6 right-6 z-50 flex items-center justify-center gap-2 rounded-full border border-[#C8A96A]/20 bg-[#C8A96A] px-5 py-3 text-sm font-bold uppercase tracking-wider text-zinc-950 shadow-lg shadow-[#C8A96A]/10 hover:bg-[#D4B87A] hover:border-[#C8A96A]/30 active:scale-95 transition-all duration-300 cursor-pointer"
+        title={t(language, "quick.openPanel")}
+        aria-label={t(language, "quick.aria")}
       >
         <span className="text-lg font-extrabold leading-none">+</span>
-        <span>Capture</span>
+        <span>{t(language, "quick.button")}</span>
       </button>
 
       {/* 2. Glassmorphic Premium Modal Panel */}
       {isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-950/70 backdrop-blur-sm animate-fade-in-up duration-200">
           <div
-            className="w-full max-w-xl rounded-xl border border-[#27272a] bg-[#18181b]/95 backdrop-blur-md p-6 shadow-2xl flex flex-col max-h-[85vh] overflow-hidden text-zinc-100"
+            className="w-full max-w-xl rounded-xl border border-[#27272a] bg-[#18181b]/95 backdrop-blur-md p-6 shadow-xl flex flex-col max-h-[85vh] overflow-hidden text-zinc-100"
             role="dialog"
             aria-modal="true"
             aria-labelledby="quick-capture-title"
@@ -389,16 +433,16 @@ export function QuickCaptureModal() {
             <div className="flex justify-between items-start border-b border-[#27272a]/60 pb-3 mb-4">
               <div>
                 <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-400">
-                  Global Action
+                  {t(language, "quick.eyebrow")}
                 </p>
                 <h2 id="quick-capture-title" className="text-xl font-bold text-zinc-100 mt-0.5">
-                  Quick Capture OS
+                  {t(language, "quick.title")}
                 </h2>
               </div>
               <button
                 onClick={() => setIsOpen(false)}
                 className="text-zinc-400 hover:text-zinc-200 text-lg font-bold p-1 hover:bg-zinc-800 rounded transition"
-                aria-label="Close modal"
+                aria-label={t(language, "quick.close")}
               >
                 ✕
               </button>
@@ -406,24 +450,14 @@ export function QuickCaptureModal() {
 
             {/* Notification/Success Feedback */}
             {successMessage && (
-              <div className="mb-4 rounded border border-emerald-500/30 bg-emerald-500/5 px-4 py-2.5 text-xs font-semibold text-emerald-400 flex items-center gap-2">
+              <div className="mb-4 rounded border border-[#8A9A5B]/30 bg-[#8A9A5B]/5 px-4 py-2.5 text-xs font-semibold text-[#9AAB6B] flex items-center gap-2">
                 <span>✓</span> {successMessage}
               </div>
             )}
 
             {/* Tabs selector */}
-            <div className="flex gap-1.5 overflow-x-auto pb-2 border-b border-[#27272a]/60 mb-4 text-xs select-none">
-              {(
-                [
-                  { id: "task", label: "📋 Task" },
-                  { id: "finance", label: "💰 Finance" },
-                  { id: "gym", label: "🏋️ Gym" },
-                  { id: "note", label: "📝 Note" },
-                  { id: "goal", label: "🎯 Goal" },
-                  { id: "work", label: "💼 Work" },
-                  { id: "academic", label: "🎓 Academic" },
-                ] as const
-              ).map((tab) => (
+            <div className="flex gap-1.5 overflow-x-auto scrollbar-none pb-2 border-b border-[#27272a]/60 mb-4 text-xs select-none">
+              {availableCaptureTabs.map((tab) => (
                 <button
                   key={tab.id}
                   onClick={() => {
@@ -431,8 +465,8 @@ export function QuickCaptureModal() {
                     setSuccessMessage("");
                   }}
                   className={`px-3 py-1.5 rounded-md font-semibold border transition shrink-0 whitespace-nowrap ${
-                    activeTab === tab.id
-                      ? "bg-amber-500/10 border-amber-500/25 text-amber-500"
+                    visibleActiveTab === tab.id
+                      ? "bg-[#C8A96A]/10 border-[#C8A96A]/25 text-[#C8A96A]"
                       : "bg-[#121214] border-[#27272a] text-zinc-400 hover:bg-zinc-800/40 hover:text-zinc-200"
                   }`}
                 >
@@ -443,29 +477,34 @@ export function QuickCaptureModal() {
 
             {/* Form Scroll Container */}
             <div className="flex-1 overflow-y-auto pr-1">
-              
+              {availableCaptureTabs.length === 0 ? (
+                <div className="rounded-lg border border-[#27272a] bg-[#121214] p-5 text-sm text-zinc-400">
+                  {t(language, "modules.quickCapture.empty")}
+                </div>
+              ) : (
+                <>
               {/* FINANCE CAPTURE FORM */}
-              {activeTab === "finance" && (
+              {visibleActiveTab === "finance" && (
                 <form onSubmit={handleSaveFinance} className="flex flex-col gap-3.5">
                   <div className="grid grid-cols-2 gap-3">
                     <label className="grid gap-1 text-xs font-semibold text-zinc-400">
-                      Type
+                      {t(language, "common.type")}
                       <select
                         value={finType}
                         onChange={(e) => setFinType(e.target.value as TransactionType)}
-                        className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2 text-sm text-zinc-200 cursor-pointer w-full block transition-colors duration-200 hover:border-zinc-750 focus:border-amber-500 focus:outline-none"
+                        className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2 text-sm text-zinc-200 cursor-pointer w-full block transition-colors duration-200 hover:border-zinc-750 focus:border-[#C8A96A] focus:outline-none"
                       >
-                        <option value="expense">Expense</option>
-                        <option value="income">Income</option>
+                        <option value="expense">{t(language, "common.expense")}</option>
+                        <option value="income">{t(language, "common.income")}</option>
                       </select>
                     </label>
 
                     <label className="grid gap-1 text-xs font-semibold text-zinc-400">
-                      Currency
+                      {t(language, "quick.currency")}
                       <select
                         value={finCurrency}
                         onChange={(e) => setFinCurrency(e.target.value as Currency)}
-                        className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2 text-sm text-zinc-200 cursor-pointer w-full block transition-colors duration-200 hover:border-zinc-750 focus:border-amber-500 focus:outline-none"
+                        className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2 text-sm text-zinc-200 cursor-pointer w-full block transition-colors duration-200 hover:border-zinc-750 focus:border-[#C8A96A] focus:outline-none"
                       >
                         <option value="PYG">PYG</option>
                         <option value="USD">USD</option>
@@ -475,31 +514,31 @@ export function QuickCaptureModal() {
 
                   <div className="grid grid-cols-2 gap-3">
                     <label className="grid gap-1 text-xs font-semibold text-zinc-400">
-                      Amount *
+                      {t(language, "quick.amountRequired")}
                       <input
                         type="number"
                         min="0"
                         step="0.01"
-                        placeholder="e.g. 15000"
+                        placeholder={t(language, "quick.placeholder.amount15000")}
                         value={finAmount}
                         onChange={(e) => setFinAmount(e.target.value)}
-                        className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2 text-sm text-zinc-100 font-bold focus:border-amber-500 focus:outline-none transition-colors duration-200 hover:border-zinc-750"
+                        className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2 text-sm text-zinc-100 font-bold focus:border-[#C8A96A] focus:outline-none transition-colors duration-200 hover:border-zinc-750"
                         required
                       />
                     </label>
 
                     <label className="grid gap-1 text-xs font-semibold text-zinc-400">
-                      Category *
+                      {t(language, "quick.categoryRequired")}
                       <select
                         value={finCategory}
                         onChange={(e) => setFinCategory(e.target.value)}
-                        className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2 text-sm text-zinc-200 cursor-pointer w-full block transition-colors duration-200 hover:border-zinc-750 focus:border-amber-500 focus:outline-none"
+                        className="rounded-lg border border-[#27272a] bg-[#121214] px-3 py-2 text-sm text-zinc-200 cursor-pointer w-full block transition-colors duration-200 hover:border-zinc-750 focus:border-[#C8A96A] focus:outline-none"
                         required
                       >
-                        <option value="" disabled>Select category</option>
+                        <option value="" disabled>{t(language, "quick.selectCategory")}</option>
                         {FINANCE_CATEGORIES.map((c) => (
                           <option key={c} value={c}>
-                            {c}
+                            {t(language, `enum.financeCategory.${c}`, c)}
                           </option>
                         ))}
                       </select>
@@ -507,9 +546,9 @@ export function QuickCaptureModal() {
                   </div>
 
                   <label className="grid gap-1 text-xs font-semibold text-zinc-400">
-                    Description *
+                    {t(language, "quick.descriptionRequired")}
                     <input
-                      placeholder="e.g. Organic Groceries"
+                      placeholder={t(language, "quick.placeholder.organicGroceries")}
                       value={finDescription}
                       onChange={(e) => setFinDescription(e.target.value)}
                       className="rounded border border-[#27272a] bg-[#121214] px-2 py-1.5 text-sm text-zinc-100 font-semibold"
@@ -519,7 +558,7 @@ export function QuickCaptureModal() {
 
                   <div className="grid grid-cols-2 gap-3">
                     <label className="grid gap-1 text-xs font-semibold text-zinc-400">
-                      Date
+                      {t(language, "common.date")}
                       <input
                         type="date"
                         value={finDate}
@@ -529,7 +568,7 @@ export function QuickCaptureModal() {
                     </label>
 
                     <label className="grid gap-1 text-xs font-semibold text-zinc-400">
-                      Payment Method
+                      {t(language, "quick.paymentMethod")}
                       <select
                         value={finMethod}
                         onChange={(e) => setFinMethod(e.target.value as PaymentMethod)}
@@ -537,7 +576,7 @@ export function QuickCaptureModal() {
                       >
                         {PAYMENT_METHODS.map((m) => (
                           <option key={m} value={m}>
-                            {m}
+                            {t(language, `enum.paymentMethod.${m}`, m)}
                           </option>
                         ))}
                       </select>
@@ -546,37 +585,37 @@ export function QuickCaptureModal() {
 
                   <button
                     type="submit"
-                    className="mt-2 rounded bg-amber-500 hover:bg-amber-400 py-2.5 text-xs font-bold text-zinc-950 transition tracking-wider uppercase"
+                    className="mt-2 rounded bg-[#C8A96A] hover:bg-[#D4B87A] py-2.5 text-xs font-bold text-zinc-950 transition tracking-wider uppercase"
                   >
-                    Save Transaction
+                    {t(language, "quick.saveTransaction")}
                   </button>
                 </form>
               )}
 
               {/* GYM CAPTURE FORM */}
-              {activeTab === "gym" && (
+              {visibleActiveTab === "gym" && (
                 <form onSubmit={handleSaveGym} className="flex flex-col gap-3.5">
                   <div className="grid grid-cols-2 gap-3">
                     <label className="grid gap-1 text-xs font-semibold text-zinc-400">
-                      Workout Type
+                      {t(language, "quick.workoutType")}
                       <select
                         value={gymType}
                         onChange={(e) => setGymType(e.target.value as WorkoutType)}
                         className="rounded border border-[#27272a] bg-[#121214] px-2 py-1.5 text-sm text-zinc-200"
                       >
-                        {WORKOUT_TYPES.map((t) => (
-                          <option key={t} value={t}>
-                            {t}
+                        {WORKOUT_TYPES.map((type) => (
+                          <option key={type} value={type}>
+                            {t(language, `enum.workoutType.${type}`, type)}
                           </option>
                         ))}
                       </select>
                     </label>
 
                     <label className="grid gap-1 text-xs font-semibold text-zinc-400">
-                      Duration (Minutes) *
+                      {t(language, "quick.durationRequired")}
                       <input
                         type="number"
-                        placeholder="e.g. 45"
+                        placeholder={t(language, "quick.placeholder.minutes45")}
                         value={gymDuration}
                         onChange={(e) => setGymDuration(e.target.value)}
                         className="rounded border border-[#27272a] bg-[#121214] px-2 py-1.5 text-sm text-zinc-100 font-bold"
@@ -587,32 +626,32 @@ export function QuickCaptureModal() {
 
                   <div className="grid grid-cols-2 gap-3">
                     <label className="grid gap-1 text-xs font-semibold text-zinc-400">
-                      Energy (1 - 10): {gymEnergy}
+                      {t(language, "quick.energyScale")}: {gymEnergy}
                       <input
                         type="range"
                         min="1"
                         max="10"
                         value={gymEnergy}
                         onChange={(e) => setGymEnergy(e.target.value)}
-                        className="w-full accent-amber-500 cursor-pointer"
+                        className="w-full accent-[#C8A96A] cursor-pointer"
                       />
                     </label>
 
                     <label className="grid gap-1 text-xs font-semibold text-zinc-400">
-                      Intensity (1 - 10): {gymIntensity}
+                      {t(language, "quick.intensityScale")}: {gymIntensity}
                       <input
                         type="range"
                         min="1"
                         max="10"
                         value={gymIntensity}
                         onChange={(e) => setGymIntensity(e.target.value)}
-                        className="w-full accent-red-500 cursor-pointer"
+                        className="w-full accent-[#B26A5B] cursor-pointer"
                       />
                     </label>
                   </div>
 
                   <label className="grid gap-1 text-xs font-semibold text-zinc-400">
-                    Date
+                    {t(language, "common.date")}
                     <input
                       type="date"
                       value={gymDate}
@@ -622,32 +661,32 @@ export function QuickCaptureModal() {
                   </label>
 
                   <label className="grid gap-1 text-xs font-semibold text-zinc-400">
-                    Notes
+                    {t(language, "common.notes")}
                     <textarea
-                      placeholder="e.g. Focus on squat form, felt strong"
+                      placeholder={t(language, "quick.placeholder.gymNotes")}
                       rows={2}
                       value={gymNotes}
                       onChange={(e) => setGymNotes(e.target.value)}
-                      className="resize-none focus:outline-none focus:border-amber-500/50 rounded border border-[#27272a] bg-[#121214] px-2 py-1 text-sm text-zinc-100"
+                      className="resize-none focus:outline-none focus:border-[#C8A96A]/50 rounded border border-[#27272a] bg-[#121214] px-2 py-1 text-sm text-zinc-100"
                     />
                   </label>
 
                   <button
                     type="submit"
-                    className="mt-2 rounded bg-amber-500 hover:bg-amber-400 py-2.5 text-xs font-bold text-zinc-950 transition tracking-wider uppercase"
+                    className="mt-2 rounded bg-[#C8A96A] hover:bg-[#D4B87A] py-2.5 text-xs font-bold text-zinc-950 transition tracking-wider uppercase"
                   >
-                    Log Workout
+                    {t(language, "quick.logWorkout")}
                   </button>
                 </form>
               )}
 
               {/* TASK CAPTURE FORM */}
-              {activeTab === "task" && (
+              {visibleActiveTab === "task" && (
                 <form onSubmit={handleSaveTask} className="flex flex-col gap-3.5">
                   <label className="grid gap-1 text-xs font-semibold text-zinc-400">
-                    Task Title *
+                    {t(language, "task.title")}
                     <input
-                      placeholder="e.g. Finalize quarterly brief"
+                      placeholder={t(language, "quick.placeholder.taskTitle")}
                       value={taskTitle}
                       onChange={(e) => setTaskTitle(e.target.value)}
                       className="rounded border border-[#27272a] bg-[#121214] px-2 py-1.5 text-sm text-zinc-100 font-bold"
@@ -657,30 +696,30 @@ export function QuickCaptureModal() {
 
                   <div className="grid grid-cols-2 gap-3">
                     <label className="grid gap-1 text-xs font-semibold text-zinc-400">
-                      Area
+                      {t(language, "common.area")}
                       <select
                         value={taskArea}
                         onChange={(e) => setTaskArea(e.target.value as TaskArea)}
                         className="rounded border border-[#27272a] bg-[#121214] px-2 py-1.5 text-sm text-zinc-200"
                       >
-                        {TASK_AREAS.map((a) => (
-                          <option key={a} value={a}>
-                            {a}
+                        {TASK_AREAS.map((area) => (
+                          <option key={area} value={area}>
+                            {t(language, `enum.taskArea.${area}`, area)}
                           </option>
                         ))}
                       </select>
                     </label>
 
                     <label className="grid gap-1 text-xs font-semibold text-zinc-400">
-                      Task Type
+                      {t(language, "task.taskType")}
                       <select
                         value={taskType}
                         onChange={(e) => setTaskType(e.target.value as TaskType)}
                         className="rounded border border-[#27272a] bg-[#121214] px-2 py-1.5 text-sm text-zinc-200"
                       >
-                        {TASK_TYPES.map((t) => (
-                          <option key={t} value={t}>
-                            {t}
+                        {TASK_TYPES.map((type) => (
+                          <option key={type} value={type}>
+                            {t(language, `enum.taskType.${type}`, type)}
                           </option>
                         ))}
                       </select>
@@ -689,30 +728,30 @@ export function QuickCaptureModal() {
 
                   <div className="grid grid-cols-2 gap-3">
                     <label className="grid gap-1 text-xs font-semibold text-zinc-400">
-                      Priority
+                      {t(language, "common.priority")}
                       <select
                         value={taskPriority}
                         onChange={(e) => setTaskPriority(e.target.value as TaskPriority)}
                         className="rounded border border-[#27272a] bg-[#121214] px-2 py-1.5 text-sm text-zinc-200"
                       >
-                        {TASK_PRIORITIES.map((p) => (
-                          <option key={p} value={p}>
-                            {p}
+                        {TASK_PRIORITIES.map((priority) => (
+                          <option key={priority} value={priority}>
+                            {t(language, `enum.priority.${priority}`, priority)}
                           </option>
                         ))}
                       </select>
                     </label>
 
                     <label className="grid gap-1 text-xs font-semibold text-zinc-400">
-                      Energy Required
+                      {t(language, "quick.energyRequired")}
                       <select
                         value={taskEnergy}
                         onChange={(e) => setTaskEnergy(e.target.value as TaskEnergy)}
                         className="rounded border border-[#27272a] bg-[#121214] px-2 py-1.5 text-sm text-zinc-200"
                       >
-                        {TASK_ENERGY_LEVELS.map((el) => (
-                          <option key={el} value={el}>
-                            {el}
+                        {TASK_ENERGY_LEVELS.map((energy) => (
+                          <option key={energy} value={energy}>
+                            {t(language, `enum.energy.${energy}`, energy)}
                           </option>
                         ))}
                       </select>
@@ -721,7 +760,7 @@ export function QuickCaptureModal() {
 
                   <div className="grid grid-cols-2 gap-3">
                     <label className="grid gap-1 text-xs font-semibold text-zinc-400">
-                      Planned Date
+                      {t(language, "task.plannedDate")}
                       <input
                         type="date"
                         value={taskPlannedDate}
@@ -731,7 +770,7 @@ export function QuickCaptureModal() {
                     </label>
 
                     <label className="grid gap-1 text-xs font-semibold text-zinc-400">
-                      Due Date (Optional)
+                      {t(language, "task.dueDateOptional")}
                       <input
                         type="date"
                         value={taskDueDate}
@@ -742,7 +781,7 @@ export function QuickCaptureModal() {
                   </div>
 
                   <label className="grid gap-1 text-xs font-semibold text-zinc-400">
-                    Est. Minutes
+                    {t(language, "quick.estimatedMinutes")}
                     <input
                       type="number"
                       placeholder="30"
@@ -753,32 +792,32 @@ export function QuickCaptureModal() {
                   </label>
 
                   <label className="grid gap-1 text-xs font-semibold text-zinc-400">
-                    Description
+                    {t(language, "common.description")}
                     <textarea
-                      placeholder="Add descriptions or links..."
+                      placeholder={t(language, "task.notesPlaceholder")}
                       rows={2}
                       value={taskDesc}
                       onChange={(e) => setTaskDesc(e.target.value)}
-                      className="resize-none focus:outline-none focus:border-amber-500/50 rounded border border-[#27272a] bg-[#121214] px-2 py-1 text-xs text-zinc-100"
+                      className="resize-none focus:outline-none focus:border-[#C8A96A]/50 rounded border border-[#27272a] bg-[#121214] px-2 py-1 text-xs text-zinc-100"
                     />
                   </label>
 
                   <button
                     type="submit"
-                    className="mt-2 rounded bg-amber-500 hover:bg-amber-400 py-2.5 text-xs font-bold text-zinc-950 transition tracking-wider uppercase"
+                    className="mt-2 rounded bg-[#C8A96A] hover:bg-[#D4B87A] py-2.5 text-xs font-bold text-zinc-950 transition tracking-wider uppercase"
                   >
-                    Create Task
+                    {t(language, "quick.createTask")}
                   </button>
                 </form>
               )}
 
               {/* NOTE CAPTURE FORM */}
-              {activeTab === "note" && (
+              {visibleActiveTab === "note" && (
                 <form onSubmit={handleSaveNote} className="flex flex-col gap-3.5">
                   <label className="grid gap-1 text-xs font-semibold text-zinc-400">
-                    Note Title *
+                    {t(language, "notes.noteTitle")}
                     <input
-                      placeholder="e.g. Design meeting retrospectives"
+                      placeholder={t(language, "quick.placeholder.noteTitle")}
                       value={noteTitle}
                       onChange={(e) => setNoteTitle(e.target.value)}
                       className="rounded border border-[#27272a] bg-[#121214] px-2 py-1.5 text-sm text-zinc-100 font-bold"
@@ -788,9 +827,9 @@ export function QuickCaptureModal() {
 
                   <div className="grid grid-cols-2 gap-3">
                     <label className="grid gap-1 text-xs font-semibold text-zinc-400">
-                      Area
+                      {t(language, "common.area")}
                       <input
-                        placeholder="e.g. Personal, Work"
+                        placeholder={t(language, "notes.areaPlaceholder")}
                         value={noteArea}
                         onChange={(e) => setNoteArea(e.target.value)}
                         className="rounded border border-[#27272a] bg-[#121214] px-2 py-1 text-xs text-zinc-200"
@@ -798,9 +837,9 @@ export function QuickCaptureModal() {
                     </label>
 
                     <label className="grid gap-1 text-xs font-semibold text-zinc-400">
-                      Tags (comma-separated)
+                      {t(language, "notes.tags")}
                       <input
-                        placeholder="e.g. ideas, references"
+                        placeholder={t(language, "quick.placeholder.tags")}
                         value={noteTags}
                         onChange={(e) => setNoteTags(e.target.value)}
                         className="rounded border border-[#27272a] bg-[#121214] px-2 py-1 text-xs text-zinc-200"
@@ -809,32 +848,32 @@ export function QuickCaptureModal() {
                   </div>
 
                   <label className="grid gap-1 text-xs font-semibold text-zinc-400">
-                    Notes / Content
+                    {t(language, "quick.notesContent")}
                     <textarea
-                      placeholder="Write your note thoughts here..."
+                      placeholder={t(language, "quick.placeholder.noteContent")}
                       rows={5}
                       value={noteContent}
                       onChange={(e) => setNoteContent(e.target.value)}
-                      className="resize-none focus:outline-none focus:border-amber-500/50 rounded border border-[#27272a] bg-[#121214] px-2 py-1 text-sm text-zinc-100"
+                      className="resize-none focus:outline-none focus:border-[#C8A96A]/50 rounded border border-[#27272a] bg-[#121214] px-2 py-1 text-sm text-zinc-100"
                     />
                   </label>
 
                   <button
                     type="submit"
-                    className="mt-2 rounded bg-amber-500 hover:bg-amber-400 py-2.5 text-xs font-bold text-zinc-950 transition tracking-wider uppercase"
+                    className="mt-2 rounded bg-[#C8A96A] hover:bg-[#D4B87A] py-2.5 text-xs font-bold text-zinc-950 transition tracking-wider uppercase"
                   >
-                    Save Note
+                    {t(language, "notes.save")}
                   </button>
                 </form>
               )}
 
               {/* GOAL CAPTURE FORM */}
-              {activeTab === "goal" && (
+              {visibleActiveTab === "goal" && (
                 <form onSubmit={handleSaveGoal} className="flex flex-col gap-3.5">
                   <label className="grid gap-1 text-xs font-semibold text-zinc-400">
-                    Goal Title *
+                    {t(language, "quick.goalTitleRequired")}
                     <input
-                      placeholder="e.g. Buy Outfit Design Course"
+                      placeholder={t(language, "quick.placeholder.goalTitle")}
                       value={goalTitle}
                       onChange={(e) => setGoalTitle(e.target.value)}
                       className="rounded border border-[#27272a] bg-[#121214] px-2 py-1.5 text-sm text-zinc-100 font-bold"
@@ -844,9 +883,9 @@ export function QuickCaptureModal() {
 
                   <div className="grid grid-cols-2 gap-3">
                     <label className="grid gap-1 text-xs font-semibold text-zinc-400">
-                      Area
+                      {t(language, "common.area")}
                       <input
-                        placeholder="e.g. Personal"
+                        placeholder={t(language, "quick.placeholder.personal")}
                         value={goalArea}
                         onChange={(e) => setGoalArea(e.target.value)}
                         className="rounded border border-[#27272a] bg-[#121214] px-2 py-1 text-xs text-zinc-200"
@@ -854,21 +893,21 @@ export function QuickCaptureModal() {
                     </label>
 
                     <label className="grid gap-1 text-xs font-semibold text-zinc-400">
-                      Financial link
+                      {t(language, "quick.financialLink")}
                       <select
                         value={goalLink}
                         onChange={(e) => setGoalLink(e.target.value as "none" | "savings")}
                         className="rounded border border-[#27272a] bg-[#121214] px-2 py-1 text-xs text-zinc-200"
                       >
-                        <option value="none">None</option>
-                        <option value="savings">Savings</option>
+                        <option value="none">{t(language, "common.none")}</option>
+                        <option value="savings">{t(language, "quick.savings")}</option>
                       </select>
                     </label>
                   </div>
 
                   <div className="grid grid-cols-2 gap-3">
                     <label className="grid gap-1 text-xs font-semibold text-zinc-400">
-                      Currency
+                      {t(language, "quick.currency")}
                       <select
                         value={goalCurrency}
                         onChange={(e) => setGoalCurrency(e.target.value as Currency)}
@@ -880,9 +919,9 @@ export function QuickCaptureModal() {
                     </label>
 
                     <label className="grid gap-1 text-xs font-semibold text-zinc-400">
-                      Unit
+                      {t(language, "quick.unit")}
                       <input
-                        placeholder="e.g. USD, kg, books"
+                        placeholder={t(language, "quick.placeholder.unit")}
                         value={goalUnit}
                         onChange={(e) => setGoalUnit(e.target.value)}
                         className="rounded border border-[#27272a] bg-[#121214] px-2 py-1.5 text-xs text-zinc-100"
@@ -892,11 +931,11 @@ export function QuickCaptureModal() {
 
                   <div className="grid grid-cols-2 gap-3">
                     <label className="grid gap-1 text-xs font-semibold text-stone-750">
-                      Current Value
+                      {t(language, "quick.currentValue")}
                       <input
                         type="number"
                         disabled={goalLink === "savings"}
-                        placeholder={goalLink === "savings" ? "Auto" : "0"}
+                        placeholder={goalLink === "savings" ? t(language, "quick.auto") : "0"}
                         value={goalLink === "savings" ? "" : goalCurrent}
                         onChange={(e) => setGoalCurrent(e.target.value)}
                         className="rounded border border-[#27272a] bg-[#121214] px-2 py-1 text-xs text-zinc-200 disabled:opacity-50"
@@ -904,7 +943,7 @@ export function QuickCaptureModal() {
                     </label>
 
                     <label className="grid gap-1 text-xs font-semibold text-stone-750">
-                      Target Value *
+                      {t(language, "quick.targetValueRequired")}
                       <input
                         type="number"
                         value={goalTarget}
@@ -916,7 +955,7 @@ export function QuickCaptureModal() {
                   </div>
 
                   <label className="grid gap-1 text-xs font-semibold text-zinc-400">
-                    Deadline (Optional)
+                    {t(language, "task.dueDateOptional")}
                     <input
                       type="date"
                       value={goalDeadline}
@@ -926,37 +965,37 @@ export function QuickCaptureModal() {
                   </label>
 
                   <label className="grid gap-1 text-xs font-semibold text-zinc-400">
-                    Private Notes
+                    {t(language, "quick.privateNotes")}
                     <textarea
-                      placeholder="Guidelines, motivations..."
+                      placeholder={t(language, "quick.placeholder.privateNotes")}
                       rows={2}
                       value={goalNotes}
                       onChange={(e) => setGoalNotes(e.target.value)}
-                      className="resize-none focus:outline-none focus:border-amber-500/50 rounded border border-[#27272a] bg-[#121214] px-2 py-1 text-xs text-zinc-100"
+                      className="resize-none focus:outline-none focus:border-[#C8A96A]/50 rounded border border-[#27272a] bg-[#121214] px-2 py-1 text-xs text-zinc-100"
                     />
                   </label>
 
                   <button
                     type="submit"
-                    className="mt-2 rounded bg-amber-500 hover:bg-amber-400 py-2.5 text-xs font-bold text-zinc-950 transition tracking-wider uppercase"
+                    className="mt-2 rounded bg-[#C8A96A] hover:bg-[#D4B87A] py-2.5 text-xs font-bold text-zinc-950 transition tracking-wider uppercase"
                   >
-                    Save Goal
+                    {t(language, "quick.saveGoal")}
                   </button>
                 </form>
               )}
 
               {/* WORK ITEM CAPTURE FORM */}
-              {activeTab === "work" && (
+              {visibleActiveTab === "work" && (
                 <form onSubmit={handleSaveWorkItem} className="flex flex-col gap-3.5">
                   <label className="grid gap-1 text-xs font-semibold text-zinc-400">
-                    Client *
+                    {t(language, "work.clientRequired", "Client *")}
                     <select
                       value={workClient}
                       onChange={(e) => setWorkClient(e.target.value)}
                       className="rounded border border-[#27272a] bg-[#121214] px-2 py-1.5 text-sm text-zinc-100 font-semibold"
                       required
                     >
-                      <option value="">Select a client</option>
+                      <option value="">{t(language, "work.selectClient", "Select a client")}</option>
                       {activeClients.map((client) => (
                         <option key={client.id} value={client.id}>
                           {client.name}
@@ -966,9 +1005,9 @@ export function QuickCaptureModal() {
                   </label>
 
                   <label className="grid gap-1 text-xs font-semibold text-zinc-400">
-                    Item Title *
+                    {t(language, "work.itemTitle", "Item Title *")}
                     <input
-                      placeholder="e.g. 3 Custom Thumbnails"
+                      placeholder={t(language, "quick.placeholder.workTitle")}
                       value={workTitle}
                       onChange={(e) => setWorkTitle(e.target.value)}
                       className="rounded border border-[#27272a] bg-[#121214] px-2 py-1.5 text-sm text-zinc-100 font-bold"
@@ -978,22 +1017,22 @@ export function QuickCaptureModal() {
 
                   <div className="grid grid-cols-2 gap-3">
                     <label className="grid gap-1 text-xs font-semibold text-zinc-400">
-                      Type
+                      {t(language, "common.type")}
                       <select
                         value={workType}
                         onChange={(e) => setWorkType(e.target.value as WorkItemType)}
                         className="rounded border border-[#27272a] bg-[#121214] px-2 py-1 text-xs text-zinc-200"
                       >
-                        {WORK_ITEM_TYPES.map((t) => (
-                          <option key={t} value={t}>
-                            {t}
+                        {WORK_ITEM_TYPES.map((type) => (
+                          <option key={type} value={type}>
+                            {t(language, `work.type.${type}`, type)}
                           </option>
                         ))}
                       </select>
                     </label>
 
                     <label className="grid gap-1 text-xs font-semibold text-zinc-400">
-                      Status
+                      {t(language, "common.status")}
                       <select
                         value={workStatus}
                         onChange={(e) => setWorkStatus(e.target.value as WorkItemStatus)}
@@ -1001,7 +1040,7 @@ export function QuickCaptureModal() {
                       >
                         {WORK_ITEM_STATUSES.map((s) => (
                           <option key={s} value={s}>
-                            {getStatusLabel(s)}
+                            {workStatusLabel(s)}
                           </option>
                         ))}
                       </select>
@@ -1010,30 +1049,30 @@ export function QuickCaptureModal() {
 
                   <div className="grid grid-cols-2 gap-3">
                     <label className="grid gap-1 text-xs font-semibold text-zinc-400">
-                      Priority
+                      {t(language, "common.priority")}
                       <select
                         value={workPriority}
                         onChange={(e) => setWorkPriority(e.target.value as TaskPriority)}
                         className="rounded border border-[#27272a] bg-[#121214] px-2 py-1 text-xs text-zinc-200"
                       >
-                        {PRIORITIES.map((p) => (
-                          <option key={p} value={p}>
-                            {p}
+                        {PRIORITIES.map((priority) => (
+                          <option key={priority} value={priority}>
+                            {t(language, `enum.priority.${priority}`, priority)}
                           </option>
                         ))}
                       </select>
                     </label>
 
                     <label className="grid gap-1 text-xs font-semibold text-zinc-400">
-                      Difficulty
+                      {t(language, "work.taskDifficulty", "Task Difficulty")}
                       <select
                         value={workDiff}
                         onChange={(e) => setWorkDiff(e.target.value as Difficulty)}
                         className="rounded border border-[#27272a] bg-[#121214] px-2 py-1 text-xs text-zinc-200"
                       >
-                        {DIFFICULTIES.map((d) => (
-                          <option key={d} value={d}>
-                            {d}
+                        {DIFFICULTIES.map((difficulty) => (
+                          <option key={difficulty} value={difficulty}>
+                            {t(language, `work.difficulty.${difficulty}`, difficulty)}
                           </option>
                         ))}
                       </select>
@@ -1046,17 +1085,17 @@ export function QuickCaptureModal() {
                       {(!selectedClient || selectedClient.billingType === "per_item" || !selectedClient.billingType) ? (
                         <div className="grid grid-cols-2 gap-3 w-full">
                           <label className="grid gap-1 text-xs font-semibold text-zinc-400">
-                            Value ($)
+                            {t(language, "work.billingValue", "Billing Value")}
                             <input
                               type="number"
-                              placeholder="Amount"
+                              placeholder={t(language, "work.amount", "Amount")}
                               value={workValue}
                               onChange={(e) => setWorkValue(e.target.value)}
                               className="rounded border border-[#27272a] bg-[#121214] px-2 py-1 text-xs text-zinc-100 w-full"
                             />
                           </label>
                           <label className="grid gap-1 text-xs font-semibold text-zinc-400">
-                            Currency
+                            {t(language, "quick.currency")}
                             <select
                               value={workCurrency}
                               onChange={(e) => setWorkCurrency(e.target.value as Currency)}
@@ -1068,16 +1107,16 @@ export function QuickCaptureModal() {
                           </label>
                         </div>
                       ) : selectedClient.billingType === "fixed_monthly" ? (
-                        <div className="rounded bg-amber-500/10 text-amber-400 border border-amber-500/20 p-2.5 text-xs leading-snug w-full">
-                          <span className="font-bold text-amber-300">Fixed Retainer:</span> Individual items do not need a value. Billed flat at {formatMoney(selectedClient.monthlyRate ?? 0, selectedClient.currency ?? "USD")}/mo.
+                        <div className="rounded bg-[#C8A96A]/10 text-[#C8A96A] border border-[#C8A96A]/20 p-2.5 text-xs leading-snug w-full">
+                          <span className="font-bold text-[#D4B87A]">{t(language, "quick.work.fixedRetainer")}:</span> {t(language, "quick.work.fixedRetainerDescription")} {formatMoney(selectedClient.monthlyRate ?? 0, selectedClient.currency ?? "USD")}/mo.
                         </div>
                       ) : selectedClient.billingType === "hourly" ? (
-                        <div className="rounded bg-blue-500/10 text-blue-400 border border-blue-500/20 p-2.5 text-xs leading-snug w-full">
-                          <span className="font-bold text-blue-300">Hourly Billing:</span> Billed hourly at {formatMoney(selectedClient.hourlyRate ?? 0, selectedClient.currency ?? "USD")}/hr. Estimated value will be calculated from work minutes.
+                        <div className="rounded bg-[#6F8799]/10 text-[#6F8799] border border-[#6F8799]/20 p-2.5 text-xs leading-snug w-full">
+                          <span className="font-bold text-[#A8A29E]">{t(language, "quick.work.hourlyBilling")}:</span> {t(language, "quick.work.hourlyBillingDescription")} {formatMoney(selectedClient.hourlyRate ?? 0, selectedClient.currency ?? "USD")}/hr. {t(language, "quick.work.hourlyEstimate")}
                         </div>
                       ) : (
                         <div className="rounded bg-zinc-800/40 text-zinc-400 border border-zinc-700/30 p-2.5 text-xs leading-snug italic w-full">
-                          This item is non-billable.
+                          {t(language, "quick.work.nonBillable")}
                         </div>
                       )}
                     </div>
@@ -1085,10 +1124,10 @@ export function QuickCaptureModal() {
 
                   <div className="grid grid-cols-2 gap-3">
                     <label className="grid gap-1 text-xs font-semibold text-zinc-400">
-                      Work Minutes
+                      {t(language, "quick.workMinutes")}
                       <input
                         type="number"
-                        placeholder="e.g. 60"
+                        placeholder={t(language, "quick.placeholder.minutes60")}
                         value={workMins}
                         onChange={(e) => setWorkMins(e.target.value)}
                         className="rounded border border-[#27272a] bg-[#121214] px-2 py-1 text-xs text-zinc-200"
@@ -1096,7 +1135,7 @@ export function QuickCaptureModal() {
                     </label>
 
                     <label className="grid gap-1 text-xs font-semibold text-zinc-400">
-                      Planned Date
+                      {t(language, "task.plannedDate")}
                       <input
                         type="date"
                         value={workPlannedDate}
@@ -1107,7 +1146,7 @@ export function QuickCaptureModal() {
                   </div>
 
                   <label className="grid gap-1 text-xs font-semibold text-zinc-400">
-                    Deadline (Optional)
+                    {t(language, "task.dueDateOptional")}
                     <input
                       type="date"
                       value={workDeadline}
@@ -1117,48 +1156,48 @@ export function QuickCaptureModal() {
                   </label>
 
                   <label className="grid gap-1 text-xs font-semibold text-zinc-400">
-                    Reference Link
+                    {t(language, "work.referenceLink", "Reference Link")}
                     <input
                       type="url"
-                      placeholder="e.g. Google Drive, notion, brief brief..."
+                      placeholder={t(language, "work.referencePlaceholder", "Google Drive, Notion, brief, folder, etc.")}
                       value={workReferenceUrl}
                       onChange={(e) => setWorkReferenceUrl(e.target.value)}
-                      className="rounded border border-[#27272a] bg-[#121214] px-2 py-1 text-xs text-zinc-200 focus:outline-none focus:border-amber-500/50"
+                      className="rounded border border-[#27272a] bg-[#121214] px-2 py-1 text-xs text-zinc-200 focus:outline-none focus:border-[#C8A96A]/50"
                     />
                   </label>
 
                   <label className="grid gap-1 text-xs font-semibold text-zinc-400">
-                    Private Guidelines
+                    {t(language, "quick.privateGuidelines")}
                     <textarea
-                      placeholder="Add deliverables spec..."
+                      placeholder={t(language, "quick.placeholder.deliverables")}
                       rows={2}
                       value={workDesc}
                       onChange={(e) => setWorkDesc(e.target.value)}
-                      className="resize-none focus:outline-none focus:border-amber-500/50 rounded border border-[#27272a] bg-[#121214] px-2 py-1 text-xs text-zinc-100"
+                      className="resize-none focus:outline-none focus:border-[#C8A96A]/50 rounded border border-[#27272a] bg-[#121214] px-2 py-1 text-xs text-zinc-100"
                     />
                   </label>
 
                   <button
                     type="submit"
-                    className="mt-2 rounded bg-amber-500 hover:bg-amber-400 py-2.5 text-xs font-bold text-zinc-950 transition tracking-wider uppercase"
+                    className="mt-2 rounded bg-[#C8A96A] hover:bg-[#D4B87A] py-2.5 text-xs font-bold text-zinc-950 transition tracking-wider uppercase"
                   >
-                    Create Deliverable
+                    {t(language, "quick.createDeliverable")}
                   </button>
                 </form>
               )}
 
               {/* ACADEMIC TASK CAPTURE FORM */}
-              {activeTab === "academic" && (
+              {visibleActiveTab === "academic" && (
                 <form onSubmit={handleSaveAcademic} className="flex flex-col gap-3.5">
                   <label className="grid gap-1 text-xs font-semibold text-zinc-400">
-                    Subject / Course *
+                    {t(language, "quick.subjectCourseRequired")}
                     <select
                       value={acadSubject}
                       onChange={(e) => setAcadSubject(e.target.value)}
                       className="rounded border border-[#27272a] bg-[#121214] px-2 py-1.5 text-sm text-zinc-100 font-semibold"
                       required
                     >
-                      <option value="">Select a subject</option>
+                      <option value="">{t(language, "quick.selectSubject")}</option>
                       {activeSubjects.map((subject) => (
                         <option key={subject.id} value={subject.id}>
                           {subject.name}
@@ -1168,9 +1207,9 @@ export function QuickCaptureModal() {
                   </label>
 
                   <label className="grid gap-1 text-xs font-semibold text-zinc-400">
-                    Task Title *
+                    {t(language, "task.title")}
                     <input
-                      placeholder="e.g. Read Chapter 5 Retroactive Study"
+                      placeholder={t(language, "quick.placeholder.academicTitle")}
                       value={acadTitle}
                       onChange={(e) => setAcadTitle(e.target.value)}
                       className="rounded border border-[#27272a] bg-[#121214] px-2 py-1.5 text-sm text-zinc-100 font-bold"
@@ -1180,30 +1219,30 @@ export function QuickCaptureModal() {
 
                   <div className="grid grid-cols-2 gap-3">
                     <label className="grid gap-1 text-xs font-semibold text-zinc-400">
-                      Task Type
+                      {t(language, "task.taskType")}
                       <select
                         value={acadType}
                         onChange={(e) => setAcadType(e.target.value as AcademicTaskType)}
                         className="rounded border border-[#27272a] bg-[#121214] px-2 py-1 text-xs text-zinc-200"
                       >
-                        {ACADEMIC_TYPES.map((t) => (
-                          <option key={t} value={t}>
-                            {t}
+                        {ACADEMIC_TYPES.map((type) => (
+                          <option key={type} value={type}>
+                            {t(language, `academic.type.${type}`, type)}
                           </option>
                         ))}
                       </select>
                     </label>
 
                     <label className="grid gap-1 text-xs font-semibold text-zinc-400">
-                      Priority
+                      {t(language, "common.priority")}
                       <select
                         value={acadPriority}
                         onChange={(e) => setAcadPriority(e.target.value as TaskPriority)}
                         className="rounded border border-[#27272a] bg-[#121214] px-2 py-1 text-xs text-zinc-200"
                       >
-                        {TASK_PRIORITIES.map((p) => (
-                          <option key={p} value={p}>
-                            {p}
+                        {TASK_PRIORITIES.map((priority) => (
+                          <option key={priority} value={priority}>
+                            {t(language, `enum.priority.${priority}`, priority)}
                           </option>
                         ))}
                       </select>
@@ -1212,7 +1251,7 @@ export function QuickCaptureModal() {
 
                   <div className="grid grid-cols-2 gap-3">
                     <label className="grid gap-1 text-xs font-semibold text-zinc-400">
-                      Planned Date
+                      {t(language, "task.plannedDate")}
                       <input
                         type="date"
                         value={acadPlannedDate}
@@ -1222,7 +1261,7 @@ export function QuickCaptureModal() {
                     </label>
 
                     <label className="grid gap-1 text-xs font-semibold text-zinc-400">
-                      Due Date *
+                      {t(language, "quick.dueDateRequired")}
                       <input
                         type="date"
                         value={acadDueDate}
@@ -1235,10 +1274,10 @@ export function QuickCaptureModal() {
 
                   <div className="grid grid-cols-2 gap-3">
                     <label className="grid gap-1 text-xs font-semibold text-zinc-400">
-                      Est. Minutes
+                      {t(language, "quick.estimatedMinutes")}
                       <input
                         type="number"
-                        placeholder="e.g. 60"
+                        placeholder={t(language, "quick.placeholder.minutes60")}
                         value={acadMins}
                         onChange={(e) => setAcadMins(e.target.value)}
                         className="rounded border border-[#27272a] bg-[#121214] px-2 py-1 text-xs text-zinc-200"
@@ -1246,15 +1285,15 @@ export function QuickCaptureModal() {
                     </label>
 
                     <label className="grid gap-1 text-xs font-semibold text-zinc-400">
-                      Energy Required
+                      {t(language, "quick.energyRequired")}
                       <select
                         value={acadEnergy}
                         onChange={(e) => setAcadEnergy(e.target.value as TaskEnergy)}
                         className="rounded border border-[#27272a] bg-[#121214] px-2 py-1 text-xs text-zinc-200"
                       >
-                        {TASK_ENERGY_LEVELS.map((el) => (
-                          <option key={el} value={el}>
-                            {el}
+                        {TASK_ENERGY_LEVELS.map((energy) => (
+                          <option key={energy} value={energy}>
+                            {t(language, `enum.energy.${energy}`, energy)}
                           </option>
                         ))}
                       </select>
@@ -1262,23 +1301,26 @@ export function QuickCaptureModal() {
                   </div>
 
                   <label className="grid gap-1 text-xs font-semibold text-zinc-400">
-                    Study Notes
+                    {t(language, "quick.studyNotes")}
                     <textarea
-                      placeholder="Add guidelines or references..."
+                      placeholder={t(language, "quick.placeholder.studyNotes")}
                       rows={2}
                       value={acadNotes}
                       onChange={(e) => setAcadNotes(e.target.value)}
-                      className="resize-none focus:outline-none focus:border-amber-500/50 rounded border border-[#27272a] bg-[#121214] px-2 py-1 text-xs text-zinc-100"
+                      className="resize-none focus:outline-none focus:border-[#C8A96A]/50 rounded border border-[#27272a] bg-[#121214] px-2 py-1 text-xs text-zinc-100"
                     />
                   </label>
 
                   <button
                     type="submit"
-                    className="mt-2 rounded bg-amber-500 hover:bg-amber-400 py-2.5 text-xs font-bold text-zinc-950 transition tracking-wider uppercase"
+                    className="mt-2 rounded bg-[#C8A96A] hover:bg-[#D4B87A] py-2.5 text-xs font-bold text-zinc-950 transition tracking-wider uppercase"
                   >
-                    Save Academic Task
+                    {t(language, "quick.saveAcademicTask")}
                   </button>
                 </form>
+              )}
+
+                </>
               )}
 
             </div>

@@ -1,4 +1,4 @@
-import { TodayPage } from "@/components/TodayPage";
+import { TodayPage } from "@/features/tasks/components/TodayPage";
 
 export default function TodayRoute() {
   return <TodayPage />;

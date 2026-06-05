@@ -14,10 +14,10 @@ Commit `.env.example` files with placeholder values only. Never commit real `.en
 
 See:
 
-- [DATA_PRIVACY.md](./DATA_PRIVACY.md) for the local data privacy guide
-- [SECURITY_AND_PRIVACY.md](./SECURITY_AND_PRIVACY.md) for security rules and threat model
-- [DATA_ARCHITECTURE.md](./DATA_ARCHITECTURE.md) for the current local data architecture
-- [SUPABASE_PLAN.md](./SUPABASE_PLAN.md) for the future database plan
+- [DATA_PRIVACY.md](./docs/architecture/DATA_PRIVACY.md) for the local data privacy guide
+- [SECURITY_AND_PRIVACY.md](./docs/architecture/SECURITY_AND_PRIVACY.md) for security rules and threat model
+- [DATA_ARCHITECTURE.md](./docs/architecture/DATA_ARCHITECTURE.md) for the current local data architecture
+- [SUPABASE_PLAN.md](./docs/supabase/SUPABASE_PLAN.md) for the future database plan
 
 ## Tech Stack
 
@@ -70,6 +70,7 @@ src/app/
   today/page.tsx
   work/page.tsx
 src/components/
+src/features/
 src/lib/
 src/types/
 public/

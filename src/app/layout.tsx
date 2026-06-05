@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { QuickCaptureModal } from "@/components/QuickCaptureModal";
-import { SidebarNav } from "@/components/SidebarNav";
+import { SidebarNav } from "@/components/layout/SidebarNav";
+import { WorkspaceOnboardingIntercept } from "@/features/onboarding/components/WorkspaceOnboardingIntercept";
+import { AtlasAuthProvider } from "@/lib/auth/provider";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -32,18 +34,21 @@ export default function RootLayout({
       style={{ colorScheme: "dark" }}
     >
       <body className="min-h-full bg-[#0d0d0e] text-zinc-100 selection:bg-amber-500/30 selection:text-amber-200">
-        <div className="flex min-h-screen flex-col md:flex-row">
-          {/* Unified Global Sidebar */}
-          <SidebarNav />
+        <AtlasAuthProvider>
+          <WorkspaceOnboardingIntercept>
+            <div className="flex min-h-screen flex-col md:flex-row">
+              {/* Unified Global Sidebar */}
+              <SidebarNav />
 
-          {/* Page content main container with sticky sidebar scrolling */}
-          <main className="flex-1 min-w-0 bg-[#0d0d0e] md:h-screen md:overflow-y-auto">
-            {children}
-          </main>
-        </div>
-        <QuickCaptureModal />
+              {/* Page content main container with sticky sidebar scrolling */}
+              <main className="flex-1 min-w-0 bg-[#0d0d0e] md:h-screen md:overflow-y-auto">
+                {children}
+              </main>
+            </div>
+            <QuickCaptureModal />
+          </WorkspaceOnboardingIntercept>
+        </AtlasAuthProvider>
       </body>
     </html>
   );
 }
-

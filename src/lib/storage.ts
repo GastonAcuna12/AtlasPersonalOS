@@ -4,8 +4,11 @@ import { useSyncExternalStore } from "react";
 
 export const ATLAS_STORAGE_KEYS = {
   transactions: "atlas.transactions",
+  plannedExpenses: "atlas.plannedExpenses",
   savings: "atlas.savings",
   financeSettings: "atlas.financeSettings",
+  financeBudgets: "atlas.financeBudgets",
+  financeAccounts: "atlas.financeAccounts",
   gymLogs: "atlas.gymLogs",
   tasks: "atlas.tasks",
   dailyPlans: "atlas.dailyPlans",
@@ -21,6 +24,7 @@ export const ATLAS_STORAGE_KEYS = {
   xp: "atlas.xp",
   xpEvents: "atlas.xpEvents",
   appSettings: "atlas.appSettings",
+  focusTask: "atlas.activeFocusTaskId",
 } as const;
 
 export type AtlasStorageDomain = keyof typeof ATLAS_STORAGE_KEYS;
@@ -221,6 +225,7 @@ export function migrateAtlasStorage() {
         if (!appSettingsExists) {
           const appSettings = {
             dayMode: parsed.dayMode ?? "Normal Day",
+            language: parsed.language ?? "en",
             gymWeeklyTarget: parsed.gymWeeklyTarget ?? 4,
           };
           window.localStorage.setItem(ATLAS_STORAGE_KEYS.appSettings, JSON.stringify(appSettings));

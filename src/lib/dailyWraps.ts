@@ -8,6 +8,7 @@ import {
   writeToStorage,
 } from "@/lib/storage";
 import { convertToBase } from "@/lib/finances";
+import { t, type Language } from "@/lib/i18n";
 import type {
   DailyWrap,
   DailyWrapStatsSnapshot,
@@ -21,6 +22,30 @@ import type {
 } from "@/types/atlas";
 
 const INITIAL_DAILY_WRAPS: DailyWrap[] = [];
+
+function fillTemplate(
+  template: string,
+  values: Record<string, string | number>,
+) {
+  return Object.entries(values).reduce(
+    (text, [key, value]) => text.replaceAll(`{${key}}`, String(value)),
+    template,
+  );
+}
+
+function joinSummaryParts(parts: string[], language: Language) {
+  if (parts.length <= 1) return parts[0] ?? "";
+  const conjunction = language === "es" ? " y " : ", and ";
+
+  return `${parts.slice(0, -1).join(", ")}${conjunction}${parts[parts.length - 1]}`;
+}
+
+function summaryCountKey(
+  baseKey: string,
+  count: number,
+) {
+  return `${baseKey}.${count === 1 ? "one" : "many"}`;
+}
 
 // Helper to construct tomorrow's date string locally safely
 export function getLocalTomorrowDateString(dateStr: string): string {
@@ -156,42 +181,121 @@ export function getOverdueStats(tasks: AtlasTask[], date: string) {
 }
 
 // 10. Summary Generator
-export function generateDailyWrapSummary(snapshot: DailyWrapStatsSnapshot): string {
+export function generateDailyWrapSummary(
+  snapshot: DailyWrapStatsSnapshot,
+  language: Language = "en",
+): string {
   const parts: string[] = [];
 
   if (snapshot.plannedTasks > 0 || snapshot.completedTasks > 0) {
-    parts.push(`completed ${snapshot.completedTasks} of ${snapshot.plannedTasks} planned tasks`);
+    parts.push(
+      fillTemplate(
+        t(
+          language,
+          summaryCountKey(
+            "dailyWrap.summary.completedTasks",
+            snapshot.plannedTasks,
+          ),
+        ),
+        {
+          completed: snapshot.completedTasks,
+          planned: snapshot.plannedTasks,
+        },
+      ),
+    );
   }
 
   if (snapshot.completedWorkItems > 0) {
-    parts.push(`finished ${snapshot.completedWorkItems} work item${snapshot.completedWorkItems > 1 ? "s" : ""}`);
+    parts.push(
+      fillTemplate(
+        t(
+          language,
+          summaryCountKey(
+            "dailyWrap.summary.workItems",
+            snapshot.completedWorkItems,
+          ),
+        ),
+        { count: snapshot.completedWorkItems },
+      ),
+    );
   }
 
   if (snapshot.gymLogged) {
-    parts.push(`logged a ${snapshot.workoutType ?? "workout"} workout`);
+    const workoutType = snapshot.workoutType
+      ? t(language, `gym.workoutType.${snapshot.workoutType}`, snapshot.workoutType)
+      : "";
+
+    parts.push(
+      snapshot.workoutType
+        ? fillTemplate(t(language, "dailyWrap.summary.workout"), {
+            type: workoutType,
+          })
+        : t(language, "dailyWrap.summary.workoutGeneric"),
+    );
   }
 
   if (snapshot.financeTransactionsCount > 0) {
-    parts.push(`recorded ${snapshot.financeTransactionsCount} finance transaction${snapshot.financeTransactionsCount > 1 ? "s" : ""}`);
+    parts.push(
+      fillTemplate(
+        t(
+          language,
+          summaryCountKey(
+            "dailyWrap.summary.finance",
+            snapshot.financeTransactionsCount,
+          ),
+        ),
+        { count: snapshot.financeTransactionsCount },
+      ),
+    );
   }
 
   if (snapshot.notesCreated > 0) {
-    parts.push(`created ${snapshot.notesCreated} note${snapshot.notesCreated > 1 ? "s" : ""}`);
+    parts.push(
+      fillTemplate(
+        t(
+          language,
+          summaryCountKey("dailyWrap.summary.notes", snapshot.notesCreated),
+        ),
+        { count: snapshot.notesCreated },
+      ),
+    );
   }
 
   if (snapshot.academicTasksCompleted > 0) {
-    parts.push(`completed ${snapshot.academicTasksCompleted} academic task${snapshot.academicTasksCompleted > 1 ? "s" : ""}`);
+    parts.push(
+      fillTemplate(
+        t(
+          language,
+          summaryCountKey(
+            "dailyWrap.summary.academic",
+            snapshot.academicTasksCompleted,
+          ),
+        ),
+        { count: snapshot.academicTasksCompleted },
+      ),
+    );
   }
 
   if (parts.length === 0) {
-    return "Today has very little tracked activity. Add tasks, transactions, workouts, or notes to make Atlas more useful.";
+    return t(language, "dailyWrap.summary.empty");
   }
 
-  let text = "Today you " + parts.slice(0, -1).join(", ") + (parts.length > 1 ? ", and " : "") + parts[parts.length - 1];
-  text += ` and gained ${snapshot.xpEarnedToday} XP.`;
+  let text = fillTemplate(t(language, "dailyWrap.summary.today"), {
+    actions: joinSummaryParts(parts, language),
+    xp: snapshot.xpEarnedToday,
+  });
 
   if (snapshot.upcomingDeadlinesTomorrow > 0) {
-    text += ` Tomorrow has ${snapshot.upcomingDeadlinesTomorrow} upcoming deadline${snapshot.upcomingDeadlinesTomorrow > 1 ? "s" : ""}.`;
+    text += ` ${fillTemplate(
+      t(
+        language,
+        summaryCountKey(
+          "dailyWrap.summary.tomorrow",
+          snapshot.upcomingDeadlinesTomorrow,
+        ),
+      ),
+      { count: snapshot.upcomingDeadlinesTomorrow },
+    )}`;
   }
 
   return text;

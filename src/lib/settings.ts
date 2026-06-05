@@ -7,9 +7,15 @@ import {
   useStoredValue,
   writeToStorage,
 } from "@/lib/storage";
-import type { AtlasSettings, FinanceSettings, Currency, DayMode } from "@/types/atlas";
+import { type Language } from "@/lib/i18n";
+import {
+  DEFAULT_ENABLED_MODULES,
+  normalizeEnabledModules,
+} from "@/lib/modules";
+import type { AtlasSettings, FinanceSettings, Currency, DayMode, AtlasModule, WorkspacePreset } from "@/types/atlas";
 
 export type { AtlasSettings, DayMode } from "@/types/atlas";
+export type { Language } from "@/lib/i18n";
 
 export const DAY_MODES: DayMode[] = [
   "Normal Day",
@@ -21,7 +27,10 @@ export const DAY_MODES: DayMode[] = [
 
 export const DEFAULT_APP_SETTINGS: AtlasSettings = {
   dayMode: "Normal Day",
+  language: "en",
   gymWeeklyTarget: 4,
+  enabledModules: DEFAULT_ENABLED_MODULES,
+  onboardingCompleted: false,
 };
 
 export const DEFAULT_FINANCE_SETTINGS: FinanceSettings = {
@@ -30,6 +39,7 @@ export const DEFAULT_FINANCE_SETTINGS: FinanceSettings = {
   exchangeRateUpdatedAt: new Date().toISOString().slice(0, 10),
   exchangeRateSource: "manual",
   usdToPygRate: 6150,
+  availableMoneyMode: "legacy",
 };
 
 function isDayMode(value: unknown): value is DayMode {
@@ -44,14 +54,41 @@ export function normalizeAppSettings(value: unknown): AtlasSettings {
   const candidate =
     value && typeof value === "object" ? (value as Partial<AtlasSettings>) : {};
 
+  const hasExistingSettings = value !== null && typeof value === "object";
+
+  const isPresetValid = (preset: unknown): preset is WorkspacePreset => {
+    return (
+      preset === "student" ||
+      preset === "freelancer" ||
+      preset === "personal_finance" ||
+      preset === "full" ||
+      preset === "custom"
+    );
+  };
+
   return {
     dayMode: isDayMode(candidate.dayMode)
       ? candidate.dayMode
       : DEFAULT_APP_SETTINGS.dayMode,
+    language: (() => {
+      const lang = candidate.language;
+      if (typeof lang !== "string") return DEFAULT_APP_SETTINGS.language;
+      const l = lang.toLowerCase();
+      if (l.startsWith("es")) return "es";
+      if (l.startsWith("en")) return "en";
+      return DEFAULT_APP_SETTINGS.language;
+    })(),
     gymWeeklyTarget:
       typeof candidate.gymWeeklyTarget === "number" && candidate.gymWeeklyTarget > 0
         ? candidate.gymWeeklyTarget
         : DEFAULT_APP_SETTINGS.gymWeeklyTarget,
+    enabledModules: normalizeEnabledModules(candidate.enabledModules),
+    onboardingCompleted: candidate.onboardingCompleted !== undefined
+      ? !!candidate.onboardingCompleted
+      : hasExistingSettings,
+    workspacePreset: isPresetValid(candidate.workspacePreset)
+      ? candidate.workspacePreset
+      : undefined,
   };
 }
 
@@ -83,6 +120,14 @@ export function normalizeFinanceSettings(value: unknown): FinanceSettings {
       candidate.exchangeRateSource === "live"
         ? "live"
         : "manual",
+    defaultFinanceAccountId:
+      typeof candidate.defaultFinanceAccountId === "string" && candidate.defaultFinanceAccountId.trim()
+        ? candidate.defaultFinanceAccountId.trim()
+        : undefined,
+    availableMoneyMode:
+      candidate.availableMoneyMode === "account_aware"
+        ? "account_aware"
+        : "legacy",
   };
 }
 
@@ -147,7 +192,13 @@ export function useAtlasSettings() {
     // 1. App settings changes
     const appChanges: Partial<AtlasSettings> = {};
     if (changes.dayMode !== undefined) appChanges.dayMode = changes.dayMode;
+    if (changes.language !== undefined) appChanges.language = changes.language;
     if (changes.gymWeeklyTarget !== undefined) appChanges.gymWeeklyTarget = changes.gymWeeklyTarget;
+    if (changes.enabledModules !== undefined) {
+      appChanges.enabledModules = normalizeEnabledModules(changes.enabledModules);
+    }
+    if (changes.onboardingCompleted !== undefined) appChanges.onboardingCompleted = changes.onboardingCompleted;
+    if (changes.workspacePreset !== undefined) appChanges.workspacePreset = changes.workspacePreset;
 
     if (Object.keys(appChanges).length > 0) {
       const current = readFromStorage(
@@ -165,6 +216,12 @@ export function useAtlasSettings() {
     if (changes.usdToPygRate !== undefined) financeChanges.usdToPygRate = changes.usdToPygRate;
     if (changes.exchangeRateUpdatedAt !== undefined) financeChanges.exchangeRateUpdatedAt = changes.exchangeRateUpdatedAt;
     if (changes.exchangeRateSource !== undefined) financeChanges.exchangeRateSource = changes.exchangeRateSource;
+    if (changes.defaultFinanceAccountId !== undefined) {
+      financeChanges.defaultFinanceAccountId = changes.defaultFinanceAccountId;
+    }
+    if (changes.availableMoneyMode !== undefined) {
+      financeChanges.availableMoneyMode = changes.availableMoneyMode;
+    }
 
     if (Object.keys(financeChanges).length > 0) {
       const current = readFromStorage(
@@ -181,6 +238,10 @@ export function useAtlasSettings() {
 
   function setDayMode(dayMode: DayMode) {
     updateSettings({ dayMode });
+  }
+
+  function setLanguage(language: Language) {
+    updateSettings({ language });
   }
 
   function setBaseCurrency(baseCurrency: Currency) {
@@ -200,12 +261,30 @@ export function useAtlasSettings() {
     updateSettings({ gymWeeklyTarget });
   }
 
+  function setModuleEnabled(module: AtlasModule, enabled: boolean) {
+    const current = readFromStorage(
+      ATLAS_STORAGE_KEYS.appSettings,
+      DEFAULT_APP_SETTINGS,
+      normalizeAppSettings,
+    );
+
+    updateSettings({
+      enabledModules: normalizeEnabledModules({
+        ...current.enabledModules,
+        [module]: enabled,
+      }),
+      workspacePreset: "custom",
+    });
+  }
+
   return {
     settings: combinedSettings,
     updateSettings,
     setDayMode,
+    setLanguage,
     setBaseCurrency,
     setExchangeRate,
     setGymWeeklyTarget,
+    setModuleEnabled,
   };
 }
