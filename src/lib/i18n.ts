@@ -173,7 +173,12 @@ type CoreTranslationKey =
   | "review.signal.highDiscipline"
   | "review.signal.highDisciplineDesc"
   | "review.signal.steadyProgress"
-  | "review.signal.steadyProgressDesc";
+  | "review.signal.steadyProgressDesc"
+  | "review.signal.recurringRhythm"
+  | "review.signal.recurringCompletions"
+  | "review.signal.recurringSeries"
+  | "review.signal.topRecurring"
+  | "review.signal.noRecurring";
 
 type Dictionary = Record<CoreTranslationKey, string>;
 
@@ -377,6 +382,11 @@ export const dictionaries: Record<Language, Dictionary> = {
     "review.signal.highDisciplineDesc": "You pushed through low-energy days to complete your planned objectives.",
     "review.signal.steadyProgress": "Steady Progress",
     "review.signal.steadyProgressDesc": "You maintained a balanced pace across planning, execution, and daily reflections.",
+    "review.signal.recurringRhythm": "Recurring Rhythm",
+    "review.signal.recurringCompletions": "recurring completions",
+    "review.signal.recurringSeries": "recurring series",
+    "review.signal.topRecurring": "Top Recurring Series",
+    "review.signal.noRecurring": "No recurring completions this week.",
   },
   es: {
     "nav.today": "Hoy",
@@ -578,6 +588,11 @@ export const dictionaries: Record<Language, Dictionary> = {
     "review.signal.highDisciplineDesc": "Te esforzaste en días de baja energía para completar tus objetivos planificados.",
     "review.signal.steadyProgress": "Progreso Constante",
     "review.signal.steadyProgressDesc": "Mantuviste un ritmo equilibrado entre planificación, ejecución y reflexiones diarias.",
+    "review.signal.recurringRhythm": "Ritmo Recurrente",
+    "review.signal.recurringCompletions": "completadas recurrentes",
+    "review.signal.recurringSeries": "series recurrentes",
+    "review.signal.topRecurring": "Series Recurrentes Principales",
+    "review.signal.noRecurring": "Sin completadas recurrentes esta semana.",
   },
 };
 

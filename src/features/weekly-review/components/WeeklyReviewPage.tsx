@@ -189,6 +189,32 @@ export function WeeklyReviewPage() {
     return maxType ? { type: maxType, count: maxCount } : null;
   }, [weekCompletedTasks]);
 
+  const recurringSeriesStats = useMemo(() => {
+    const recurringTasks = weekCompletedTasks.filter((t) => !!t.seriesId);
+    const totalCompletions = recurringTasks.length;
+
+    const seriesGroups: Record<string, { title: string; count: number }> = {};
+    recurringTasks.forEach((t) => {
+      const sId = t.seriesId!;
+      if (!seriesGroups[sId]) {
+        seriesGroups[sId] = { title: t.title, count: 0 };
+      }
+      seriesGroups[sId].count++;
+    });
+
+    const uniqueSeriesCount = Object.keys(seriesGroups).length;
+
+    const sortedSeries = Object.entries(seriesGroups)
+      .map(([id, info]) => ({ id, ...info }))
+      .sort((a, b) => b.count - a.count || a.title.localeCompare(b.title));
+
+    return {
+      totalCompletions,
+      uniqueSeriesCount,
+      topSeries: sortedSeries.slice(0, 3),
+    };
+  }, [weekCompletedTasks]);
+
   const weekSignal = useMemo(() => {
     const completedTasks = weekCompletedTasks.length;
     if (completedTasks === 0) {
@@ -664,7 +690,7 @@ export function WeeklyReviewPage() {
                   </h3>
                 </div>
 
-                <div className="grid gap-4 sm:grid-cols-2">
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                   {/* Signal Card */}
                   <div className="rounded-lg border border-[#27272a] bg-[#121214] p-4 flex flex-col justify-between">
                     <div>
@@ -716,6 +742,49 @@ export function WeeklyReviewPage() {
                       ) : (
                         <p className="text-zinc-500 mt-1 italic">
                           {t(language, "review.signal.noType", "No dominant type")}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Recurring Rhythm Card */}
+                  <div className="rounded-lg border border-[#27272a] bg-[#121214] p-4 flex flex-col justify-between">
+                    <div>
+                      <p className="text-[10px] font-bold uppercase text-zinc-500 tracking-wider">
+                        {t(language, "review.signal.recurringRhythm", "Recurring Rhythm")}
+                      </p>
+                      {recurringSeriesStats.totalCompletions > 0 ? (
+                        <div className="mt-2.5 space-y-2.5">
+                          <div className="flex items-baseline gap-2">
+                            <span className="text-2xl font-bold text-zinc-150">
+                              {recurringSeriesStats.totalCompletions}
+                            </span>
+                            <span className="text-xs text-zinc-400 font-semibold">
+                              {t(language, "review.signal.recurringCompletions", "recurring completions")}
+                            </span>
+                          </div>
+                          
+                          <div className="text-xs text-zinc-400 font-medium">
+                            {recurringSeriesStats.uniqueSeriesCount} {t(language, "review.signal.recurringSeries", "recurring series")}
+                          </div>
+
+                          <div className="border-t border-[#27272a]/60 pt-2.5 mt-2">
+                            <p className="text-[9px] font-bold uppercase text-zinc-500 tracking-wider mb-1.5">
+                              {t(language, "review.signal.topRecurring", "Top Recurring Series")}
+                            </p>
+                            <ul className="space-y-1 text-xs">
+                              {recurringSeriesStats.topSeries.map((s) => (
+                                <li key={s.id} className="text-zinc-300 flex items-center justify-between gap-2">
+                                  <span className="truncate text-zinc-300">🔁 {s.title}</span>
+                                  <span className="text-[#C8A96A] font-bold shrink-0">({s.count}x)</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        </div>
+                      ) : (
+                        <p className="text-xs text-zinc-500 italic mt-3 leading-relaxed">
+                          {t(language, "review.signal.noRecurring", "No recurring completions this week.")}
                         </p>
                       )}
                     </div>
