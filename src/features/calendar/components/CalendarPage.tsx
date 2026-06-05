@@ -3,7 +3,8 @@
 
 import React, { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
-import { useTasks, todayISO } from "@/lib/tasks";
+import { useTasks, todayISO, calculateNextOccurrenceDate } from "@/lib/tasks";
+import type { AtlasTask } from "@/types/atlas";
 import { useWorkItems, useClients } from "@/lib/work";
 import { useSubjects } from "@/lib/academics";
 import {
@@ -32,6 +33,7 @@ interface AgendaItem {
   type: "task" | "work" | "goal" | "finance" | "habit" | "workout" | "wrap" | "review";
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   payload: any;
+  isProjectedOccurrence?: boolean;
 }
 
 const addDays = (dateStr: string, days: number): string => {
@@ -71,6 +73,66 @@ const getMonthsInRange = (startStr: string, endStr: string) => {
   }
   return months;
 };
+
+function getProjectedTasks(
+  tasks: AtlasTask[],
+  startStr: string,
+  endStr: string,
+  academicsEnabled: boolean,
+  todayEnabled: boolean
+): (AtlasTask & { isProjectedOccurrence?: boolean })[] {
+  const projected: (AtlasTask & { isProjectedOccurrence?: boolean })[] = [];
+
+  tasks.forEach((t) => {
+    if (!t.recurrence) return;
+
+    const isAcademic = t.area === "Academic";
+    if ((isAcademic && !academicsEnabled) || (!isAcademic && !todayEnabled)) return;
+
+    const currentPlanned = t.plannedDate;
+    if (!currentPlanned || !/^\d{4}-\d{2}-\d{2}$/.test(currentPlanned)) return;
+
+    let loopDate = calculateNextOccurrenceDate(currentPlanned, t.recurrence);
+    const loopLimit = 120; // Hard cap
+    let count = 0;
+
+    while (loopDate && loopDate <= endStr && count < loopLimit) {
+      if (loopDate >= startStr) {
+        // Deduplication: check if any real task exists for this series on loopDate
+        const hasRealTaskOnDate = tasks.some((existing) => {
+          const tSeriesId = t.seriesId || t.id.split("-completed-")[0];
+          const existingSeriesId = existing.seriesId || existing.id.split("-completed-")[0];
+          const isSameSeries = tSeriesId === existingSeriesId;
+
+          if (!isSameSeries) return false;
+
+          return existing.plannedDate === loopDate || existing.dueDate === loopDate;
+        });
+
+        if (!hasRealTaskOnDate) {
+          let nextDueDate = t.dueDate;
+          if (t.dueDate && t.dueDate !== "" && t.dueDate === t.plannedDate) {
+            nextDueDate = loopDate;
+          }
+
+          projected.push({
+            ...t,
+            id: `${t.id}-projected-${loopDate}`,
+            plannedDate: loopDate,
+            dueDate: nextDueDate,
+            completedAt: null,
+            completionNotes: "",
+            isProjectedOccurrence: true,
+          });
+        }
+      }
+      loopDate = calculateNextOccurrenceDate(loopDate, t.recurrence);
+      count++;
+    }
+  });
+
+  return projected;
+}
 
 export function CalendarPage() {
   const { settings } = useAtlasSettings();
@@ -238,6 +300,22 @@ export function CalendarPage() {
       }
     });
 
+    // Generate and merge virtual task projections for the current visible month
+    const startOfMonth = `${year}-${String(monthIndex + 1).padStart(2, "0")}-01`;
+    const endOfMonth = `${year}-${String(monthIndex + 1).padStart(2, "0")}-${String(daysInMonth).padStart(2, "0")}`;
+    const monthProjected = getProjectedTasks(
+      tasks,
+      startOfMonth,
+      endOfMonth,
+      academicsEnabled,
+      todayEnabled
+    );
+    monthProjected.forEach((pt) => {
+      const target = getOrCreate(pt.plannedDate);
+      target.tasks.push(pt);
+      target.count++;
+    });
+
     // 2. Freelance Work Items
     if (workEnabled) {
       workItems.forEach((w) => {
@@ -336,6 +414,7 @@ export function CalendarPage() {
     plannedExpenses,
     year,
     monthIndex,
+    daysInMonth,
   ]);
 
   const selectedDayItems = useMemo(() => {
@@ -436,6 +515,28 @@ export function CalendarPage() {
           payload: t,
         });
       }
+    });
+
+    // Generate and merge virtual task projections for the agenda range
+    const agendaProjected = getProjectedTasks(
+      tasks,
+      todayStr,
+      endDateStr,
+      academicsEnabled,
+      todayEnabled
+    );
+    agendaProjected.forEach((pt) => {
+      const date = pt.plannedDate;
+      itemsList.push({
+        id: `task-${pt.id}-${date}`,
+        date,
+        category: "deadlines",
+        priorityScore: 2,
+        isCompletedOrMuted: false,
+        type: "task",
+        payload: pt,
+        isProjectedOccurrence: true,
+      });
     });
 
     // 2. Work Items
@@ -710,7 +811,10 @@ export function CalendarPage() {
     let styles = "bg-zinc-800 text-zinc-400 border border-zinc-700/40";
     
     if (item.type === "task") {
-      if (item.payload.status === "completed") {
+      if (item.isProjectedOccurrence || item.payload?.isProjectedOccurrence) {
+        text = language === "es" ? "🔁 Proyectada" : "🔁 Projected";
+        styles = "bg-[#6F8799]/15 text-[#7F97A9] border border-[#6F8799]/20";
+      } else if (item.payload.status === "completed") {
         text = t(language, "calendar.agenda.completedBadge", "Completed");
         styles = "bg-[#6F9990]/10 text-[#7FA9A0] border border-[#6F9990]/20";
       } else if (item.date < todayISO()) {
@@ -1006,15 +1110,22 @@ export function CalendarPage() {
 
   const renderAgendaItemCard = (item: AgendaItem) => {
     const isCompleted = item.isCompletedOrMuted;
+    const isProjected = item.isProjectedOccurrence || item.payload?.isProjectedOccurrence;
     
     let leftBorderColor = "border-l-[#27272a]";
     let categoryBadgeText = "";
     let badgeStyles = "";
 
     if (item.category === "deadlines") {
-      leftBorderColor = "border-l-[#C8A96A]";
-      categoryBadgeText = t(language, "calendar.category.deadlines");
-      badgeStyles = "bg-[#C8A96A]/10 text-[#D4B87A] border border-[#C8A96A]/20";
+      if (isProjected) {
+        leftBorderColor = "border-l-[#6F8799]/30";
+        categoryBadgeText = t(language, "calendar.category.deadlines");
+        badgeStyles = "bg-[#6F8799]/15 text-[#7F97A9] border border-[#6F8799]/20";
+      } else {
+        leftBorderColor = "border-l-[#C8A96A]";
+        categoryBadgeText = t(language, "calendar.category.deadlines");
+        badgeStyles = "bg-[#C8A96A]/10 text-[#D4B87A] border border-[#C8A96A]/20";
+      }
     } else if (item.category === "finances") {
       leftBorderColor = "border-l-[#6F9990]";
       categoryBadgeText = t(language, "calendar.category.finances");
@@ -1029,9 +1140,11 @@ export function CalendarPage() {
       badgeStyles = "bg-[#8B7A99]/10 text-[#9B8AA9] border border-[#8B7A99]/20";
     }
 
-    const cardClasses = `flex flex-col justify-between h-full rounded-lg border border-[#27272a]/60 bg-[#121214]/40 p-4 border-l-4 ${leftBorderColor} hover:border-[#27272a] transition-all ${
-      isCompleted ? "opacity-60 text-zinc-500" : ""
-    }`;
+    const cardClasses = isProjected
+      ? `flex flex-col justify-between h-full rounded-lg border border-[#6F8799]/20 border-dashed bg-[#6F8799]/5 p-4 border-l-4 ${leftBorderColor} transition-all opacity-85`
+      : `flex flex-col justify-between h-full rounded-lg border border-[#27272a]/60 bg-[#121214]/40 p-4 border-l-4 ${leftBorderColor} hover:border-[#27272a] transition-all ${
+          isCompleted ? "opacity-60 text-zinc-500" : ""
+        }`;
 
     const titleText = item.type === "finance" ? item.payload.title : 
       item.type === "habit" ? item.payload.goal.title : 
@@ -1051,7 +1164,13 @@ export function CalendarPage() {
             {renderStatusBadge(item)}
           </div>
 
-          <p className={`font-bold text-zinc-100 mt-1 leading-snug break-words ${isCompleted ? "line-through text-zinc-500" : ""}`}>
+          <p className={`font-bold mt-1 leading-snug break-words ${
+            isProjected 
+              ? "text-[#7F97A9]" 
+              : isCompleted 
+              ? "line-through text-zinc-500" 
+              : "text-zinc-100"
+          }`}>
             {titleText}
           </p>
 
@@ -1578,6 +1697,7 @@ export function CalendarPage() {
 
                         const isCompleted = item.status === "completed";
                         const isHigh = !isCompleted && (isTask || isWork) && (item.priority === "high" || item.priority === "critical");
+                        const isProjected = isTask && !!(item as any).isProjectedOccurrence;
 
                         let cardBorder = "border-[#27272a]";
                         let cardBg = "bg-[#121214]/80";
@@ -1587,6 +1707,9 @@ export function CalendarPage() {
                         } else if (isOverdue) {
                           cardBorder = "border-[#B26A5B]/30";
                           cardBg = "bg-[#2A1815]/5";
+                        } else if (isProjected) {
+                          cardBorder = "border-[#6F8799]/15 border-dashed";
+                          cardBg = "bg-[#6F8799]/5 opacity-85 text-zinc-450";
                         } else if (isHigh) {
                           cardBorder = "border-[#C8A96A]/20";
                         }
@@ -1606,6 +1729,11 @@ export function CalendarPage() {
                                       ? t(language, "calendar.agenda.workSource", "Work")
                                       : t(language, "calendar.agenda.goalSource", "Goal")}
                                   </span>
+                                  {isProjected && (
+                                    <span className="rounded bg-[#6F8799]/15 text-[#7F97A9] border border-[#6F8799]/20 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide">
+                                      {language === "es" ? "🔁 Proyectada" : "🔁 Projected"}
+                                    </span>
+                                  )}
                                   {isCompleted && (
                                     <span className="rounded bg-[#6F9990]/10 text-[#7FA9A0] border border-[#6F9990]/20 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide">
                                       {t(language, "calendar.agenda.completedBadge", "Completed")}
@@ -1616,7 +1744,7 @@ export function CalendarPage() {
                                       {t(language, "calendar.agenda.overdueBadge", "Overdue")}
                                     </span>
                                   )}
-                                  {!isCompleted && !isOverdue && (
+                                  {!isCompleted && !isOverdue && !isProjected && (
                                     <span className="rounded bg-zinc-800 text-zinc-400 border border-zinc-700/40 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide">
                                       {t(language, "calendar.agenda.pendingBadge", "Pending")}
                                     </span>
