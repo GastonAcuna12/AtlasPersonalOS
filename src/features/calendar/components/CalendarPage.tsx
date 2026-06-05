@@ -1697,7 +1697,7 @@ export function CalendarPage() {
 
                         const isCompleted = item.status === "completed";
                         const isHigh = !isCompleted && (isTask || isWork) && (item.priority === "high" || item.priority === "critical");
-                        const isProjected = isTask && !!(item as any).isProjectedOccurrence;
+                        const isProjected = isTask && !!(item as { isProjectedOccurrence?: boolean }).isProjectedOccurrence;
 
                         let cardBorder = "border-[#27272a]";
                         let cardBg = "bg-[#121214]/80";
